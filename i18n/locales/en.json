@@ -1,0 +1,73 @@
+{
+  "brand": "Web File Lab",
+  "common": {
+    "switchToChinese": "切換中文",
+    "switchToEnglish": "Switch to English",
+    "download": "Download",
+    "remove": "Remove",
+    "clear": "Clear",
+    "processing": "Processing",
+    "ready": "Ready",
+    "failed": "Failed",
+    "selectFiles": "Select files",
+    "dropFiles": "Drop files here",
+    "browse": "Browse",
+    "original": "Original",
+    "result": "Result",
+    "size": "Size",
+    "dot": "·",
+    "arrow": "→",
+    "by": "x",
+    "percent": "%",
+    "degree": "°",
+    "logoMark": "WF"
+  },
+  "pwa": {
+    "install": "Install app",
+    "online": "Online",
+    "offline": "Offline"
+  },
+  "home": {
+    "metaTitle": "{brand} - WASM PWA file tools",
+    "description": "A local-first file workbench: WASM image codecs for conversion and compression, browser-side PDF merge, split, and edit flows, plus PWA offline support.",
+    "eyebrow": "Nuxt 4 / TypeScript / WASM / PWA",
+    "title": "A file utility polished enough for interviews.",
+    "summary": "Files never leave the browser. This project ties together practical frontend engineering topics: WASM codecs, worker-friendly architecture, client-side PDF workflows, PWA installability, i18n, and testable utility modules.",
+    "imageTab": "Image tools",
+    "pdfTab": "PDF tools",
+    "stackSignals": "Stack signals"
+  },
+  "image": {
+    "title": "Image conversion and compression",
+    "description": "JPEG, PNG, and WebP support. JPEG/WebP use WASM codecs, while PNG can run through OxiPNG WASM optimization.",
+    "outputFormat": "Output format",
+    "quality": "Quality",
+    "maxWidth": "Max width",
+    "maxHeight": "Max height",
+    "keepOriginal": "Keep original dimensions",
+    "losslessPng": "PNG WASM optimization",
+    "convert": "Convert",
+    "empty": "Add images to start converting."
+  },
+  "pdf": {
+    "title": "PDF merge / split / edit",
+    "description": "Powered by pdf-lib in the browser. No uploads, a clear client-side document workflow.",
+    "mode": "Mode",
+    "merge": "Merge",
+    "split": "Split",
+    "edit": "Edit",
+    "pageRanges": "Page ranges",
+    "pageRangesHelp": "Example: 1-3,5,8-end",
+    "rotation": "Rotation",
+    "titleField": "Title",
+    "author": "Author",
+    "run": "Generate PDF",
+    "empty": "Add PDFs, then choose a workflow."
+  },
+  "tech": {
+    "local": "Local processing",
+    "wasm": "WASM codecs",
+    "pwa": "Offline PWA",
+    "typed": "Typed layers"
+  }
+}

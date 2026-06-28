@@ -1,0 +1,73 @@
+{
+  "brand": "Web File Lab",
+  "common": {
+    "switchToChinese": "切換中文",
+    "switchToEnglish": "Switch to English",
+    "download": "下載",
+    "remove": "移除",
+    "clear": "清空",
+    "processing": "處理中",
+    "ready": "完成",
+    "failed": "失敗",
+    "selectFiles": "選擇檔案",
+    "dropFiles": "拖曳檔案到這裡",
+    "browse": "瀏覽",
+    "original": "原始",
+    "result": "結果",
+    "size": "大小",
+    "dot": "·",
+    "arrow": "→",
+    "by": "x",
+    "percent": "%",
+    "degree": "°",
+    "logoMark": "WF"
+  },
+  "pwa": {
+    "install": "安裝 App",
+    "online": "線上",
+    "offline": "離線"
+  },
+  "home": {
+    "metaTitle": "{brand} - WASM PWA 線上轉檔工具",
+    "description": "一個本機優先的轉檔工作台：圖片用 WASM codecs 壓縮與轉檔，PDF 在瀏覽器內完成合併、拆分和編輯，並支援 PWA 離線使用。",
+    "eyebrow": "Nuxt 4 / TypeScript / WASM / PWA",
+    "title": "把檔案工具做成能面試展示的產品。",
+    "summary": "檔案不離開瀏覽器。這個專案展示前端工程中較少被完整串起來的能力：WASM codec、Web Worker 友善架構、PDF client-side workflow、PWA installability、i18n 與可測試工具函式。",
+    "imageTab": "圖片工具",
+    "pdfTab": "PDF 工具",
+    "stackSignals": "技術亮點"
+  },
+  "image": {
+    "title": "圖片轉檔與壓縮",
+    "description": "支援 JPEG、PNG、WebP。JPEG/WebP 使用 WASM codec，PNG 可選 OxiPNG WASM 最佳化。",
+    "outputFormat": "輸出格式",
+    "quality": "品質",
+    "maxWidth": "最大寬度",
+    "maxHeight": "最大高度",
+    "keepOriginal": "保留原尺寸",
+    "losslessPng": "PNG WASM 最佳化",
+    "convert": "開始轉檔",
+    "empty": "加入圖片後開始轉檔。"
+  },
+  "pdf": {
+    "title": "PDF 合併 / 拆分 / 編輯",
+    "description": "使用 pdf-lib 在瀏覽器端處理，不上傳檔案。適合展示 client-side document workflow。",
+    "mode": "模式",
+    "merge": "合併",
+    "split": "拆分",
+    "edit": "編輯",
+    "pageRanges": "頁碼範圍",
+    "pageRangesHelp": "例如 1-3,5,8-end",
+    "rotation": "旋轉",
+    "titleField": "標題",
+    "author": "作者",
+    "run": "產生 PDF",
+    "empty": "加入 PDF 後選擇處理模式。"
+  },
+  "tech": {
+    "local": "本機處理",
+    "wasm": "WASM codecs",
+    "pwa": "PWA 離線",
+    "typed": "TypeScript 分層"
+  }
+}

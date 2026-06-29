@@ -11,6 +11,8 @@ export const defaultImageOptions: ImageTransformOptions = {
   quality: 78,
   maxWidth: 1920,
   maxHeight: 1920,
+  resizeMode: 'percent',
+  resizePercent: 100,
   preserveDimensions: false,
   cropPosition: 'none',
   optimisePng: true,

@@ -2,6 +2,7 @@ export type ToolMode = 'image' | 'pdf'
 
 export type ImageOutputFormat = 'jpeg' | 'png' | 'webp'
 export type ImageCropPosition = 'none' | 'center' | 'top' | 'bottom' | 'left' | 'right'
+export type ImageResizeMode = 'dimensions' | 'percent'
 
 export interface ImageCropSelection {
   x: number
@@ -15,6 +16,8 @@ export interface ImageTransformOptions {
   quality: number
   maxWidth: number
   maxHeight: number
+  resizeMode: ImageResizeMode
+  resizePercent: number
   preserveDimensions: boolean
   cropPosition: ImageCropPosition
   optimisePng: boolean

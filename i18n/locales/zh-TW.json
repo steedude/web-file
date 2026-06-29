@@ -59,6 +59,7 @@
     "customSettings": "已套用單張設定",
     "useBatchSettings": "使用批次",
     "proportionalResize": "等比例縮放",
+    "resizePercent": "縮放比例",
     "batchRatioHint": "批次裁切會對每張圖片套用相同尺寸與位置。",
     "sourceSize": "來源",
     "outputSizeReference": "輸出參考",

@@ -59,6 +59,7 @@
     "customSettings": "Single settings applied",
     "useBatchSettings": "Use batch",
     "proportionalResize": "Proportional resize",
+    "resizePercent": "Scale",
     "batchRatioHint": "Batch crop applies the same size and position to every image.",
     "sourceSize": "Source",
     "outputSizeReference": "Output ref",

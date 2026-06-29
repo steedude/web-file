@@ -1,4 +1,4 @@
-import type { ImageCropPosition, ImageCropSelection } from '~/types/file-tool.type'
+import type { ImageCropPosition, ImageCropSelection, ImageResizeMode } from '~/types/file-tool.type'
 
 interface SourceRect {
   x: number
@@ -7,10 +7,11 @@ interface SourceRect {
   height: number
 }
 
-export async function fileToImageData(file: File, maxWidth: number, maxHeight: number, preserveDimensions: boolean, cropPosition: ImageCropPosition, crop?: ImageCropSelection): Promise<ImageData> {
+export async function fileToImageData(file: File, maxWidth: number, maxHeight: number, preserveDimensions: boolean, cropPosition: ImageCropPosition, crop: ImageCropSelection | undefined, resizeMode: ImageResizeMode, resizePercent: number): Promise<ImageData> {
   const bitmap = await createImageBitmap(file)
-  const source = crop ? getManualCropRect(bitmap.width, bitmap.height, crop) : getSourceRect(bitmap.width, bitmap.height, maxWidth, maxHeight, preserveDimensions ? 'none' : cropPosition)
-  const scale = preserveDimensions ? 1 : Math.min(1, maxWidth / source.width, maxHeight / source.height)
+  const effectiveCropPosition = resizeMode === 'percent' ? 'none' : cropPosition
+  const source = crop ? getManualCropRect(bitmap.width, bitmap.height, crop) : getSourceRect(bitmap.width, bitmap.height, maxWidth, maxHeight, preserveDimensions ? 'none' : effectiveCropPosition)
+  const scale = getScale(source, maxWidth, maxHeight, preserveDimensions, resizeMode, resizePercent)
   const width = Math.max(1, Math.round(source.width * scale))
   const height = Math.max(1, Math.round(source.height * scale))
   const canvas = document.createElement('canvas')
@@ -25,6 +26,16 @@ export async function fileToImageData(file: File, maxWidth: number, maxHeight: n
   bitmap.close()
 
   return context.getImageData(0, 0, width, height)
+}
+
+function getScale(source: SourceRect, maxWidth: number, maxHeight: number, preserveDimensions: boolean, resizeMode: ImageResizeMode, resizePercent: number): number {
+  if (preserveDimensions)
+    return 1
+
+  if (resizeMode === 'percent')
+    return Math.min(1, Math.max(1, Math.min(100, resizePercent)) / 100)
+
+  return Math.min(1, maxWidth / source.width, maxHeight / source.height)
 }
 
 function getManualCropRect(imageWidth: number, imageHeight: number, crop: ImageCropSelection): SourceRect {

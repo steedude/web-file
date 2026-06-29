@@ -105,7 +105,7 @@ export function useImageTranscoder() {
         if (!file)
           continue
 
-        const imageData = await fileToImageData(file, options.maxWidth, options.maxHeight, options.preserveDimensions, options.cropPosition, previews.value[_index]?.crop)
+        const imageData = await fileToImageData(file, options.maxWidth, options.maxHeight, options.preserveDimensions, options.cropPosition, previews.value[_index]?.crop, options.resizeMode, options.resizePercent)
         const encoded = await encodeImage(imageData, options.format, options)
         const format = imageFormatOptions.find(item => item.value === options.format) ?? imageFormatOptions[0]!
         const blob = new Blob([encoded], { type: format.mimeType })
@@ -150,7 +150,7 @@ export function useImageTranscoder() {
         if (!file)
           continue
 
-        const imageData = await fileToImageData(file, options.maxWidth, options.maxHeight, options.preserveDimensions, options.cropPosition, previews.value[fileIndex]?.crop)
+        const imageData = await fileToImageData(file, options.maxWidth, options.maxHeight, options.preserveDimensions, options.cropPosition, previews.value[fileIndex]?.crop, options.resizeMode, options.resizePercent)
         const encoded = await encodeImage(imageData, options.format, options)
         sizes.push({ index: fileIndex, size: encoded.byteLength })
       }

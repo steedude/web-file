@@ -79,6 +79,7 @@ function setImageMode(mode: 'batch' | 'single') {
   imageMode.value = mode
   clear()
   resetOptions()
+  options.resizeMode = mode === 'batch' ? 'percent' : 'dimensions'
   cropEditorIndex.value = null
   clearEstimate()
 }
@@ -114,6 +115,11 @@ function updateHeight(event: Event) {
   patchCurrentOptions(patch)
 }
 
+function updateResizePercent(event: Event) {
+  patchCurrentOptions({ resizePercent: Math.max(1, Math.min(100, Number((event.target as HTMLInputElement).value) || 100)) })
+  scheduleEstimate()
+}
+
 function updateQuality(event: Event) {
   patchCurrentOptions({ quality: Math.max(1, Math.min(100, Number((event.target as HTMLInputElement).value) || 1)) })
   scheduleEstimate()
@@ -134,6 +140,14 @@ function updateCropPosition(event: Event) {
 
 function setPreserveDimensions(preserveDimensions: boolean) {
   patchCurrentOptions({ preserveDimensions, cropPosition: preserveDimensions ? 'none' : options.cropPosition })
+  scheduleEstimate()
+}
+
+function setProportionalResize() {
+  patchCurrentOptions({
+    preserveDimensions: false,
+    resizeMode: imageMode.value === 'batch' ? 'percent' : 'dimensions',
+  })
   scheduleEstimate()
 }
 
@@ -320,7 +334,40 @@ function getDeltaLabel(delta: { type: 'larger' | 'saved' | 'same', percent: numb
         <span v-if="summaryDelta">{{ getDeltaLabel(summaryDelta) }}</span>
       </div>
 
-      <div class="grid gap-4 sm:grid-cols-2">
+      <div class="flex flex-wrap gap-3">
+        <button
+          type="button"
+          class="focus-ring border px-3 py-2 font-mono text-xs font-black transition"
+          :class="options.preserveDimensions ? 'border-sky bg-sky text-paper' : 'border-line bg-grid text-ink/62 hover:border-sky hover:text-sky'"
+          @click="setPreserveDimensions(true)"
+        >
+          {{ t('image.keepOriginal') }}
+        </button>
+        <button
+          type="button"
+          class="focus-ring border px-3 py-2 font-mono text-xs font-black transition"
+          :class="!options.preserveDimensions ? 'border-sky bg-sky text-paper' : 'border-line bg-grid text-ink/62 hover:border-sky hover:text-sky'"
+          @click="setProportionalResize"
+        >
+          {{ t('image.proportionalResize') }}
+        </button>
+      </div>
+
+      <label v-if="imageMode === 'batch' && !options.preserveDimensions" class="block space-y-2">
+        <span class="font-mono text-xs font-black tracking-widest text-sky uppercase">{{ t('image.resizePercent') }} {{ t('common.dot') }} {{ options.resizePercent }}{{ t('common.percent') }}</span>
+        <input :value="options.resizePercent" class="w-full accent-acid" type="range" min="1" max="100" step="1" @input="updateResizePercent">
+        <input
+          :value="options.resizePercent"
+          class="focus-ring w-28 border border-line bg-grid px-3 py-2 font-mono text-sm font-bold text-ink"
+          type="number"
+          min="1"
+          max="100"
+          step="1"
+          @input="updateResizePercent"
+        >
+      </label>
+
+      <div v-if="imageMode === 'single'" class="grid gap-4 sm:grid-cols-2">
         <label class="space-y-2">
           <span class="font-mono text-xs font-black tracking-widest text-sky uppercase">{{ t('image.width') }}</span>
           <input
@@ -348,26 +395,7 @@ function getDeltaLabel(delta: { type: 'larger' | 'saved' | 'same', percent: numb
         </label>
       </div>
 
-      <div class="flex flex-wrap gap-3">
-        <button
-          type="button"
-          class="focus-ring border px-3 py-2 font-mono text-xs font-black transition"
-          :class="options.preserveDimensions ? 'border-sky bg-sky text-paper' : 'border-line bg-grid text-ink/62 hover:border-sky hover:text-sky'"
-          @click="setPreserveDimensions(true)"
-        >
-          {{ t('image.keepOriginal') }}
-        </button>
-        <button
-          type="button"
-          class="focus-ring border px-3 py-2 font-mono text-xs font-black transition"
-          :class="!options.preserveDimensions ? 'border-sky bg-sky text-paper' : 'border-line bg-grid text-ink/62 hover:border-sky hover:text-sky'"
-          @click="setPreserveDimensions(false)"
-        >
-          {{ t('image.proportionalResize') }}
-        </button>
-      </div>
-
-      <label v-if="imageMode === 'batch' && !options.preserveDimensions" class="block space-y-2">
+      <label v-if="imageMode === 'batch' && !options.preserveDimensions && options.resizeMode === 'dimensions'" class="block space-y-2">
         <span class="font-mono text-xs font-black tracking-widest text-sky uppercase">{{ t('image.cropPosition') }}</span>
         <select :value="options.cropPosition" class="focus-ring w-full border border-line bg-grid px-3 py-2 font-mono text-sm font-bold text-ink" @change="updateCropPosition">
           <option v-for="position in imageCropPositionOptions" :key="position" :value="position">

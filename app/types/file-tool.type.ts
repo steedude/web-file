@@ -50,7 +50,6 @@ export type PdfMode = 'merge' | 'split'
 
 export interface PdfOptions {
   mode: PdfMode
-  ranges: string
 }
 
 export interface PdfResult {
@@ -58,4 +57,14 @@ export interface PdfResult {
   fileName: string
   size: number
   url: string
+}
+
+export interface PdfPageItem {
+  id: string
+  file: File
+  sourceName: string
+  pageIndex: number
+  pageNumber: number
+  thumbnailUrl: string
+  selected: boolean
 }

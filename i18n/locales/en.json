@@ -90,13 +90,20 @@
   },
   "pdf": {
     "title": "PDF merge / extract",
-    "description": "Powered by pdf-lib in the browser. Merge multiple files or extract selected pages locally.",
+    "description": "Powered by pdf-lib and PDF.js in the browser. Merge pages by thumbnail order, or extract selected pages locally.",
     "mode": "Mode",
     "merge": "Merge",
     "split": "Extract pages",
-    "pageRanges": "Page ranges",
-    "pageRangesHelp": "Example: 1-3,5,8-end",
     "run": "Generate PDF",
-    "empty": "Add PDFs, then choose merge or extract. Extract uses one file at a time."
+    "empty": "Add PDFs to build a page queue. Merge uses the visible order, and extract uses checked pages.",
+    "pageQueue": "Page queue",
+    "pageSelection": "Page selection",
+    "renderingPages": "rendering pages",
+    "pageCount": "{count} pages",
+    "selectedPages": "{count} selected",
+    "selectAll": "Select all",
+    "clearSelection": "Clear",
+    "pageNumber": "Page {number}",
+    "noPages": "Add PDFs to preview pages."
   }
 }

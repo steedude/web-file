@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import type { ToolMode } from '~/types/file-tool.type'
 import { FileText, Image } from '@lucide/vue'
+import ImageToolPanel from '~/components/ImageToolPanel.vue'
+import PdfToolPanel from '~/components/PdfToolPanel.vue'
 
 const { t } = useI18n()
 const activeTool = ref<ToolMode>('image')

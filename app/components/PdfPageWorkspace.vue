@@ -1,0 +1,118 @@
+<script setup lang="ts">
+import type { PdfMode, PdfPageItem } from '~/types/file-tool.type'
+import { Check, GripVertical, Trash2 } from '@lucide/vue'
+
+const props = defineProps<{
+  isLoading: boolean
+  mode: PdfMode
+  pages: PdfPageItem[]
+}>()
+
+const emit = defineEmits<{
+  move: [fromIndex: number, toIndex: number]
+  remove: [id: string]
+  selectAll: [selected: boolean]
+  toggle: [id: string]
+}>()
+
+const { t } = useI18n()
+const draggedIndex = ref<number | null>(null)
+const selectedCount = computed(() => props.pages.filter(page => page.selected).length)
+
+function handleDragStart(index: number) {
+  draggedIndex.value = index
+}
+
+function handleDrop(index: number) {
+  if (draggedIndex.value === null || draggedIndex.value === index)
+    return
+
+  emit('move', draggedIndex.value, index)
+  draggedIndex.value = null
+}
+</script>
+
+<template>
+  <div class="space-y-3">
+    <div class="flex flex-wrap items-end justify-between gap-3">
+      <div>
+        <h3 class="font-mono text-sm font-black tracking-widest text-lilac uppercase">
+          {{ mode === 'merge' ? t('pdf.pageQueue') : t('pdf.pageSelection') }}
+        </h3>
+        <p class="mt-1 font-mono text-xs font-bold text-ink/42">
+          {{ isLoading ? t('pdf.renderingPages') : t('pdf.pageCount', { count: pages.length }) }}
+        </p>
+      </div>
+      <div v-if="mode === 'split' && pages.length" class="flex gap-2">
+        <button
+          type="button"
+          class="focus-ring border border-line bg-grid px-3 py-2 font-mono text-xs font-black text-ink/62 transition hover:border-lilac hover:text-lilac"
+          @click="emit('selectAll', true)"
+        >
+          {{ t('pdf.selectAll') }}
+        </button>
+        <button
+          type="button"
+          class="focus-ring border border-line bg-grid px-3 py-2 font-mono text-xs font-black text-ink/62 transition hover:border-coral hover:text-coral"
+          @click="emit('selectAll', false)"
+        >
+          {{ t('pdf.clearSelection') }}
+        </button>
+      </div>
+    </div>
+
+    <p v-if="mode === 'split' && pages.length" class="font-mono text-xs font-black text-acid">
+      {{ t('pdf.selectedPages', { count: selectedCount }) }}
+    </p>
+
+    <div v-if="pages.length" class="grid max-h-[520px] grid-cols-2 gap-3 overflow-y-auto pr-1 sm:grid-cols-3">
+      <article
+        v-for="(page, index) in pages"
+        :key="page.id"
+        class="group border bg-grid/80 p-2 transition"
+        :class="mode === 'split' && !page.selected ? 'border-line opacity-45' : 'border-line hover:border-lilac'"
+        :draggable="mode === 'merge'"
+        @dragstart="handleDragStart(index)"
+        @dragover.prevent
+        @drop.prevent="handleDrop(index)"
+        @dragend="draggedIndex = null"
+      >
+        <div class="relative border border-line bg-paper">
+          <img :src="page.thumbnailUrl" :alt="`${page.sourceName} ${page.pageNumber}`" class="aspect-[3/4] w-full object-contain">
+          <button
+            v-if="mode === 'split'"
+            type="button"
+            class="focus-ring absolute top-2 left-2 grid size-7 place-items-center border font-mono text-xs font-black transition"
+            :class="page.selected ? 'border-acid bg-acid text-paper' : 'border-line bg-panel text-ink/52 hover:border-acid hover:text-acid'"
+            @click="emit('toggle', page.id)"
+          >
+            <Check v-if="page.selected" class="size-4" aria-hidden="true" />
+          </button>
+          <span v-if="mode === 'merge'" class="absolute top-2 left-2 grid size-7 place-items-center border border-line bg-panel text-ink/42">
+            <GripVertical class="size-4" aria-hidden="true" />
+          </span>
+          <button
+            v-if="mode === 'merge'"
+            type="button"
+            class="focus-ring absolute top-2 right-2 grid size-7 place-items-center border border-line bg-panel text-ink/52 transition hover:border-coral hover:text-coral"
+            @click="emit('remove', page.id)"
+          >
+            <Trash2 class="size-4" aria-hidden="true" />
+          </button>
+        </div>
+        <div class="mt-2 min-w-0 font-mono">
+          <p class="truncate text-xs font-black text-ink">
+            {{ page.sourceName }}
+          </p>
+          <p class="mt-1 text-xs font-bold text-ink/42">
+            {{ t('pdf.pageNumber', { number: page.pageNumber }) }}
+          </p>
+        </div>
+      </article>
+    </div>
+
+    <p v-else class="border border-line bg-grid/70 px-3 py-8 text-center font-mono text-sm font-bold text-ink/42">
+      {{ isLoading ? t('pdf.renderingPages') : t('pdf.noPages') }}
+    </p>
+  </div>
+</template>

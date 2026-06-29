@@ -9,11 +9,17 @@ const {
   clear,
   error,
   files,
+  isRenderingPages,
   isProcessing,
+  movePage,
   options,
+  pages,
+  removePage,
   removeFile,
   results,
   run,
+  selectAllPages,
+  togglePageSelection,
 } = usePdfWorkshop()
 </script>
 
@@ -55,11 +61,15 @@ const {
         </div>
       </div>
 
-      <label v-if="options.mode === 'split'" class="block space-y-2">
-        <span class="font-mono text-xs font-black tracking-widest text-lilac uppercase">{{ t('pdf.pageRanges') }}</span>
-        <input v-model="options.ranges" class="focus-ring w-full border border-line bg-grid px-3 py-2 font-mono text-sm font-bold text-ink" type="text">
-        <span class="font-mono text-xs font-bold text-ink/42">{{ t('pdf.pageRangesHelp') }}</span>
-      </label>
+      <PdfPageWorkspace
+        :is-loading="isRenderingPages"
+        :mode="options.mode"
+        :pages="pages"
+        @move="movePage"
+        @remove="removePage"
+        @select-all="selectAllPages"
+        @toggle="togglePageSelection"
+      />
 
       <div class="flex flex-wrap gap-3">
         <button
@@ -69,7 +79,7 @@ const {
           @click="run"
         >
           <Play class="size-4" aria-hidden="true" />
-          {{ isProcessing ? t('common.processing') : t('pdf.run') }}
+          {{ isProcessing || isRenderingPages ? t('common.processing') : t('pdf.run') }}
         </button>
         <button
           type="button"

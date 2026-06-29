@@ -90,13 +90,20 @@
   },
   "pdf": {
     "title": "PDF 合併 / 拆分",
-    "description": "使用 pdf-lib 在瀏覽器內處理。可以合併多個檔案，或將指定頁面拆分匯出。",
+    "description": "使用 pdf-lib 與 PDF.js 在瀏覽器內處理。可以用縮圖順序合併頁面，或匯出勾選頁面。",
     "mode": "模式",
     "merge": "合併",
     "split": "擷取頁面",
-    "pageRanges": "頁面範圍",
-    "pageRangesHelp": "例如：1-3,5,8-end",
     "run": "產生 PDF",
-    "empty": "加入 PDF 後，選擇合併或拆分流程。拆分一次處理一個檔案。"
+    "empty": "加入 PDF 以建立頁面佇列。合併會依畫面順序輸出，拆分會匯出勾選頁面。",
+    "pageQueue": "頁面佇列",
+    "pageSelection": "頁面選取",
+    "renderingPages": "產生縮圖中",
+    "pageCount": "共 {count} 頁",
+    "selectedPages": "已選 {count} 頁",
+    "selectAll": "全選",
+    "clearSelection": "清除",
+    "pageNumber": "第 {number} 頁",
+    "noPages": "加入 PDF 後預覽頁面。"
   }
 }

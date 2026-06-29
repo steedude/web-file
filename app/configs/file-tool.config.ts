@@ -26,5 +26,4 @@ export const pdfModeOptions: PdfMode[] = ['merge', 'split']
 
 export const defaultPdfOptions: PdfOptions = {
   mode: 'merge',
-  ranges: '1-end',
 }

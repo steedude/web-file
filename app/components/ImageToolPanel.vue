@@ -285,9 +285,11 @@ function getDeltaLabel(delta: { type: 'larger' | 'saved' | 'same', percent: numb
             <input :value="options.quality" class="w-full accent-acid" type="range" min="1" max="100" @input="updateQuality">
           </label>
 
-          <div v-else class="border border-line bg-grid px-3 py-2 font-mono text-xs font-bold text-ink/42">
-            <span class="block font-black tracking-widest text-sky uppercase">{{ t('image.pngQualityTitle') }}</span>
-            <span class="mt-1 block">{{ t('image.pngQualityUnavailable') }}</span>
+          <div v-else class="space-y-2">
+            <span class="block font-mono text-xs font-black tracking-widest text-sky uppercase">{{ t('image.pngQualityTitle') }}</span>
+            <div class="border border-line bg-grid px-3 py-2 font-mono text-xs font-bold text-ink/42">
+              {{ t('image.pngQualityUnavailable') }}
+            </div>
           </div>
         </div>
       </div>
@@ -309,7 +311,7 @@ function getDeltaLabel(delta: { type: 'larger' | 'saved' | 'same', percent: numb
       </label>
 
       <div class="grid gap-2 border border-line bg-grid/70 px-3 py-2 font-mono text-xs font-bold text-ink/52 sm:grid-cols-3">
-        <span>{{ t('image.batchSummary') }} {{ t('image.sourceSize') }} {{ formatFileSize(originalSizeReference) }}</span>
+        <span><template v-if="imageMode === 'batch'">{{ t('image.batchSummary') }} </template>{{ t('image.sourceSize') }} {{ formatFileSize(originalSizeReference) }}</span>
         <span>{{ t('image.outputSizeReference') }} {{ isEstimatePending ? t('image.estimating') : outputSizeReference ? formatFileSize(outputSizeReference) : t('image.waitingEstimate') }}</span>
         <span v-if="summaryDelta">{{ getDeltaLabel(summaryDelta) }}</span>
       </div>

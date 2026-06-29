@@ -59,14 +59,14 @@ function getDeltaLabel(delta: { type: 'larger' | 'saved' | 'same', percent: numb
         <p v-if="preview.crop" class="mt-1 font-mono text-xs font-black text-acid">
           {{ $t('image.cropped') }} {{ preview.crop.width }} {{ $t('common.by') }} {{ preview.crop.height }} {{ $t('image.pixels') }}
         </p>
-        <p class="mt-1 font-mono text-xs font-bold text-ink/42">
+        <p v-if="!allowCrop" class="mt-1 font-mono text-xs font-bold text-ink/42">
           {{ $t('image.sourceSize') }} {{ formatFileSize(preview.file.size) }}
         </p>
-        <p class="mt-1 font-mono text-xs font-bold text-ink/42">
+        <p v-if="!allowCrop" class="mt-1 font-mono text-xs font-bold text-ink/42">
           {{ $t('image.outputSizeReference') }} {{ estimates[index]?.outputSize ? formatFileSize(estimates[index]!.outputSize) : $t('image.waitingEstimate') }}
         </p>
         <p
-          v-if="estimates[index]?.delta"
+          v-if="!allowCrop && estimates[index]?.delta"
           class="mt-1 font-mono text-xs font-black"
           :class="estimates[index]!.delta?.type === 'larger' ? 'text-coral' : estimates[index]!.delta?.type === 'saved' ? 'text-acid' : 'text-ink/42'"
         >

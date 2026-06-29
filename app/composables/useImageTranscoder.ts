@@ -34,6 +34,7 @@ export function useImageTranscoder() {
     if (isFirstUpload && nextPreviews[0]?.width && nextPreviews[0]?.height) {
       options.maxWidth = nextPreviews[0].width
       options.maxHeight = nextPreviews[0].height
+      options.outputFileName = getFileBaseName(nextPreviews[0].file.name)
       clearResults()
     }
   }
@@ -112,7 +113,7 @@ export function useImageTranscoder() {
         const encoded = await encodeImage(imageData, options.format, options)
         const format = imageFormatOptions.find(item => item.value === options.format) ?? imageFormatOptions[0]!
         const blob = new Blob([encoded], { type: format.mimeType })
-        const fileName = replaceFileExtension(file.name, format.extension)
+        const fileName = getOutputFileName(file, format.extension, entries.length === 1 ? options.outputFileName : '')
 
         nextResults.push({
           id: crypto.randomUUID(),
@@ -204,6 +205,24 @@ function isSupportedImageFile(file: File) {
     return supportedImageExtensions.has(extension) || extension === ''
 
   return supportedImageExtensions.has(extension)
+}
+
+function getOutputFileName(file: File, extension: string, outputFileName: string) {
+  const cleanName = sanitiseFileName(outputFileName.trim())
+
+  return replaceFileExtension(cleanName || file.name, extension)
+}
+
+function getFileBaseName(fileName: string) {
+  return fileName.replace(/\.[^/.]+$/, '')
+}
+
+function sanitiseFileName(fileName: string) {
+  return Array.from(fileName)
+    .map(character => character.charCodeAt(0) < 32 || /[<>:"/\\|?*]/.test(character) ? '-' : character)
+    .join('')
+    .replace(/\s+/g, ' ')
+    .trim()
 }
 
 async function createImagePreview(file: File): Promise<UploadedImagePreview> {

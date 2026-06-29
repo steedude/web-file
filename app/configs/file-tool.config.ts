@@ -8,6 +8,7 @@ export const imageFormatOptions: Array<{ value: ImageOutputFormat, mimeType: str
 
 export const defaultImageOptions: ImageTransformOptions = {
   format: 'webp',
+  outputFileName: '',
   quality: 78,
   maxWidth: 1920,
   maxHeight: 1920,

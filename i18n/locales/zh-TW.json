@@ -85,7 +85,8 @@
       "left": "靠左裁切",
       "right": "靠右裁切"
     },
-    "pixels": "px"
+    "pixels": "px",
+    "outputFileName": "\u6a94\u6848\u540d\u7a31"
   },
   "pdf": {
     "title": "PDF 合併 / 拆分 / 編輯",

@@ -85,7 +85,8 @@
       "left": "Left crop",
       "right": "Right crop"
     },
-    "pixels": "px"
+    "pixels": "px",
+    "outputFileName": "File name"
   },
   "pdf": {
     "title": "PDF merge / extract / edit",

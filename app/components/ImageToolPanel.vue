@@ -139,6 +139,10 @@ function updateFormat(event: Event) {
   scheduleEstimate()
 }
 
+function updateOutputFileName(event: Event) {
+  patchCurrentOptions({ outputFileName: (event.target as HTMLInputElement).value })
+}
+
 function updateCropPosition(event: Event) {
   if (imageMode.value !== 'batch')
     return
@@ -374,6 +378,18 @@ function getOutputExtensions(format: ImageOutputFormat) {
       <p v-if="hasSameExtensionWarning" class="border border-coral/70 bg-coral/12 px-3 py-2 font-mono text-xs font-black text-coral">
         {{ t('image.sameExtensionWarning') }}
       </p>
+
+      <label v-if="imageMode === 'single' && previews.length" class="block space-y-2">
+        <span class="font-mono text-xs font-black tracking-widest text-sky uppercase">{{ t('image.outputFileName') }}</span>
+        <input
+          :value="options.outputFileName"
+          class="focus-ring w-full border border-line bg-grid px-3 py-2 font-mono text-sm font-bold text-ink"
+          type="text"
+          autocomplete="off"
+          spellcheck="false"
+          @input="updateOutputFileName"
+        >
+      </label>
 
       <div class="grid gap-2 font-mono text-xs font-bold text-ink sm:grid-cols-3">
         <span class="border border-line/70 bg-paper/70 px-3 py-2">

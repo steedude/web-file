@@ -13,6 +13,7 @@ export interface ImageCropSelection {
 
 export interface ImageTransformOptions {
   format: ImageOutputFormat
+  outputFileName: string
   quality: number
   maxWidth: number
   maxHeight: number

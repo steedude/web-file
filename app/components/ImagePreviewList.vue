@@ -35,7 +35,7 @@ function getDeltaLabel(delta: { type: 'larger' | 'saved' | 'same', percent: numb
 </script>
 
 <template>
-  <div v-if="previews.length" :class="compact ? 'space-y-2' : allowCrop ? 'space-y-3' : 'grid gap-3 sm:grid-cols-2'">
+  <div v-if="previews.length" :class="compact ? 'space-y-2' : allowCrop ? 'space-y-3' : 'grid gap-3 md:grid-cols-2'">
     <article
       v-for="(preview, index) in previews"
       :key="preview.id"
@@ -74,7 +74,7 @@ function getDeltaLabel(delta: { type: 'larger' | 'saved' | 'same', percent: numb
       </div>
       <button
         type="button"
-        class="focus-ring absolute top-2 right-2 grid size-8 place-items-center border border-line bg-paper/90 text-ink/70 opacity-100 transition hover:border-coral hover:text-coral sm:opacity-0 sm:group-hover:opacity-100"
+        class="focus-ring absolute top-2 right-2 grid size-8 place-items-center border border-line bg-paper/90 text-ink/70 opacity-100 transition hover:border-coral hover:text-coral md:opacity-0 md:group-hover:opacity-100"
         :aria-label="$t('common.remove')"
         :title="$t('common.remove')"
         @click="emit('remove', index)"

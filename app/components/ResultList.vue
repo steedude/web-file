@@ -16,7 +16,7 @@ const { t } = useI18n()
     <article
       v-for="result in imageResults"
       :key="result.id"
-      class="grid gap-4 border border-line bg-grid/80 p-4 shadow-[0_0_24px_rgb(0_0_0_/_18%)] sm:grid-cols-[96px_1fr_auto] sm:items-center"
+      class="grid gap-4 border border-line bg-grid/80 p-4 shadow-[0_0_24px_rgb(0_0_0_/_18%)] md:grid-cols-[96px_1fr_auto] md:items-center"
     >
       <img :src="result.url" :alt="result.fileName" class="h-24 w-24 border border-line object-cover">
       <div class="min-w-0">
@@ -43,7 +43,7 @@ const { t } = useI18n()
     <article
       v-for="result in pdfResults"
       :key="result.id"
-      class="flex flex-col gap-4 border border-line bg-grid/80 p-4 shadow-[0_0_24px_rgb(0_0_0_/_18%)] sm:flex-row sm:items-center sm:justify-between"
+      class="flex flex-col gap-4 border border-line bg-grid/80 p-4 shadow-[0_0_24px_rgb(0_0_0_/_18%)] md:flex-row md:items-center md:justify-between"
     >
       <div class="min-w-0">
         <h3 class="truncate font-mono text-sm font-black text-ink">

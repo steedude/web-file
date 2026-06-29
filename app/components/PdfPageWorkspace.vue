@@ -65,7 +65,7 @@ const sortablePages = computed({
       :disabled="mode !== 'merge'"
       ghost-class="opacity-35"
       handle=".pdf-page-drag-handle"
-      class="grid grid-cols-2 gap-3 sm:grid-cols-3 2xl:grid-cols-4"
+      class="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-4"
     >
       <article
         v-for="(page, index) in pages"

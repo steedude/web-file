@@ -13,12 +13,12 @@ function toggleLocale() {
 <template>
   <div class="min-h-screen text-ink">
     <div class="noise" />
-    <header class="mx-auto flex w-full max-w-7xl items-center justify-between px-5 py-5 lg:px-10">
+    <header class="mx-auto flex w-full max-w-7xl items-center justify-between px-5 py-5 xl:px-10">
       <NuxtLink :to="localePath('/')" class="focus-ring group inline-flex items-center gap-3 rounded-sm">
         <span class="grid size-10 place-items-center border border-acid/60 bg-acid/12 font-mono text-sm font-black text-acid shadow-[0_0_24px_rgb(109_255_157_/_18%)] transition group-hover:bg-acid group-hover:text-paper">
           {{ t('common.logoMark') }}
         </span>
-        <span class="hidden font-mono text-sm font-black tracking-[0.22em] text-ink/80 uppercase lg:block">{{ t('brand') }}</span>
+        <span class="hidden font-mono text-sm font-black tracking-[0.22em] text-ink/80 uppercase xl:block">{{ t('brand') }}</span>
       </NuxtLink>
 
       <div class="flex items-center gap-2">

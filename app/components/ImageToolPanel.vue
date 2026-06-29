@@ -327,7 +327,7 @@ function getOutputExtensions(format: ImageOutputFormat) {
     </div>
 
     <div class="space-y-4 border border-line bg-panel/82 p-4 shadow-[0_0_44px_rgb(72_215_255_/_7%)] backdrop-blur">
-      <div class="grid gap-4 sm:grid-cols-2">
+      <div class="grid gap-4 md:grid-cols-2">
         <label class="grid grid-rows-[auto_2.25rem] gap-2">
           <span class="flex h-4 items-center font-mono text-xs font-black tracking-widest text-sky uppercase">{{ t('image.outputFormat') }}</span>
           <select :value="options.format" class="focus-ring w-full border border-line bg-grid px-3 py-2 font-mono text-sm font-bold text-ink" @change="updateFormat">
@@ -391,7 +391,7 @@ function getOutputExtensions(format: ImageOutputFormat) {
         >
       </label>
 
-      <div class="grid gap-2 font-mono text-xs font-bold text-ink sm:grid-cols-3">
+      <div class="grid gap-2 font-mono text-xs font-bold text-ink md:grid-cols-3">
         <span class="border border-line/70 bg-paper/70 px-3 py-2">
           <span class="block text-ink/42"><template v-if="imageMode === 'batch'">{{ t('image.batchSummary') }} </template>{{ t('image.sourceSize') }}</span>
           <span class="mt-1 block text-sm font-black text-ink">{{ formatFileSize(originalSizeReference) }}</span>
@@ -435,7 +435,7 @@ function getOutputExtensions(format: ImageOutputFormat) {
         </button>
       </div>
 
-      <div v-if="imageMode === 'single' && !options.preserveDimensions" class="grid grid-cols-2 gap-2 sm:w-max">
+      <div v-if="imageMode === 'single' && !options.preserveDimensions" class="grid grid-cols-2 gap-2 md:w-max">
         <button
           type="button"
           class="focus-ring border px-3 py-2 font-mono text-xs font-black transition"
@@ -459,7 +459,7 @@ function getOutputExtensions(format: ImageOutputFormat) {
         <input :value="options.resizePercent" class="w-full accent-acid" type="range" min="1" max="100" step="1" @change="commitEstimate" @input="updateResizePercent">
       </label>
 
-      <div v-if="imageMode === 'single' && options.resizeMode === 'dimensions'" class="grid gap-4 sm:grid-cols-2">
+      <div v-if="imageMode === 'single' && options.resizeMode === 'dimensions'" class="grid gap-4 md:grid-cols-2">
         <label class="space-y-2">
           <span class="font-mono text-xs font-black tracking-widest text-sky uppercase">{{ t('image.width') }}</span>
           <input

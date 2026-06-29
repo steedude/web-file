@@ -3,6 +3,8 @@
 @theme {
   --font-sans: 'Inter', 'Avenir Next', 'Segoe UI', 'Noto Sans TC', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', 'Cascadia Code', 'SFMono-Regular', ui-monospace, monospace;
+  --breakpoint-md: 48rem;
+  --breakpoint-xl: 80rem;
   --color-ink: #dffdf2;
   --color-paper: #060b10;
   --color-grid: #0b1720;

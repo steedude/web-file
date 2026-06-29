@@ -14,13 +14,13 @@ useSeoMeta({
 </script>
 
 <template>
-  <div class="mx-auto w-full max-w-[1540px] px-4 pt-6 pb-16 sm:px-5 lg:px-8 lg:pt-8">
-    <section class="grid gap-4 border-b border-line/70 pb-6 lg:grid-cols-[minmax(0,1fr)_minmax(300px,420px)] lg:items-end">
+  <div class="mx-auto w-full max-w-[1540px] px-4 pt-6 pb-16 md:px-5 xl:px-8 xl:pt-8">
+    <section class="grid gap-4 border-b border-line/70 pb-6 xl:grid-cols-[minmax(0,1fr)_minmax(300px,420px)] xl:items-end">
       <div>
-        <h1 class="max-w-4xl text-4xl leading-[0.96] font-black text-ink lg:text-6xl">
+        <h1 class="max-w-4xl text-4xl leading-[0.96] font-black text-ink xl:text-6xl">
           {{ t('home.title') }}
         </h1>
-        <p class="mt-4 max-w-3xl text-sm leading-6 font-semibold text-ink/58 lg:text-base">
+        <p class="mt-4 max-w-3xl text-sm leading-6 font-semibold text-ink/58 xl:text-base">
           {{ t('home.summary') }}
         </p>
       </div>

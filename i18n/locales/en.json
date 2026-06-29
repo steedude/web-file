@@ -48,18 +48,18 @@
     "height": "Height"
   },
   "pdf": {
-    "title": "PDF merge / split / edit",
-    "description": "Powered by pdf-lib in the browser. No uploads, a clear client-side document workflow.",
+    "title": "PDF merge / extract / edit",
+    "description": "Powered by pdf-lib in the browser. Merge multiple files, extract selected pages, or adjust document info locally.",
     "mode": "Mode",
     "merge": "Merge",
-    "split": "Split",
-    "edit": "Edit",
+    "split": "Extract pages",
+    "edit": "Rotate / info",
     "pageRanges": "Page ranges",
     "pageRangesHelp": "Example: 1-3,5,8-end",
     "rotation": "Rotation",
     "titleField": "Title",
     "author": "Author",
     "run": "Generate PDF",
-    "empty": "Add PDFs, then choose a workflow."
+    "empty": "Add PDFs, then choose a workflow. Extract and edit use one file at a time."
   }
 }

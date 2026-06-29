@@ -7,7 +7,12 @@ export function parsePageRanges(input: string, pageCount: number): number[] {
   const ranges = tokens.length > 0 ? tokens : ['1-end']
 
   for (const token of ranges) {
-    const [rawStart, rawEnd] = token.split('-').map(part => part.trim())
+    const parts = token.split('-').map(part => part.trim())
+
+    if (parts.length > 2 || !parts[0])
+      throw new Error('Invalid page range. Use a format like 1-3,5,8-end.')
+
+    const [rawStart, rawEnd] = parts
     const start = parsePageNumber(rawStart ?? '1', pageCount)
     const end = rawEnd ? parsePageNumber(rawEnd, pageCount) : start
 
@@ -25,10 +30,10 @@ function parsePageNumber(value: string, pageCount: number): number {
   if (value.toLowerCase() === 'end')
     return pageCount
 
-  const parsed = Number.parseInt(value, 10)
+  if (!/^\d+$/.test(value))
+    throw new Error('Invalid page range. Use a format like 1-3,5,8-end.')
 
-  if (!Number.isFinite(parsed))
-    return 1
+  const parsed = Number.parseInt(value, 10)
 
   return Math.min(Math.max(parsed, 1), pageCount)
 }

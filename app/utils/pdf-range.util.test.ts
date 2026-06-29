@@ -13,4 +13,9 @@ describe('parsePageRanges', () => {
   it('falls back to the whole document when empty', () => {
     expect(parsePageRanges('', 3)).toEqual([0, 1, 2])
   })
+
+  it('rejects invalid page range tokens', () => {
+    expect(() => parsePageRanges('abc', 3)).toThrow('Invalid page range')
+    expect(() => parsePageRanges('1-2-3', 3)).toThrow('Invalid page range')
+  })
 })

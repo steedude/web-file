@@ -13,9 +13,23 @@ export function usePdfWorkshop() {
 
   const canRun = computed(() => files.value.length > 0 && !isProcessing.value)
 
+  watch(() => options.mode, (mode) => {
+    clearResults()
+    error.value = ''
+
+    if (mode !== 'merge' && files.value.length > 1)
+      files.value = files.value.slice(0, 1)
+  })
+
   function addFiles(fileList: FileList | File[]) {
     const pdfFiles = Array.from(fileList).filter(file => file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf'))
-    files.value = [...files.value, ...pdfFiles]
+
+    if (pdfFiles.length === 0)
+      return
+
+    clearResults()
+    error.value = ''
+    files.value = options.mode === 'merge' ? [...files.value, ...pdfFiles] : pdfFiles.slice(0, 1)
   }
 
   function removeFile(index: number) {
@@ -49,7 +63,7 @@ export function usePdfWorkshop() {
       if (options.mode === 'merge')
         results.value = [await mergePdfs(files.value)]
       else if (options.mode === 'split' && firstFile)
-        results.value = await splitPdf(firstFile, options.ranges)
+        results.value = await extractPdfPages(firstFile, options.ranges)
       else if (firstFile)
         results.value = [await editPdf(firstFile, options)]
     }
@@ -89,14 +103,14 @@ async function mergePdfs(files: File[]): Promise<PdfResult> {
   return pdfDocumentToResult(output, 'merged.pdf')
 }
 
-async function splitPdf(file: File, ranges: string): Promise<PdfResult[]> {
+async function extractPdfPages(file: File, ranges: string): Promise<PdfResult[]> {
   const source = await PDFDocument.load(await file.arrayBuffer())
   const indexes = parsePageRanges(ranges, source.getPageCount())
   const output = await PDFDocument.create()
   const copiedPages = await output.copyPages(source, indexes)
   copiedPages.forEach(page => output.addPage(page))
 
-  return [await pdfDocumentToResult(output, appendFileSuffix(file.name, 'split'))]
+  return [await pdfDocumentToResult(output, appendFileSuffix(file.name, 'extracted'))]
 }
 
 async function editPdf(file: File, options: PdfOptions): Promise<PdfResult> {

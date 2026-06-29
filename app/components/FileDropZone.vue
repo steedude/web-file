@@ -1,13 +1,16 @@
 <script setup lang="ts">
 import { UploadCloud } from '@lucide/vue'
 
-defineProps<{
+const props = withDefaults(defineProps<{
   accept: string
   label: string
-}>()
+  multiple?: boolean
+}>(), {
+  multiple: true,
+})
 
 const emit = defineEmits<{
-  files: [files: FileList]
+  files: [files: FileList | File[]]
 }>()
 
 const isDragging = ref(false)
@@ -21,7 +24,7 @@ function handleInput(event: Event) {
   const target = event.target as HTMLInputElement
 
   if (target.files)
-    emit('files', target.files)
+    emit('files', props.multiple ? target.files : Array.from(target.files).slice(0, 1))
 
   target.value = ''
 }
@@ -30,7 +33,7 @@ function handleDrop(event: DragEvent) {
   isDragging.value = false
 
   if (event.dataTransfer?.files)
-    emit('files', event.dataTransfer.files)
+    emit('files', props.multiple ? event.dataTransfer.files : Array.from(event.dataTransfer.files).slice(0, 1))
 }
 </script>
 
@@ -43,7 +46,7 @@ function handleDrop(event: DragEvent) {
     @dragleave.prevent="isDragging = false"
     @drop.prevent="handleDrop"
   >
-    <input ref="input" class="sr-only" type="file" multiple :accept="accept" @change="handleInput">
+    <input ref="input" class="sr-only" type="file" :multiple="multiple" :accept="accept" @change="handleInput">
     <button
       type="button"
       class="focus-ring flex w-full flex-col items-center justify-center gap-3 py-8 text-center"

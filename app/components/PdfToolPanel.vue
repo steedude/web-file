@@ -34,7 +34,7 @@ const {
         </div>
       </div>
 
-      <FileDropZone accept="application/pdf,.pdf" :label="t('common.dropFiles')" @files="addFiles" />
+      <FileDropZone accept="application/pdf,.pdf" :label="t('common.dropFiles')" :multiple="options.mode === 'merge'" @files="addFiles" />
       <FileList :files="files" @remove="removeFile" />
     </div>
 

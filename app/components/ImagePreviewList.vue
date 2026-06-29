@@ -4,6 +4,10 @@ import { Scissors, Settings2, X } from '@lucide/vue'
 import { formatFileSize } from '~/utils/file-size.util'
 
 defineProps<{
+  estimates?: Array<{
+    outputSize: number
+    delta: { type: 'larger' | 'saved' | 'same', percent: number } | null
+  }>
   previews: UploadedImagePreview[]
 }>()
 
@@ -12,6 +16,18 @@ const emit = defineEmits<{
   customise: [index: number]
   remove: [index: number]
 }>()
+
+const { t } = useI18n()
+
+function getDeltaLabel(delta: { type: 'larger' | 'saved' | 'same', percent: number } | null) {
+  if (!delta)
+    return t('image.waitingEstimate')
+
+  if (delta.type === 'same')
+    return t('image.unchanged')
+
+  return `${delta.type === 'larger' ? t('image.largerReference') : t('image.savedReference')} ${delta.percent}${t('common.percent')}`
+}
 </script>
 
 <template>
@@ -31,7 +47,17 @@ const emit = defineEmits<{
           {{ preview.file.name }}
         </p>
         <p class="mt-1 font-mono text-xs font-bold text-ink/42">
-          {{ formatFileSize(preview.file.size) }}
+          {{ $t('image.sourceSize') }} {{ formatFileSize(preview.file.size) }}
+        </p>
+        <p class="mt-1 font-mono text-xs font-bold text-ink/42">
+          {{ $t('image.outputSizeReference') }} {{ estimates?.[index]?.outputSize ? formatFileSize(estimates[index]!.outputSize) : $t('image.waitingEstimate') }}
+        </p>
+        <p
+          v-if="estimates?.[index]?.delta"
+          class="mt-1 font-mono text-xs font-black"
+          :class="estimates[index]!.delta?.type === 'larger' ? 'text-coral' : estimates[index]!.delta?.type === 'saved' ? 'text-acid' : 'text-ink/42'"
+        >
+          {{ getDeltaLabel(estimates[index]!.delta) }}
         </p>
         <p v-if="preview.crop" class="mt-1 font-mono text-xs font-black text-acid">
           {{ $t('image.cropped') }} {{ preview.crop.width }} {{ $t('common.by') }} {{ preview.crop.height }}

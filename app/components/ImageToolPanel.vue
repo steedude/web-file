@@ -14,7 +14,7 @@ const {
   clearResults,
   convert,
   error,
-  estimateOutputSize,
+  estimateOutputSizes,
   files,
   isEstimating,
   isProcessing,
@@ -29,7 +29,7 @@ const {
 const settingsScope = ref<'batch' | 'single'>('batch')
 const selectedPreviewIndex = ref(0)
 const cropEditorIndex = ref<number | null>(null)
-const estimatedOutputSize = ref(0)
+const estimatedOutputSizes = ref<number[]>([])
 let estimateTimer: ReturnType<typeof setTimeout> | null = null
 let estimateRequestId = 0
 const activeCropPreview = computed(() => cropEditorIndex.value === null ? null : previews.value[cropEditorIndex.value] ?? null)
@@ -60,20 +60,32 @@ const originalSizeReference = computed(() => {
   return files.value.reduce((total, file) => total + file.size, 0)
 })
 const outputSizeReference = computed(() => {
-  if (estimatedOutputSize.value)
-    return estimatedOutputSize.value
+  const estimatedSize = settingsScope.value === 'single'
+    ? estimatedOutputSizes.value[selectedPreviewIndex.value] ?? 0
+    : estimatedOutputSizes.value.reduce((total, size) => total + size, 0)
+
+  if (estimatedSize)
+    return estimatedSize
 
   if (settingsScope.value === 'single')
     return results.value[selectedPreviewIndex.value]?.outputSize ?? 0
 
   return results.value.reduce((total, result) => total + result.outputSize, 0)
 })
-const savedPercentReference = computed(() => {
+const summaryDelta = computed(() => {
   if (!originalSizeReference.value || !outputSizeReference.value)
     return null
 
-  return Math.round((1 - outputSizeReference.value / originalSizeReference.value) * 100)
+  return createSizeDelta(originalSizeReference.value, outputSizeReference.value)
 })
+const previewEstimates = computed(() => previews.value.map((preview, index) => {
+  const outputSize = estimatedOutputSizes.value[index] || results.value[index]?.outputSize || 0
+
+  return {
+    outputSize,
+    delta: outputSize ? createSizeDelta(preview.file.size, outputSize) : null,
+  }
+}))
 
 watch([settingsScope, selectedPreviewIndex, previews], () => {
   if (selectedPreviewIndex.value >= previews.value.length)
@@ -180,16 +192,44 @@ function scheduleEstimate() {
 
   const requestId = ++estimateRequestId
   estimateTimer = setTimeout(async () => {
-    const size = await estimateOutputSize(settingsScope.value === 'single' ? selectedPreviewIndex.value : undefined).catch(() => 0)
+    const sizes = await estimateOutputSizes(settingsScope.value === 'single' ? selectedPreviewIndex.value : undefined).catch(() => [])
 
-    if (requestId === estimateRequestId)
-      estimatedOutputSize.value = size
+    if (requestId === estimateRequestId) {
+      const nextSizes = settingsScope.value === 'single' ? [...estimatedOutputSizes.value] : []
+
+      for (const item of sizes)
+        nextSizes[item.index] = item.size
+
+      estimatedOutputSizes.value = nextSizes
+    }
   }, 450)
 }
 
 function clearEstimate() {
-  estimatedOutputSize.value = 0
+  estimatedOutputSizes.value = []
   estimateRequestId += 1
+}
+
+function createSizeDelta(sourceSize: number, outputSize: number) {
+  const change = outputSize - sourceSize
+
+  if (change === 0)
+    return { type: 'same' as const, percent: 0 }
+
+  return {
+    type: change > 0 ? 'larger' as const : 'saved' as const,
+    percent: Math.round(Math.abs(change) / sourceSize * 100),
+  }
+}
+
+function getDeltaLabel(delta: { type: 'larger' | 'saved' | 'same', percent: number } | null) {
+  if (!delta)
+    return t('image.waitingEstimate')
+
+  if (delta.type === 'same')
+    return t('image.unchanged')
+
+  return `${delta.type === 'larger' ? t('image.largerReference') : t('image.savedReference')} ${delta.percent}${t('common.percent')}`
 }
 
 function saveCrop(crop: { x: number, y: number, width: number, height: number }) {
@@ -227,7 +267,7 @@ function clearCrop() {
       </div>
 
       <FileDropZone accept="image/*" :label="t('common.dropFiles')" @files="addFiles" />
-      <ImagePreviewList :previews="previews" @crop="cropEditorIndex = $event" @customise="selectSingleImage" @remove="removeFile" />
+      <ImagePreviewList :estimates="previewEstimates" :previews="previews" @crop="cropEditorIndex = $event" @customise="selectSingleImage" @remove="removeFile" />
       <FileList v-if="!previews.length" :files="files" @remove="removeFile" />
     </div>
 
@@ -311,9 +351,9 @@ function clearCrop() {
       </label>
 
       <div class="grid gap-2 border border-line bg-grid/70 px-3 py-2 font-mono text-xs font-bold text-ink/52 sm:grid-cols-3">
-        <span>{{ t('image.sourceSize') }} {{ formatFileSize(originalSizeReference) }}</span>
+        <span>{{ t('image.batchSummary') }} {{ t('image.sourceSize') }} {{ formatFileSize(originalSizeReference) }}</span>
         <span>{{ t('image.outputSizeReference') }} {{ isEstimating ? t('image.estimating') : outputSizeReference ? formatFileSize(outputSizeReference) : t('image.waitingEstimate') }}</span>
-        <span v-if="savedPercentReference !== null">{{ t('image.savedReference') }} {{ savedPercentReference }}{{ t('common.percent') }}</span>
+        <span v-if="summaryDelta">{{ getDeltaLabel(summaryDelta) }}</span>
       </div>
 
       <div class="grid gap-4 sm:grid-cols-2">

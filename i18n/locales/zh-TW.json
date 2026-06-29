@@ -67,7 +67,10 @@
     "estimating": "估算中",
     "enableWebpLossless": "使用 WebP 無損模式",
     "pngQualityUnavailable": "PNG 使用無損最佳化，不使用品質滑桿。",
-    "waitingEstimate": "等待估算"
+    "waitingEstimate": "等待估算",
+    "batchSummary": "總覽",
+    "largerReference": "變大",
+    "unchanged": "相同"
   },
   "pdf": {
     "title": "PDF 合併 / 擷取 / 編輯",

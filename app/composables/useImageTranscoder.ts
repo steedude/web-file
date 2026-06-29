@@ -154,9 +154,9 @@ export function useImageTranscoder() {
     }
   }
 
-  async function estimateOutputSize(index?: number): Promise<number> {
+  async function estimateOutputSizes(index?: number): Promise<Array<{ index: number, size: number }>> {
     if (files.value.length === 0)
-      return 0
+      return []
 
     isEstimating.value = true
 
@@ -164,7 +164,7 @@ export function useImageTranscoder() {
       const entries = typeof index === 'number'
         ? [[index, files.value[index]] as const]
         : files.value.map((file, fileIndex) => [fileIndex, file] as const)
-      let totalSize = 0
+      const sizes: Array<{ index: number, size: number }> = []
 
       for (const [fileIndex, file] of entries) {
         if (!file)
@@ -174,14 +174,19 @@ export function useImageTranscoder() {
         const activeOptions = preview?.options ?? options
         const imageData = await fileToImageData(file, activeOptions.maxWidth, activeOptions.maxHeight, activeOptions.preserveDimensions, preview?.crop)
         const encoded = await encodeImage(imageData, activeOptions.format, activeOptions)
-        totalSize += encoded.byteLength
+        sizes.push({ index: fileIndex, size: encoded.byteLength })
       }
 
-      return totalSize
+      return sizes
     }
     finally {
       isEstimating.value = false
     }
+  }
+
+  async function estimateOutputSize(index?: number): Promise<number> {
+    const sizes = await estimateOutputSizes(index)
+    return sizes.reduce((total, item) => total + item.size, 0)
   }
 
   onBeforeUnmount(() => {
@@ -207,6 +212,7 @@ export function useImageTranscoder() {
     clearPreviewOptions,
     setPreviewOptions,
     setCropSelection,
+    estimateOutputSizes,
     estimateOutputSize,
   }
 }

@@ -67,7 +67,10 @@
     "estimating": "estimating",
     "enableWebpLossless": "Encode WebP in lossless mode",
     "pngQualityUnavailable": "PNG uses lossless optimization instead of quality.",
-    "waitingEstimate": "waiting"
+    "waitingEstimate": "waiting",
+    "batchSummary": "Total",
+    "largerReference": "Larger",
+    "unchanged": "Unchanged"
   },
   "pdf": {
     "title": "PDF merge / extract / edit",

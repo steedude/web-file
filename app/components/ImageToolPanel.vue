@@ -301,8 +301,8 @@ function getOutputExtensions(format: ImageOutputFormat) {
 
     <div class="space-y-4 border border-line bg-panel/82 p-4 shadow-[0_0_44px_rgb(72_215_255_/_7%)] backdrop-blur">
       <div class="grid gap-4 sm:grid-cols-2">
-        <label class="space-y-2">
-          <span class="font-mono text-xs font-black tracking-widest text-sky uppercase">{{ t('image.outputFormat') }}</span>
+        <label class="grid grid-rows-[auto_2.25rem] gap-2">
+          <span class="flex h-4 items-center font-mono text-xs font-black tracking-widest text-sky uppercase">{{ t('image.outputFormat') }}</span>
           <select :value="options.format" class="focus-ring w-full border border-line bg-grid px-3 py-2 font-mono text-sm font-bold text-ink" @change="updateFormat">
             <option v-for="format in imageFormatOptions" :key="format.value" :value="format.value">
               {{ format.value.toUpperCase() }}
@@ -310,22 +310,22 @@ function getOutputExtensions(format: ImageOutputFormat) {
           </select>
         </label>
 
-        <div class="space-y-2">
-          <div v-if="options.format === 'webp'" class="h-full">
-            <label class="flex h-full flex-col justify-between gap-2">
-              <span class="font-mono text-xs font-black tracking-widest text-sky uppercase">{{ t('image.quality') }} {{ t('common.dot') }} {{ displayedQuality }}</span>
-              <input :value="displayedQuality" class="h-10 w-full accent-acid disabled:opacity-40" type="range" min="1" max="100" :disabled="options.webpLossless" @input="updateQuality">
+        <div>
+          <div v-if="options.format === 'webp'">
+            <label class="grid grid-rows-[auto_2.25rem] gap-2">
+              <span class="flex h-4 items-center font-mono text-xs font-black tracking-widest text-sky uppercase">{{ t('image.quality') }} {{ t('common.dot') }} {{ displayedQuality }}</span>
+              <input :value="displayedQuality" class="h-9 w-full accent-acid disabled:opacity-40" type="range" min="1" max="100" :disabled="options.webpLossless" @input="updateQuality">
             </label>
           </div>
 
-          <label v-else-if="options.format === 'jpeg'" class="flex h-full flex-col justify-between gap-2">
-            <span class="font-mono text-xs font-black tracking-widest text-sky uppercase">{{ t('image.quality') }} {{ t('common.dot') }} {{ options.quality }}</span>
-            <input :value="options.quality" class="h-10 w-full accent-acid" type="range" min="1" max="100" @input="updateQuality">
+          <label v-else-if="options.format === 'jpeg'" class="grid grid-rows-[auto_2.25rem] gap-2">
+            <span class="flex h-4 items-center font-mono text-xs font-black tracking-widest text-sky uppercase">{{ t('image.quality') }} {{ t('common.dot') }} {{ options.quality }}</span>
+            <input :value="options.quality" class="h-9 w-full accent-acid" type="range" min="1" max="100" @input="updateQuality">
           </label>
 
-          <div v-else class="space-y-2">
-            <span class="block font-mono text-xs font-black tracking-widest text-sky uppercase">{{ t('image.pngQualityTitle') }}</span>
-            <div class="border border-line bg-grid px-3 py-2 font-mono text-xs font-bold text-ink/42">
+          <div v-else class="grid grid-rows-[auto_2.25rem] gap-2">
+            <span class="flex h-4 items-center font-mono text-xs font-black tracking-widest text-sky uppercase">{{ t('image.pngQualityTitle') }}</span>
+            <div class="flex items-center border border-line bg-grid px-3 font-mono text-xs font-bold text-ink/42">
               {{ t('image.pngQualityUnavailable') }}
             </div>
           </div>

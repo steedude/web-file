@@ -25,7 +25,7 @@ const {
 </script>
 
 <template>
-  <section class="grid gap-6 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)]">
+  <section class="grid gap-5 xl:grid-cols-[360px_minmax(0,1fr)]">
     <div class="space-y-4">
       <div class="flex items-start gap-3">
         <span class="grid size-11 shrink-0 place-items-center border border-lilac/70 bg-lilac/12 text-lilac shadow-[0_0_28px_rgb(167_139_250_/_14%)]">

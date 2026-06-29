@@ -282,7 +282,7 @@ function getOutputExtensions(format: ImageOutputFormat) {
 </script>
 
 <template>
-  <section class="grid gap-6 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)]">
+  <section class="grid gap-5 xl:grid-cols-[minmax(340px,0.9fr)_minmax(0,1.35fr)]">
     <div class="space-y-4">
       <div class="flex items-start gap-3">
         <span class="grid size-11 shrink-0 place-items-center border border-sky/70 bg-sky/12 text-sky shadow-[0_0_28px_rgb(72_215_255_/_14%)]">

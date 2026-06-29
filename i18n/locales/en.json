@@ -1,7 +1,7 @@
 {
   "brand": "web file",
   "common": {
-    "switchToChinese": "切換中文",
+    "switchToChinese": "Switch to Chinese",
     "switchToEnglish": "Switch to English",
     "download": "Download",
     "remove": "Remove",
@@ -59,7 +59,7 @@
     "customSettings": "Single settings applied",
     "useBatchSettings": "Use batch",
     "proportionalResize": "Proportional resize",
-    "batchRatioHint": "Batch crops use the same size and position for every image.",
+    "batchRatioHint": "Batch crop applies the same size and position to every image.",
     "sourceSize": "Source",
     "outputSizeReference": "Output ref",
     "convertForEstimate": "convert first",

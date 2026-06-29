@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ImageOutputFormat, ImageTransformOptions } from '~/types/file-tool.type'
+import type { ImageCropSelection, ImageOutputFormat, ImageTransformOptions } from '~/types/file-tool.type'
 import { Image, Play, Trash2 } from '@lucide/vue'
 import { imageCropPositionOptions, imageFormatOptions } from '~/configs/file-tool.config'
 import { formatFileSize } from '~/utils/file-size.util'
@@ -9,6 +9,7 @@ const {
   addFiles,
   canConvert,
   clear,
+  clearCropSelection,
   clearResults,
   convert,
   error,
@@ -20,16 +21,19 @@ const {
   removeFile,
   resetOptions,
   results,
+  setCropSelection,
 } = useImageTranscoder()
 
 const imageMode = ref<'batch' | 'single'>('batch')
 const estimatedOutputSizes = ref<number[]>([])
 const isEstimatePending = ref(false)
+const cropEditorIndex = ref<number | null>(null)
 let estimateTimer: ReturnType<typeof setTimeout> | null = null
 let estimateRequestId = 0
 
 const displayedQuality = computed(() => options.webpLossless ? 100 : options.quality)
 const activeReference = computed(() => previews.value.length === 1 ? previews.value[0] ?? null : null)
+const activeCropPreview = computed(() => cropEditorIndex.value === null ? null : previews.value[cropEditorIndex.value] ?? null)
 const activeAspectRatio = computed(() => {
   const preview = activeReference.value
 
@@ -75,11 +79,13 @@ function setImageMode(mode: 'batch' | 'single') {
   imageMode.value = mode
   clear()
   resetOptions()
+  cropEditorIndex.value = null
   clearEstimate()
 }
 
 function handleImageFiles(fileList: FileList | File[]) {
   addFiles(fileList, imageMode.value === 'single')
+  cropEditorIndex.value = null
 }
 
 function patchCurrentOptions(patch: Partial<ImageTransformOptions>) {
@@ -119,12 +125,33 @@ function updateFormat(event: Event) {
 }
 
 function updateCropPosition(event: Event) {
+  if (imageMode.value !== 'batch')
+    return
+
   patchCurrentOptions({ cropPosition: (event.target as HTMLSelectElement).value as ImageTransformOptions['cropPosition'] })
   scheduleEstimate()
 }
 
 function setPreserveDimensions(preserveDimensions: boolean) {
   patchCurrentOptions({ preserveDimensions, cropPosition: preserveDimensions ? 'none' : options.cropPosition })
+  scheduleEstimate()
+}
+
+function saveCrop(crop: ImageCropSelection) {
+  if (cropEditorIndex.value === null)
+    return
+
+  setCropSelection(cropEditorIndex.value, crop)
+  cropEditorIndex.value = null
+  scheduleEstimate()
+}
+
+function clearCrop() {
+  if (cropEditorIndex.value === null)
+    return
+
+  clearCropSelection(cropEditorIndex.value)
+  cropEditorIndex.value = null
   scheduleEstimate()
 }
 
@@ -211,7 +238,7 @@ function getDeltaLabel(delta: { type: 'larger' | 'saved' | 'same', percent: numb
       </div>
 
       <FileDropZone accept="image/*" :label="t('common.dropFiles')" :multiple="imageMode === 'batch'" @files="handleImageFiles" />
-      <ImagePreviewList :compact="imageMode === 'batch'" :estimates="previewEstimates" :previews="previews" @remove="removeFile" />
+      <ImagePreviewList :allow-crop="imageMode === 'single'" :compact="imageMode === 'batch'" :estimates="previewEstimates" :previews="previews" @crop="cropEditorIndex = $event" @remove="removeFile" />
       <FileList v-if="!previews.length" :files="files" @remove="removeFile" />
     </div>
 
@@ -334,7 +361,7 @@ function getDeltaLabel(delta: { type: 'larger' | 'saved' | 'same', percent: numb
         </button>
       </div>
 
-      <label v-if="!options.preserveDimensions" class="block space-y-2">
+      <label v-if="imageMode === 'batch' && !options.preserveDimensions" class="block space-y-2">
         <span class="font-mono text-xs font-black tracking-widest text-sky uppercase">{{ t('image.cropPosition') }}</span>
         <select :value="options.cropPosition" class="focus-ring w-full border border-line bg-grid px-3 py-2 font-mono text-sm font-bold text-ink" @change="updateCropPosition">
           <option v-for="position in imageCropPositionOptions" :key="position" :value="position">
@@ -375,5 +402,7 @@ function getDeltaLabel(delta: { type: 'larger' | 'saved' | 'same', percent: numb
       </p>
       <ResultList v-else :image-results="results" />
     </div>
+
+    <ImageCropEditor v-if="activeCropPreview" :preview="activeCropPreview" @clear="clearCrop" @close="cropEditorIndex = null" @save="saveCrop" />
   </section>
 </template>

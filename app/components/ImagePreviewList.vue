@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import type { UploadedImagePreview } from '~/types/file-tool.type'
-import { X } from '@lucide/vue'
+import { Scissors, X } from '@lucide/vue'
 import { formatFileSize } from '~/utils/file-size.util'
 
 withDefaults(defineProps<{
+  allowCrop?: boolean
   compact?: boolean
   estimates?: Array<{
     outputSize: number
@@ -11,11 +12,13 @@ withDefaults(defineProps<{
   }>
   previews: UploadedImagePreview[]
 }>(), {
+  allowCrop: false,
   compact: false,
   estimates: () => [],
 })
 
 const emit = defineEmits<{
+  crop: [index: number]
   remove: [index: number]
 }>()
 
@@ -53,6 +56,9 @@ function getDeltaLabel(delta: { type: 'larger' | 'saved' | 'same', percent: numb
         <p class="mt-1 font-mono text-xs font-bold text-ink/42">
           {{ preview.width }} {{ $t('common.by') }} {{ preview.height }} {{ $t('image.pixels') }}
         </p>
+        <p v-if="preview.crop" class="mt-1 font-mono text-xs font-black text-acid">
+          {{ $t('image.cropped') }} {{ preview.crop.width }} {{ $t('common.by') }} {{ preview.crop.height }} {{ $t('image.pixels') }}
+        </p>
         <p class="mt-1 font-mono text-xs font-bold text-ink/42">
           {{ $t('image.sourceSize') }} {{ formatFileSize(preview.file.size) }}
         </p>
@@ -66,6 +72,15 @@ function getDeltaLabel(delta: { type: 'larger' | 'saved' | 'same', percent: numb
         >
           {{ getDeltaLabel(estimates[index]!.delta) }}
         </p>
+        <button
+          v-if="allowCrop"
+          type="button"
+          class="focus-ring mt-3 inline-flex items-center gap-2 border border-line bg-paper/80 px-3 py-2 font-mono text-xs font-black text-ink/70 transition hover:border-sky hover:text-sky"
+          @click="emit('crop', index)"
+        >
+          <Scissors class="size-4" aria-hidden="true" />
+          {{ $t('image.crop') }}
+        </button>
       </div>
       <button
         type="button"

@@ -1,4 +1,4 @@
-import type { ConvertedImage, ImageOutputFormat, ImageTransformOptions, UploadedImagePreview } from '~/types/file-tool.type'
+import type { ConvertedImage, ImageCropSelection, ImageOutputFormat, ImageTransformOptions, UploadedImagePreview } from '~/types/file-tool.type'
 import { defaultImageOptions, imageFormatOptions } from '~/configs/file-tool.config'
 import { replaceFileExtension } from '~/utils/file-name.util'
 import { fileToImageData } from '~/utils/image-canvas.util'
@@ -45,6 +45,22 @@ export function useImageTranscoder() {
     previews.value = previews.value.filter((_, previewIndex) => previewIndex !== index)
   }
 
+  function setCropSelection(index: number, crop: ImageCropSelection) {
+    previews.value = previews.value.map((preview, previewIndex) => previewIndex === index ? { ...preview, crop } : preview)
+    clearResults()
+  }
+
+  function clearCropSelection(index: number) {
+    previews.value = previews.value.map((preview, previewIndex) => {
+      if (previewIndex !== index)
+        return preview
+
+      const { crop: _crop, ...rest } = preview
+      return rest
+    })
+    clearResults()
+  }
+
   function clear() {
     files.value = []
     clearPreviews()
@@ -89,7 +105,7 @@ export function useImageTranscoder() {
         if (!file)
           continue
 
-        const imageData = await fileToImageData(file, options.maxWidth, options.maxHeight, options.preserveDimensions, options.cropPosition)
+        const imageData = await fileToImageData(file, options.maxWidth, options.maxHeight, options.preserveDimensions, options.cropPosition, previews.value[_index]?.crop)
         const encoded = await encodeImage(imageData, options.format, options)
         const format = imageFormatOptions.find(item => item.value === options.format) ?? imageFormatOptions[0]!
         const blob = new Blob([encoded], { type: format.mimeType })
@@ -134,7 +150,7 @@ export function useImageTranscoder() {
         if (!file)
           continue
 
-        const imageData = await fileToImageData(file, options.maxWidth, options.maxHeight, options.preserveDimensions, options.cropPosition)
+        const imageData = await fileToImageData(file, options.maxWidth, options.maxHeight, options.preserveDimensions, options.cropPosition, previews.value[fileIndex]?.crop)
         const encoded = await encodeImage(imageData, options.format, options)
         sizes.push({ index: fileIndex, size: encoded.byteLength })
       }
@@ -161,6 +177,7 @@ export function useImageTranscoder() {
     canConvert,
     clear,
     clearResults,
+    clearCropSelection,
     convert,
     error,
     files,
@@ -171,6 +188,7 @@ export function useImageTranscoder() {
     removeFile,
     resetOptions,
     results,
+    setCropSelection,
     estimateOutputSizes,
     estimateOutputSize,
   }

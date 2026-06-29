@@ -1,4 +1,4 @@
-import type { ImageCropPosition } from '~/types/file-tool.type'
+import type { ImageCropPosition, ImageCropSelection } from '~/types/file-tool.type'
 
 interface SourceRect {
   x: number
@@ -7,9 +7,9 @@ interface SourceRect {
   height: number
 }
 
-export async function fileToImageData(file: File, maxWidth: number, maxHeight: number, preserveDimensions: boolean, cropPosition: ImageCropPosition): Promise<ImageData> {
+export async function fileToImageData(file: File, maxWidth: number, maxHeight: number, preserveDimensions: boolean, cropPosition: ImageCropPosition, crop?: ImageCropSelection): Promise<ImageData> {
   const bitmap = await createImageBitmap(file)
-  const source = getSourceRect(bitmap.width, bitmap.height, maxWidth, maxHeight, preserveDimensions ? 'none' : cropPosition)
+  const source = crop ? getManualCropRect(bitmap.width, bitmap.height, crop) : getSourceRect(bitmap.width, bitmap.height, maxWidth, maxHeight, preserveDimensions ? 'none' : cropPosition)
   const scale = preserveDimensions ? 1 : Math.min(1, maxWidth / source.width, maxHeight / source.height)
   const width = Math.max(1, Math.round(source.width * scale))
   const height = Math.max(1, Math.round(source.height * scale))
@@ -25,6 +25,15 @@ export async function fileToImageData(file: File, maxWidth: number, maxHeight: n
   bitmap.close()
 
   return context.getImageData(0, 0, width, height)
+}
+
+function getManualCropRect(imageWidth: number, imageHeight: number, crop: ImageCropSelection): SourceRect {
+  const x = Math.min(Math.max(Math.round(crop.x), 0), imageWidth - 1)
+  const y = Math.min(Math.max(Math.round(crop.y), 0), imageHeight - 1)
+  const width = Math.min(Math.max(Math.round(crop.width), 1), imageWidth - x)
+  const height = Math.min(Math.max(Math.round(crop.height), 1), imageHeight - y)
+
+  return { x, y, width, height }
 }
 
 function getSourceRect(imageWidth: number, imageHeight: number, targetWidth: number, targetHeight: number, cropPosition: ImageCropPosition): SourceRect {

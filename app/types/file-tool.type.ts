@@ -3,6 +3,13 @@ export type ToolMode = 'image' | 'pdf'
 export type ImageOutputFormat = 'jpeg' | 'png' | 'webp'
 export type ImageCropPosition = 'none' | 'center' | 'top' | 'bottom' | 'left' | 'right'
 
+export interface ImageCropSelection {
+  x: number
+  y: number
+  width: number
+  height: number
+}
+
 export interface ImageTransformOptions {
   format: ImageOutputFormat
   quality: number
@@ -32,6 +39,7 @@ export interface UploadedImagePreview {
   url: string
   width: number
   height: number
+  crop?: ImageCropSelection
 }
 
 export type PdfMode = 'merge' | 'split' | 'edit'

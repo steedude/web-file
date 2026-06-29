@@ -28,10 +28,10 @@
     "install": "安裝 App"
   },
   "home": {
-    "metaTitle": "{brand} - WASM PWA 線上轉檔工具",
-    "description": "一個本機優先的轉檔工作站：圖片用 WASM codecs 壓縮與轉檔，PDF 在瀏覽器內完成合併、拆分和編輯，並支援 PWA 離線使用。",
+    "metaTitle": "{brand} - WASM PWA 檔案工具",
+    "description": "本機優先的檔案處理工作站：使用 WASM 圖片 codec 做轉檔與壓縮，在瀏覽器端完成 PDF 合併、拆分與編輯，並支援 PWA 離線安裝。",
     "title": "本機檔案處理工作站",
-    "summary": "檔案不離開瀏覽器。web file 把 WASM codec、PDF client-side workflow、PWA installability、i18n 與可測試工具函式串成一個瀏覽器內的轉檔控制台。",
+    "summary": "檔案不離開瀏覽器。web file 把 WASM codec、PDF client-side workflow、PWA installability、i18n 與可測試工具模組串成一個瀏覽器內的轉檔控制台。",
     "imageTab": "圖片工具",
     "pdfTab": "PDF 工具"
   },
@@ -57,8 +57,8 @@
     "batchSettings": "批次",
     "singleSettings": "單張",
     "customSettings": "已套用單張設定",
-    "useBatchSettings": "改用批次",
-    "proportionalResize": "等比縮放",
+    "useBatchSettings": "使用批次",
+    "proportionalResize": "等比例縮放",
     "batchRatioHint": "批次裁切會對每張圖片套用相同尺寸與位置。",
     "sourceSize": "來源",
     "outputSizeReference": "輸出參考",
@@ -69,33 +69,33 @@
     "pngQualityUnavailable": "PNG 使用無損最佳化，不使用品質滑桿。",
     "waitingEstimate": "等待估算",
     "batchSummary": "總覽",
-    "largerReference": "變大",
-    "unchanged": "相同",
+    "largerReference": "增加",
+    "unchanged": "無變化",
     "pngQualityTitle": "PNG 品質",
     "cropPosition": "裁切",
     "cropPositions": {
       "none": "不裁切",
       "center": "置中裁切",
-      "top": "上方裁切",
-      "bottom": "下方裁切",
-      "left": "左側裁切",
-      "right": "右側裁切"
+      "top": "靠上裁切",
+      "bottom": "靠下裁切",
+      "left": "靠左裁切",
+      "right": "靠右裁切"
     },
     "pixels": "px"
   },
   "pdf": {
-    "title": "PDF 合併 / 擷取 / 編輯",
-    "description": "使用 pdf-lib 在瀏覽器本機處理。可以合併多份 PDF、擷取指定頁面，或調整文件資訊。",
+    "title": "PDF 合併 / 拆分 / 編輯",
+    "description": "使用 pdf-lib 在瀏覽器端處理。可以合併多個檔案、擷取指定頁面，或調整文件資訊。",
     "mode": "模式",
     "merge": "合併",
     "split": "擷取頁面",
     "edit": "旋轉 / 資訊",
-    "pageRanges": "頁碼範圍",
-    "pageRangesHelp": "例如 1-3,5,8-end",
+    "pageRanges": "頁面範圍",
+    "pageRangesHelp": "例如：1-3,5,8-end",
     "rotation": "旋轉",
     "titleField": "標題",
     "author": "作者",
     "run": "產生 PDF",
-    "empty": "加入 PDF 後選擇流程。擷取與編輯一次處理一份檔案。"
+    "empty": "加入 PDF 後選擇工作流程。拆分與編輯一次處理一個檔案。"
   }
 }

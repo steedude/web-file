@@ -16,6 +16,8 @@ const {
   removeFile,
   results,
 } = useImageTranscoder()
+
+const displayedQuality = computed(() => options.webpLossless ? 100 : options.quality)
 </script>
 
 <template>
@@ -51,11 +53,34 @@ const {
           </select>
         </label>
 
-        <label v-if="options.format !== 'png'" class="space-y-2">
-          <span class="font-mono text-xs font-black tracking-widest text-sky uppercase">{{ t('image.quality') }} {{ t('common.dot') }} {{ options.quality }}</span>
-          <input v-model.number="options.quality" class="w-full accent-acid" type="range" min="1" max="100">
-        </label>
+        <div class="min-h-[4.25rem] space-y-2">
+          <label v-if="options.format === 'png'" class="block space-y-2">
+            <span class="font-mono text-xs font-black tracking-widest text-sky uppercase">{{ t('image.losslessPng') }}</span>
+            <span class="inline-flex w-full items-center gap-2 border border-line bg-grid px-3 py-2 font-mono text-xs font-black text-ink/70">
+              <input v-model="options.optimisePng" type="checkbox" class="size-4 accent-acid">
+              {{ t('image.optimisePng') }}
+            </span>
+          </label>
 
+          <div v-else-if="options.format === 'webp'" class="space-y-2">
+            <label class="block space-y-2">
+              <span class="font-mono text-xs font-black tracking-widest text-sky uppercase">{{ t('image.quality') }} {{ t('common.dot') }} {{ displayedQuality }}</span>
+              <input v-model.number="options.quality" class="w-full accent-acid disabled:opacity-40" type="range" min="1" max="100" :disabled="options.webpLossless">
+            </label>
+            <label class="inline-flex items-center gap-2 font-mono text-xs font-black text-ink/70">
+              <input v-model="options.webpLossless" type="checkbox" class="size-4 accent-acid">
+              {{ t('image.webpLossless') }}
+            </label>
+          </div>
+
+          <label v-else class="block space-y-2">
+            <span class="font-mono text-xs font-black tracking-widest text-sky uppercase">{{ t('image.quality') }} {{ t('common.dot') }} {{ options.quality }}</span>
+            <input v-model.number="options.quality" class="w-full accent-acid" type="range" min="1" max="100">
+          </label>
+        </div>
+      </div>
+
+      <div class="grid gap-4 sm:grid-cols-2">
         <label class="space-y-2">
           <span class="font-mono text-xs font-black tracking-widest text-sky uppercase">{{ t('image.width') }}</span>
           <input
@@ -85,10 +110,6 @@ const {
         <label class="inline-flex items-center gap-2 border border-line bg-grid px-3 py-2 font-mono text-xs font-black text-ink/70">
           <input v-model="options.preserveDimensions" type="checkbox" class="size-4 accent-acid">
           {{ t('image.keepOriginal') }}
-        </label>
-        <label v-if="options.format === 'png'" class="inline-flex items-center gap-2 border border-line bg-grid px-3 py-2 font-mono text-xs font-black text-ink/70">
-          <input v-model="options.optimisePng" type="checkbox" class="size-4 accent-acid">
-          {{ t('image.losslessPng') }}
         </label>
       </div>
 

@@ -45,7 +45,9 @@
     "convert": "Convert",
     "empty": "Add images to start converting.",
     "width": "Width",
-    "height": "Height"
+    "height": "Height",
+    "optimisePng": "Optimize PNG with OxiPNG",
+    "webpLossless": "WebP lossless"
   },
   "pdf": {
     "title": "PDF merge / extract / edit",

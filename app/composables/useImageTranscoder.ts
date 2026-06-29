@@ -131,9 +131,11 @@ async function encodeImage(imageData: ImageData, format: ImageOutputFormat, opti
   if (format === 'webp') {
     const { encode } = await import('@jsquash/webp')
     return encode(imageData, {
-      quality: options.quality,
+      quality: options.webpLossless ? 100 : options.quality,
       method: 4,
-      alpha_quality: options.quality,
+      alpha_quality: options.webpLossless ? 100 : options.quality,
+      lossless: options.webpLossless ? 1 : 0,
+      near_lossless: 100,
       thread_level: 1,
     })
   }

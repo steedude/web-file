@@ -13,6 +13,7 @@ export const defaultImageOptions: ImageTransformOptions = {
   maxHeight: 1920,
   preserveDimensions: false,
   optimisePng: true,
+  webpLossless: false,
 }
 
 export const pdfModeOptions: PdfMode[] = ['merge', 'split', 'edit']

@@ -9,6 +9,7 @@ export interface ImageTransformOptions {
   maxHeight: number
   preserveDimensions: boolean
   optimisePng: boolean
+  webpLossless: boolean
 }
 
 export interface ConvertedImage {

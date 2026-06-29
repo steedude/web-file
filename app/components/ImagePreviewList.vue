@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { UploadedImagePreview } from '~/types/file-tool.type'
-import { Scissors, X } from '@lucide/vue'
+import { Scissors, Settings2, X } from '@lucide/vue'
 import { formatFileSize } from '~/utils/file-size.util'
 
 defineProps<{
@@ -9,6 +9,7 @@ defineProps<{
 
 const emit = defineEmits<{
   crop: [index: number]
+  customise: [index: number]
   remove: [index: number]
 }>()
 </script>
@@ -35,7 +36,19 @@ const emit = defineEmits<{
         <p v-if="preview.crop" class="mt-1 font-mono text-xs font-black text-acid">
           {{ $t('image.cropped') }} {{ preview.crop.width }} {{ $t('common.by') }} {{ preview.crop.height }}
         </p>
+        <p v-if="preview.options" class="mt-1 font-mono text-xs font-black text-sky">
+          {{ $t('image.customSettings') }}
+        </p>
       </div>
+      <button
+        type="button"
+        class="focus-ring absolute top-2 right-[5.5rem] grid size-8 place-items-center border border-line bg-paper/90 text-ink/70 opacity-100 transition hover:border-sky hover:text-sky sm:opacity-0 sm:group-hover:opacity-100"
+        :aria-label="$t('image.singleSettings')"
+        :title="$t('image.singleSettings')"
+        @click="emit('customise', index)"
+      >
+        <Settings2 class="size-4" aria-hidden="true" />
+      </button>
       <button
         type="button"
         class="focus-ring absolute top-2 right-12 grid size-8 place-items-center border border-line bg-paper/90 text-ink/70 opacity-100 transition hover:border-acid hover:text-acid sm:opacity-0 sm:group-hover:opacity-100"

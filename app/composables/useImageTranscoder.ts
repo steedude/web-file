@@ -13,17 +13,11 @@ export function useImageTranscoder() {
 
   const canConvert = computed(() => files.value.length > 0 && !isProcessing.value)
 
-  function addFiles(fileList: FileList | File[]) {
+  async function addFiles(fileList: FileList | File[]) {
     const imageFiles = Array.from(fileList).filter(file => file.type.startsWith('image/'))
+    const nextPreviews = await Promise.all(imageFiles.map(createImagePreview))
     files.value = [...files.value, ...imageFiles]
-    previews.value = [
-      ...previews.value,
-      ...imageFiles.map(file => ({
-        id: crypto.randomUUID(),
-        file,
-        url: URL.createObjectURL(file),
-      })),
-    ]
+    previews.value = [...previews.value, ...nextPreviews]
   }
 
   function removeFile(index: number) {
@@ -62,6 +56,32 @@ export function useImageTranscoder() {
     clearResults()
   }
 
+  function setPreviewOptions(index: number, nextOptions: ImageTransformOptions) {
+    const preview = previews.value[index]
+
+    if (!preview)
+      return
+
+    previews.value = previews.value.map((item, previewIndex) => previewIndex === index ? { ...item, options: cloneImageOptions(nextOptions) } : item)
+    clearResults()
+  }
+
+  function clearPreviewOptions(index: number) {
+    const preview = previews.value[index]
+
+    if (!preview)
+      return
+
+    previews.value = previews.value.map((item, previewIndex) => {
+      if (previewIndex !== index)
+        return item
+
+      const { options: _options, ...nextPreview } = item
+      return nextPreview
+    })
+    clearResults()
+  }
+
   function clear() {
     files.value = []
     clearPreviews()
@@ -95,9 +115,11 @@ export function useImageTranscoder() {
       const nextResults: ConvertedImage[] = []
 
       for (const [index, file] of files.value.entries()) {
-        const imageData = await fileToImageData(file, options.maxWidth, options.maxHeight, options.preserveDimensions, previews.value[index]?.crop)
-        const encoded = await encodeImage(imageData, options.format, options)
-        const format = imageFormatOptions.find(item => item.value === options.format) ?? imageFormatOptions[0]!
+        const preview = previews.value[index]
+        const activeOptions = preview?.options ?? options
+        const imageData = await fileToImageData(file, activeOptions.maxWidth, activeOptions.maxHeight, activeOptions.preserveDimensions, preview?.crop)
+        const encoded = await encodeImage(imageData, activeOptions.format, activeOptions)
+        const format = imageFormatOptions.find(item => item.value === activeOptions.format) ?? imageFormatOptions[0]!
         const blob = new Blob([encoded], { type: format.mimeType })
         const fileName = replaceFileExtension(file.name, format.extension)
 
@@ -133,6 +155,7 @@ export function useImageTranscoder() {
     addFiles,
     canConvert,
     clear,
+    clearResults,
     convert,
     error,
     files,
@@ -142,8 +165,38 @@ export function useImageTranscoder() {
     removeFile,
     results,
     clearCropSelection,
+    clearPreviewOptions,
+    setPreviewOptions,
     setCropSelection,
   }
+}
+
+async function createImagePreview(file: File): Promise<UploadedImagePreview> {
+  const dimensions = await getImageDimensions(file)
+
+  return {
+    id: crypto.randomUUID(),
+    file,
+    url: URL.createObjectURL(file),
+    width: dimensions.width,
+    height: dimensions.height,
+  }
+}
+
+async function getImageDimensions(file: File): Promise<{ width: number, height: number }> {
+  try {
+    const bitmap = await createImageBitmap(file)
+    const dimensions = { width: bitmap.width, height: bitmap.height }
+    bitmap.close()
+    return dimensions
+  }
+  catch {
+    return { width: 0, height: 0 }
+  }
+}
+
+function cloneImageOptions(options: ImageTransformOptions): ImageTransformOptions {
+  return { ...options }
 }
 
 async function encodeImage(imageData: ImageData, format: ImageOutputFormat, options: ImageTransformOptions): Promise<ArrayBuffer> {

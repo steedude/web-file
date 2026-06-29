@@ -35,7 +35,10 @@ export interface UploadedImagePreview {
   id: string
   file: File
   url: string
+  width: number
+  height: number
   crop?: ImageCropSelection
+  options?: ImageTransformOptions
 }
 
 export type PdfMode = 'merge' | 'split' | 'edit'

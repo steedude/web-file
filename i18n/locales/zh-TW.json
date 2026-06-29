@@ -53,7 +53,17 @@
     "crop": "裁切",
     "cropped": "已裁切",
     "clearCrop": "清除裁切",
-    "resetCrop": "重設裁切"
+    "resetCrop": "重設裁切",
+    "batchSettings": "批次",
+    "singleSettings": "單張",
+    "customSettings": "自訂設定",
+    "useBatchSettings": "改用批次",
+    "proportionalResize": "等比縮放",
+    "batchRatioHint": "多張圖片會將寬高當作共同上限。",
+    "sourceSize": "來源",
+    "outputSizeReference": "輸出參考",
+    "convertForEstimate": "先轉檔",
+    "savedReference": "節省"
   },
   "pdf": {
     "title": "PDF 合併 / 擷取 / 編輯",

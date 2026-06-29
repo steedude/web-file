@@ -53,7 +53,17 @@
     "crop": "Crop",
     "cropped": "Cropped",
     "clearCrop": "Clear crop",
-    "resetCrop": "Reset crop"
+    "resetCrop": "Reset crop",
+    "batchSettings": "Batch",
+    "singleSettings": "Single",
+    "customSettings": "Custom settings",
+    "useBatchSettings": "Use batch",
+    "proportionalResize": "Proportional resize",
+    "batchRatioHint": "Multiple images use width and height as shared limits.",
+    "sourceSize": "Source",
+    "outputSizeReference": "Output ref",
+    "convertForEstimate": "convert first",
+    "savedReference": "Saved"
   },
   "pdf": {
     "title": "PDF merge / extract / edit",

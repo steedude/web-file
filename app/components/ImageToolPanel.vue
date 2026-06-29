@@ -237,31 +237,35 @@ function getDeltaLabel(delta: { type: 'larger' | 'saved' | 'same', percent: numb
         </div>
       </div>
 
+      <div class="border border-line bg-panel/82 p-1 shadow-[0_0_34px_rgb(72_215_255_/_7%)]">
+        <div class="grid grid-cols-2 gap-1">
+          <button
+            type="button"
+            class="focus-ring min-h-12 border px-4 py-3 font-mono text-sm font-black transition"
+            :aria-pressed="imageMode === 'batch'"
+            :class="imageMode === 'batch' ? 'border-sky bg-sky text-paper shadow-[0_0_22px_rgb(72_215_255_/_18%)]' : 'border-transparent bg-grid/70 text-ink/62 hover:border-sky/70 hover:text-sky'"
+            @click="setImageMode('batch')"
+          >
+            {{ t('image.batchSettings') }}
+          </button>
+          <button
+            type="button"
+            class="focus-ring min-h-12 border px-4 py-3 font-mono text-sm font-black transition"
+            :aria-pressed="imageMode === 'single'"
+            :class="imageMode === 'single' ? 'border-sky bg-sky text-paper shadow-[0_0_22px_rgb(72_215_255_/_18%)]' : 'border-transparent bg-grid/70 text-ink/62 hover:border-sky/70 hover:text-sky'"
+            @click="setImageMode('single')"
+          >
+            {{ t('image.singleSettings') }}
+          </button>
+        </div>
+      </div>
+
       <FileDropZone accept="image/*" :label="t('common.dropFiles')" :multiple="imageMode === 'batch'" @files="handleImageFiles" />
       <ImagePreviewList :allow-crop="imageMode === 'single'" :compact="imageMode === 'batch'" :estimates="previewEstimates" :previews="previews" @crop="cropEditorIndex = $event" @remove="removeFile" />
       <FileList v-if="!previews.length" :files="files" @remove="removeFile" />
     </div>
 
     <div class="space-y-4 border border-line bg-panel/82 p-4 shadow-[0_0_44px_rgb(72_215_255_/_7%)] backdrop-blur">
-      <div class="grid grid-cols-2 gap-2 sm:w-max">
-        <button
-          type="button"
-          class="focus-ring border px-3 py-2 font-mono text-xs font-black transition"
-          :class="imageMode === 'batch' ? 'border-sky bg-sky text-paper' : 'border-line bg-grid text-ink/62 hover:border-sky hover:text-sky'"
-          @click="setImageMode('batch')"
-        >
-          {{ t('image.batchSettings') }}
-        </button>
-        <button
-          type="button"
-          class="focus-ring border px-3 py-2 font-mono text-xs font-black transition"
-          :class="imageMode === 'single' ? 'border-sky bg-sky text-paper' : 'border-line bg-grid text-ink/62 hover:border-sky hover:text-sky'"
-          @click="setImageMode('single')"
-        >
-          {{ t('image.singleSettings') }}
-        </button>
-      </div>
-
       <div class="grid gap-4 sm:grid-cols-2">
         <label class="space-y-2">
           <span class="font-mono text-xs font-black tracking-widest text-sky uppercase">{{ t('image.outputFormat') }}</span>

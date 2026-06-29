@@ -23,6 +23,12 @@ export interface ConvertedImage {
   url: string
 }
 
+export interface UploadedImagePreview {
+  id: string
+  file: File
+  url: string
+}
+
 export type PdfMode = 'merge' | 'split' | 'edit'
 
 export interface PdfOptions {

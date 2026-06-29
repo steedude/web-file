@@ -26,5 +26,3 @@ export const defaultPdfOptions: PdfOptions = {
 }
 
 export const rotationOptions = [0, 90, 180, 270]
-
-export const techBadges = ['local', 'wasm', 'pwa', 'typed'] as const

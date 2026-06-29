@@ -1,4 +1,4 @@
-import type { ConvertedImage, ImageOutputFormat, ImageTransformOptions } from '~/types/file-tool.type'
+import type { ConvertedImage, ImageOutputFormat, ImageTransformOptions, UploadedImagePreview } from '~/types/file-tool.type'
 import { defaultImageOptions, imageFormatOptions } from '~/configs/file-tool.config'
 import { replaceFileExtension } from '~/utils/file-name.util'
 import { fileToImageData } from '~/utils/image-canvas.util'
@@ -6,6 +6,7 @@ import { fileToImageData } from '~/utils/image-canvas.util'
 export function useImageTranscoder() {
   const options = reactive<ImageTransformOptions>({ ...defaultImageOptions })
   const files = ref<File[]>([])
+  const previews = ref<UploadedImagePreview[]>([])
   const results = ref<ConvertedImage[]>([])
   const isProcessing = ref(false)
   const error = ref('')
@@ -15,16 +16,38 @@ export function useImageTranscoder() {
   function addFiles(fileList: FileList | File[]) {
     const imageFiles = Array.from(fileList).filter(file => file.type.startsWith('image/'))
     files.value = [...files.value, ...imageFiles]
+    previews.value = [
+      ...previews.value,
+      ...imageFiles.map(file => ({
+        id: crypto.randomUUID(),
+        file,
+        url: URL.createObjectURL(file),
+      })),
+    ]
   }
 
   function removeFile(index: number) {
+    const preview = previews.value[index]
+
+    if (preview)
+      URL.revokeObjectURL(preview.url)
+
     files.value = files.value.filter((_, fileIndex) => fileIndex !== index)
+    previews.value = previews.value.filter((_, previewIndex) => previewIndex !== index)
   }
 
   function clear() {
     files.value = []
+    clearPreviews()
     clearResults()
     error.value = ''
+  }
+
+  function clearPreviews() {
+    for (const preview of previews.value)
+      URL.revokeObjectURL(preview.url)
+
+    previews.value = []
   }
 
   function clearResults() {
@@ -75,7 +98,10 @@ export function useImageTranscoder() {
     }
   }
 
-  onBeforeUnmount(clearResults)
+  onBeforeUnmount(() => {
+    clearPreviews()
+    clearResults()
+  })
 
   return {
     addFiles,
@@ -86,6 +112,7 @@ export function useImageTranscoder() {
     files,
     isProcessing,
     options,
+    previews,
     removeFile,
     results,
   }

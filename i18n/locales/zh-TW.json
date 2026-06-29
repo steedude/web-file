@@ -23,31 +23,29 @@
     "logoMark": "WF"
   },
   "pwa": {
-    "install": "安裝 App",
-    "online": "線上",
-    "offline": "離線"
+    "install": "安裝 App"
   },
   "home": {
     "metaTitle": "{brand} - WASM PWA 線上轉檔工具",
     "description": "一個本機優先的轉檔工作站：圖片用 WASM codecs 壓縮與轉檔，PDF 在瀏覽器內完成合併、拆分和編輯，並支援 PWA 離線使用。",
-    "eyebrow": "Nuxt 4 / TypeScript / WASM / PWA",
     "title": "本機檔案處理工作站",
     "summary": "檔案不離開瀏覽器。web file 把 WASM codec、PDF client-side workflow、PWA installability、i18n 與可測試工具函式串成一個瀏覽器內的轉檔控制台。",
     "imageTab": "圖片工具",
-    "pdfTab": "PDF 工具",
-    "stackSignals": "技術亮點"
+    "pdfTab": "PDF 工具"
   },
   "image": {
     "title": "圖片轉檔與壓縮",
     "description": "支援 JPEG、PNG、WebP。JPEG/WebP 使用 WASM codec，PNG 可選 OxiPNG WASM 最佳化。",
     "outputFormat": "輸出格式",
     "quality": "品質",
-    "maxWidth": "最大寬度",
-    "maxHeight": "最大高度",
+    "maxWidth": "??",
+    "maxHeight": "??",
     "keepOriginal": "保留原尺寸",
-    "losslessPng": "PNG WASM 最佳化",
+    "losslessPng": "PNG ?????",
     "convert": "開始轉檔",
-    "empty": "加入圖片後開始轉檔。"
+    "empty": "加入圖片後開始轉檔。",
+    "width": "??",
+    "height": "??"
   },
   "pdf": {
     "title": "PDF 合併 / 拆分 / 編輯",
@@ -63,11 +61,5 @@
     "author": "作者",
     "run": "產生 PDF",
     "empty": "加入 PDF 後選擇處理模式。"
-  },
-  "tech": {
-    "local": "本機處理",
-    "wasm": "WASM codecs",
-    "pwa": "PWA 離線",
-    "typed": "TypeScript 分層"
   }
 }

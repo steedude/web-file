@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { Download, Languages, Wifi, WifiOff } from '@lucide/vue'
+import { Download, Languages } from '@lucide/vue'
 
 const { locale, setLocale, t } = useI18n()
 const localePath = useLocalePath()
-const { canInstall, install, isOnline } = usePwaInstall()
+const { canInstall, install } = usePwaInstall()
 
 function toggleLocale() {
   setLocale(locale.value === 'zh-TW' ? 'en' : 'zh-TW')
@@ -22,15 +22,6 @@ function toggleLocale() {
       </NuxtLink>
 
       <div class="flex items-center gap-2">
-        <span
-          class="hidden items-center gap-2 border border-line bg-panel/85 px-3 py-2 font-mono text-xs font-black text-ink/70 shadow-[0_0_18px_rgb(72_215_255_/_8%)] sm:inline-flex"
-          :title="isOnline ? t('pwa.online') : t('pwa.offline')"
-        >
-          <Wifi v-if="isOnline" class="size-4 text-acid" aria-hidden="true" />
-          <WifiOff v-else class="size-4 text-coral" aria-hidden="true" />
-          {{ isOnline ? t('pwa.online') : t('pwa.offline') }}
-        </span>
-
         <button
           v-if="canInstall"
           type="button"

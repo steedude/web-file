@@ -6,19 +6,8 @@ interface BeforeInstallPromptEvent extends Event {
 export function usePwaInstall() {
   const deferredPrompt = useState<BeforeInstallPromptEvent | null>('pwa-install-prompt', () => null)
   const canInstall = computed(() => Boolean(deferredPrompt.value))
-  const isOnline = useState('pwa-online', () => true)
 
   if (import.meta.client) {
-    isOnline.value = navigator.onLine
-
-    window.addEventListener('online', () => {
-      isOnline.value = true
-    })
-
-    window.addEventListener('offline', () => {
-      isOnline.value = false
-    })
-
     window.addEventListener('beforeinstallprompt', (event) => {
       event.preventDefault()
       deferredPrompt.value = event as BeforeInstallPromptEvent
@@ -37,6 +26,5 @@ export function usePwaInstall() {
   return {
     canInstall,
     install,
-    isOnline,
   }
 }

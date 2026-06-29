@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import type { ToolMode } from '~/types/file-tool.type'
-import { FileText, Image, Sparkles } from '@lucide/vue'
-import { techBadges } from '~/configs/file-tool.config'
+import { FileText, Image } from '@lucide/vue'
 
 const { t } = useI18n()
 const activeTool = ref<ToolMode>('image')
@@ -14,33 +13,14 @@ useSeoMeta({
 
 <template>
   <div class="mx-auto w-full max-w-7xl px-5 pt-8 pb-20 lg:px-10 lg:pt-14">
-    <section class="grid gap-8 lg:grid-cols-[minmax(0,1fr)_390px] lg:items-end">
+    <section>
       <div>
-        <p class="font-mono text-xs font-black tracking-[0.24em] text-sky uppercase">
-          {{ t('home.eyebrow') }}
-        </p>
-        <h1 class="mt-5 max-w-4xl text-5xl leading-[0.94] font-black text-ink lg:text-7xl">
+        <h1 class="max-w-4xl text-5xl leading-[0.94] font-black text-ink lg:text-7xl">
           {{ t('home.title') }}
         </h1>
         <p class="mt-6 max-w-3xl text-base leading-7 font-semibold text-ink/58 lg:text-lg">
           {{ t('home.summary') }}
         </p>
-      </div>
-
-      <div class="grid gap-3 border border-line bg-panel/80 p-4 shadow-[0_0_44px_rgb(72_215_255_/_8%)] backdrop-blur">
-        <div class="flex items-center gap-2 font-mono text-xs font-black tracking-widest text-acid uppercase">
-          <Sparkles class="size-4" aria-hidden="true" />
-          {{ t('home.stackSignals') }}
-        </div>
-        <div class="grid grid-cols-2 gap-2">
-          <span
-            v-for="badge in techBadges"
-            :key="badge"
-            class="border border-line bg-grid/80 px-3 py-2 font-mono text-xs font-black text-ink/70"
-          >
-            {{ t(`tech.${badge}`) }}
-          </span>
-        </div>
       </div>
     </section>
 

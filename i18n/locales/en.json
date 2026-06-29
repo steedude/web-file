@@ -23,31 +23,29 @@
     "logoMark": "WF"
   },
   "pwa": {
-    "install": "Install app",
-    "online": "Online",
-    "offline": "Offline"
+    "install": "Install app"
   },
   "home": {
     "metaTitle": "{brand} - WASM PWA file tools",
     "description": "A local-first file workstation: WASM image codecs for conversion and compression, browser-side PDF merge, split, and edit flows, plus PWA offline support.",
-    "eyebrow": "Nuxt 4 / TypeScript / WASM / PWA",
     "title": "Local file processing workstation",
     "summary": "Files never leave the browser. web file ties WASM codecs, client-side PDF workflows, PWA installability, i18n, and testable utility modules into one browser-native conversion console.",
     "imageTab": "Image tools",
-    "pdfTab": "PDF tools",
-    "stackSignals": "Stack signals"
+    "pdfTab": "PDF tools"
   },
   "image": {
     "title": "Image conversion and compression",
     "description": "JPEG, PNG, and WebP support. JPEG/WebP use WASM codecs, while PNG can run through OxiPNG WASM optimization.",
     "outputFormat": "Output format",
     "quality": "Quality",
-    "maxWidth": "Max width",
-    "maxHeight": "Max height",
+    "maxWidth": "Width",
+    "maxHeight": "Height",
     "keepOriginal": "Keep original dimensions",
-    "losslessPng": "PNG WASM optimization",
+    "losslessPng": "PNG lossless optimization",
     "convert": "Convert",
-    "empty": "Add images to start converting."
+    "empty": "Add images to start converting.",
+    "width": "Width",
+    "height": "Height"
   },
   "pdf": {
     "title": "PDF merge / split / edit",
@@ -63,11 +61,5 @@
     "author": "Author",
     "run": "Generate PDF",
     "empty": "Add PDFs, then choose a workflow."
-  },
-  "tech": {
-    "local": "Local processing",
-    "wasm": "WASM codecs",
-    "pwa": "Offline PWA",
-    "typed": "Typed layers"
   }
 }

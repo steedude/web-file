@@ -36,7 +36,7 @@ function getDeltaLabel(delta: { type: 'larger' | 'saved' | 'same', percent: numb
 </script>
 
 <template>
-  <div v-if="previews.length" :class="compact ? 'space-y-2' : 'grid gap-3 sm:grid-cols-2'">
+  <div v-if="previews.length" :class="compact ? 'space-y-2' : allowCrop ? 'space-y-3' : 'grid gap-3 sm:grid-cols-2'">
     <article
       v-for="(preview, index) in previews"
       :key="preview.id"
@@ -47,7 +47,7 @@ function getDeltaLabel(delta: { type: 'larger' | 'saved' | 'same', percent: numb
         :src="preview.url"
         :alt="preview.file.name"
         class="bg-grid object-contain"
-        :class="compact ? 'h-full min-h-24 w-20' : 'aspect-video w-full'"
+        :class="compact ? 'h-full min-h-24 w-20' : allowCrop ? 'max-h-[520px] min-h-72 w-full' : 'aspect-video w-full'"
       >
       <div class="border-line bg-grid/90 p-3" :class="compact ? 'border-l' : 'border-t'">
         <p class="truncate font-mono text-xs font-black text-ink/84">

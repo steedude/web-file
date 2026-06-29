@@ -34,6 +34,8 @@ let estimateRequestId = 0
 const displayedQuality = computed(() => options.webpLossless ? 100 : options.quality)
 const activeReference = computed(() => previews.value.length === 1 ? previews.value[0] ?? null : null)
 const activeCropPreview = computed(() => cropEditorIndex.value === null ? null : previews.value[cropEditorIndex.value] ?? null)
+const outputExtensions = computed(() => getOutputExtensions(options.format))
+const hasSameExtensionWarning = computed(() => files.value.some(file => getFileExtension(file.name) !== '' && outputExtensions.value.includes(getFileExtension(file.name))))
 const activeAspectRatio = computed(() => {
   const preview = activeReference.value
 
@@ -117,6 +119,11 @@ function updateHeight(event: Event) {
 
 function updateResizePercent(event: Event) {
   patchCurrentOptions({ resizePercent: Math.max(1, Math.min(100, Number((event.target as HTMLInputElement).value) || 100)) })
+  scheduleEstimate()
+}
+
+function setResizeMode(resizeMode: ImageTransformOptions['resizeMode']) {
+  patchCurrentOptions({ resizeMode })
   scheduleEstimate()
 }
 
@@ -217,9 +224,11 @@ function createSizeDelta(sourceSize: number, outputSize: number) {
   if (change === 0)
     return { type: 'same' as const, percent: 0 }
 
+  const percent = Math.round(Math.abs(change) / sourceSize * 100)
+
   return {
     type: change > 0 ? 'larger' as const : 'saved' as const,
-    percent: Math.round(Math.abs(change) / sourceSize * 100),
+    percent: outputSize > 0 && change < 0 && percent >= 100 ? 99 : percent,
   }
 }
 
@@ -231,6 +240,17 @@ function getDeltaLabel(delta: { type: 'larger' | 'saved' | 'same', percent: numb
     return t('image.unchanged')
 
   return `${delta.type === 'larger' ? t('image.largerReference') : t('image.savedReference')} ${delta.percent}${t('common.percent')}`
+}
+
+function getFileExtension(fileName: string) {
+  return fileName.split('.').pop()?.toLowerCase() ?? ''
+}
+
+function getOutputExtensions(format: ImageOutputFormat) {
+  if (format === 'jpeg')
+    return ['jpg', 'jpeg']
+
+  return [format]
 }
 </script>
 
@@ -291,16 +311,16 @@ function getDeltaLabel(delta: { type: 'larger' | 'saved' | 'same', percent: numb
         </label>
 
         <div class="space-y-2">
-          <div v-if="options.format === 'webp'" class="space-y-2">
-            <label class="block space-y-2">
+          <div v-if="options.format === 'webp'" class="h-full">
+            <label class="flex h-full flex-col justify-between gap-2">
               <span class="font-mono text-xs font-black tracking-widest text-sky uppercase">{{ t('image.quality') }} {{ t('common.dot') }} {{ displayedQuality }}</span>
-              <input :value="displayedQuality" class="w-full accent-acid disabled:opacity-40" type="range" min="1" max="100" :disabled="options.webpLossless" @input="updateQuality">
+              <input :value="displayedQuality" class="h-10 w-full accent-acid disabled:opacity-40" type="range" min="1" max="100" :disabled="options.webpLossless" @input="updateQuality">
             </label>
           </div>
 
-          <label v-else-if="options.format === 'jpeg'" class="block space-y-2">
+          <label v-else-if="options.format === 'jpeg'" class="flex h-full flex-col justify-between gap-2">
             <span class="font-mono text-xs font-black tracking-widest text-sky uppercase">{{ t('image.quality') }} {{ t('common.dot') }} {{ options.quality }}</span>
-            <input :value="options.quality" class="w-full accent-acid" type="range" min="1" max="100" @input="updateQuality">
+            <input :value="options.quality" class="h-10 w-full accent-acid" type="range" min="1" max="100" @input="updateQuality">
           </label>
 
           <div v-else class="space-y-2">
@@ -328,10 +348,23 @@ function getDeltaLabel(delta: { type: 'larger' | 'saved' | 'same', percent: numb
         </span>
       </label>
 
-      <div class="grid gap-2 border border-line bg-grid/70 px-3 py-2 font-mono text-xs font-bold text-ink/52 sm:grid-cols-3">
-        <span><template v-if="imageMode === 'batch'">{{ t('image.batchSummary') }} </template>{{ t('image.sourceSize') }} {{ formatFileSize(originalSizeReference) }}</span>
-        <span>{{ t('image.outputSizeReference') }} {{ isEstimatePending ? t('image.estimating') : outputSizeReference ? formatFileSize(outputSizeReference) : t('image.waitingEstimate') }}</span>
-        <span v-if="summaryDelta">{{ getDeltaLabel(summaryDelta) }}</span>
+      <p v-if="hasSameExtensionWarning" class="border border-coral/70 bg-coral/12 px-3 py-2 font-mono text-xs font-black text-coral">
+        {{ t('image.sameExtensionWarning') }}
+      </p>
+
+      <div class="grid gap-2 border border-sky/60 bg-sky/10 p-3 font-mono text-xs font-bold text-ink shadow-[0_0_30px_rgb(72_215_255_/_10%)] sm:grid-cols-3">
+        <span class="border border-line/70 bg-paper/70 px-3 py-2">
+          <span class="block text-ink/42"><template v-if="imageMode === 'batch'">{{ t('image.batchSummary') }} </template>{{ t('image.sourceSize') }}</span>
+          <span class="mt-1 block text-sm font-black text-ink">{{ formatFileSize(originalSizeReference) }}</span>
+        </span>
+        <span class="border border-line/70 bg-paper/70 px-3 py-2">
+          <span class="block text-ink/42">{{ t('image.outputSizeReference') }}</span>
+          <span class="mt-1 block text-sm font-black text-ink">{{ isEstimatePending ? t('image.estimating') : outputSizeReference ? formatFileSize(outputSizeReference) : t('image.waitingEstimate') }}</span>
+        </span>
+        <span v-if="summaryDelta" class="border px-3 py-2" :class="summaryDelta.type === 'larger' ? 'border-coral/60 bg-coral/12 text-coral' : summaryDelta.type === 'saved' ? 'border-acid/60 bg-acid/12 text-acid' : 'border-line/70 bg-paper/70 text-ink/62'">
+          <span class="block text-current/70">{{ summaryDelta.type === 'larger' ? t('image.largerReference') : summaryDelta.type === 'saved' ? t('image.savedReference') : t('image.unchanged') }}</span>
+          <span class="mt-1 block text-sm font-black">{{ getDeltaLabel(summaryDelta) }}</span>
+        </span>
       </div>
 
       <div class="flex flex-wrap gap-3">
@@ -353,21 +386,31 @@ function getDeltaLabel(delta: { type: 'larger' | 'saved' | 'same', percent: numb
         </button>
       </div>
 
-      <label v-if="imageMode === 'batch' && !options.preserveDimensions" class="block space-y-2">
+      <div v-if="imageMode === 'single' && !options.preserveDimensions" class="grid grid-cols-2 gap-2 sm:w-max">
+        <button
+          type="button"
+          class="focus-ring border px-3 py-2 font-mono text-xs font-black transition"
+          :class="options.resizeMode === 'dimensions' ? 'border-sky bg-sky text-paper' : 'border-line bg-grid text-ink/62 hover:border-sky hover:text-sky'"
+          @click="setResizeMode('dimensions')"
+        >
+          {{ t('image.resizeByPixels') }}
+        </button>
+        <button
+          type="button"
+          class="focus-ring border px-3 py-2 font-mono text-xs font-black transition"
+          :class="options.resizeMode === 'percent' ? 'border-sky bg-sky text-paper' : 'border-line bg-grid text-ink/62 hover:border-sky hover:text-sky'"
+          @click="setResizeMode('percent')"
+        >
+          {{ t('image.resizeByPercent') }}
+        </button>
+      </div>
+
+      <label v-if="!options.preserveDimensions && options.resizeMode === 'percent'" class="block space-y-2">
         <span class="font-mono text-xs font-black tracking-widest text-sky uppercase">{{ t('image.resizePercent') }} {{ t('common.dot') }} {{ options.resizePercent }}{{ t('common.percent') }}</span>
         <input :value="options.resizePercent" class="w-full accent-acid" type="range" min="1" max="100" step="1" @input="updateResizePercent">
-        <input
-          :value="options.resizePercent"
-          class="focus-ring w-28 border border-line bg-grid px-3 py-2 font-mono text-sm font-bold text-ink"
-          type="number"
-          min="1"
-          max="100"
-          step="1"
-          @input="updateResizePercent"
-        >
       </label>
 
-      <div v-if="imageMode === 'single'" class="grid gap-4 sm:grid-cols-2">
+      <div v-if="imageMode === 'single' && options.resizeMode === 'dimensions'" class="grid gap-4 sm:grid-cols-2">
         <label class="space-y-2">
           <span class="font-mono text-xs font-black tracking-widest text-sky uppercase">{{ t('image.width') }}</span>
           <input

@@ -13,5 +13,10 @@ export function percentSaved(original: number, output: number): number {
   if (original <= 0)
     return 0
 
-  return Math.round((1 - output / original) * 100)
+  const percent = Math.round((1 - output / original) * 100)
+
+  if (output > 0 && percent >= 100)
+    return 99
+
+  return percent
 }

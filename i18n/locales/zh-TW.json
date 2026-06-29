@@ -20,7 +20,9 @@
     "by": "x",
     "percent": "%",
     "degree": "°",
-    "logoMark": "WF"
+    "logoMark": "WF",
+    "apply": "套用",
+    "close": "關閉"
   },
   "pwa": {
     "install": "安裝 App"
@@ -47,7 +49,11 @@
     "width": "寬度",
     "height": "高度",
     "optimisePng": "使用 OxiPNG 最佳化 PNG",
-    "webpLossless": "WebP 無損"
+    "webpLossless": "WebP 無損",
+    "crop": "裁切",
+    "cropped": "已裁切",
+    "clearCrop": "清除裁切",
+    "resetCrop": "重設裁切"
   },
   "pdf": {
     "title": "PDF 合併 / 擷取 / 編輯",

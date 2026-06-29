@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { UploadedImagePreview } from '~/types/file-tool.type'
-import { X } from '@lucide/vue'
+import { Scissors, X } from '@lucide/vue'
 import { formatFileSize } from '~/utils/file-size.util'
 
 defineProps<{
@@ -8,6 +8,7 @@ defineProps<{
 }>()
 
 const emit = defineEmits<{
+  crop: [index: number]
   remove: [index: number]
 }>()
 </script>
@@ -31,7 +32,19 @@ const emit = defineEmits<{
         <p class="mt-1 font-mono text-xs font-bold text-ink/42">
           {{ formatFileSize(preview.file.size) }}
         </p>
+        <p v-if="preview.crop" class="mt-1 font-mono text-xs font-black text-acid">
+          {{ $t('image.cropped') }} {{ preview.crop.width }} {{ $t('common.by') }} {{ preview.crop.height }}
+        </p>
       </div>
+      <button
+        type="button"
+        class="focus-ring absolute top-2 right-12 grid size-8 place-items-center border border-line bg-paper/90 text-ink/70 opacity-100 transition hover:border-acid hover:text-acid sm:opacity-0 sm:group-hover:opacity-100"
+        :aria-label="$t('image.crop')"
+        :title="$t('image.crop')"
+        @click="emit('crop', index)"
+      >
+        <Scissors class="size-4" aria-hidden="true" />
+      </button>
       <button
         type="button"
         class="focus-ring absolute top-2 right-2 grid size-8 place-items-center border border-line bg-paper/90 text-ink/70 opacity-100 transition hover:border-coral hover:text-coral sm:opacity-0 sm:group-hover:opacity-100"

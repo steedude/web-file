@@ -20,7 +20,9 @@
     "by": "x",
     "percent": "%",
     "degree": "°",
-    "logoMark": "WF"
+    "logoMark": "WF",
+    "apply": "Apply",
+    "close": "Close"
   },
   "pwa": {
     "install": "Install app"
@@ -47,7 +49,11 @@
     "width": "Width",
     "height": "Height",
     "optimisePng": "Optimize PNG with OxiPNG",
-    "webpLossless": "WebP lossless"
+    "webpLossless": "WebP lossless",
+    "crop": "Crop",
+    "cropped": "Cropped",
+    "clearCrop": "Clear crop",
+    "resetCrop": "Reset crop"
   },
   "pdf": {
     "title": "PDF merge / extract / edit",

@@ -6,6 +6,7 @@ const { t } = useI18n()
 const {
   addFiles,
   canConvert,
+  clearCropSelection,
   clear,
   convert,
   error,
@@ -15,9 +16,28 @@ const {
   previews,
   removeFile,
   results,
+  setCropSelection,
 } = useImageTranscoder()
 
 const displayedQuality = computed(() => options.webpLossless ? 100 : options.quality)
+const cropEditorIndex = ref<number | null>(null)
+const activeCropPreview = computed(() => cropEditorIndex.value === null ? null : previews.value[cropEditorIndex.value] ?? null)
+
+function saveCrop(crop: { x: number, y: number, width: number, height: number }) {
+  if (cropEditorIndex.value === null)
+    return
+
+  setCropSelection(cropEditorIndex.value, crop)
+  cropEditorIndex.value = null
+}
+
+function clearCrop() {
+  if (cropEditorIndex.value === null)
+    return
+
+  clearCropSelection(cropEditorIndex.value)
+  cropEditorIndex.value = null
+}
 </script>
 
 <template>
@@ -38,7 +58,7 @@ const displayedQuality = computed(() => options.webpLossless ? 100 : options.qua
       </div>
 
       <FileDropZone accept="image/*" :label="t('common.dropFiles')" @files="addFiles" />
-      <ImagePreviewList :previews="previews" @remove="removeFile" />
+      <ImagePreviewList :previews="previews" @crop="cropEditorIndex = $event" @remove="removeFile" />
       <FileList v-if="!previews.length" :files="files" @remove="removeFile" />
     </div>
 
@@ -142,5 +162,13 @@ const displayedQuality = computed(() => options.webpLossless ? 100 : options.qua
       </p>
       <ResultList v-else :image-results="results" />
     </div>
+
+    <ImageCropEditor
+      v-if="activeCropPreview"
+      :preview="activeCropPreview"
+      @clear="clearCrop"
+      @close="cropEditorIndex = null"
+      @save="saveCrop"
+    />
   </section>
 </template>

@@ -24,10 +24,18 @@ export interface ConvertedImage {
   url: string
 }
 
+export interface ImageCropSelection {
+  x: number
+  y: number
+  width: number
+  height: number
+}
+
 export interface UploadedImagePreview {
   id: string
   file: File
   url: string
+  crop?: ImageCropSelection
 }
 
 export type PdfMode = 'merge' | 'split' | 'edit'

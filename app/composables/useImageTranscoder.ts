@@ -1,4 +1,4 @@
-import type { ConvertedImage, ImageOutputFormat, ImageTransformOptions, UploadedImagePreview } from '~/types/file-tool.type'
+import type { ConvertedImage, ImageCropSelection, ImageOutputFormat, ImageTransformOptions, UploadedImagePreview } from '~/types/file-tool.type'
 import { defaultImageOptions, imageFormatOptions } from '~/configs/file-tool.config'
 import { replaceFileExtension } from '~/utils/file-name.util'
 import { fileToImageData } from '~/utils/image-canvas.util'
@@ -36,6 +36,32 @@ export function useImageTranscoder() {
     previews.value = previews.value.filter((_, previewIndex) => previewIndex !== index)
   }
 
+  function setCropSelection(index: number, crop: ImageCropSelection) {
+    const preview = previews.value[index]
+
+    if (!preview)
+      return
+
+    previews.value = previews.value.map((item, previewIndex) => previewIndex === index ? { ...item, crop } : item)
+    clearResults()
+  }
+
+  function clearCropSelection(index: number) {
+    const preview = previews.value[index]
+
+    if (!preview)
+      return
+
+    previews.value = previews.value.map((item, previewIndex) => {
+      if (previewIndex !== index)
+        return item
+
+      const { crop: _crop, ...nextPreview } = item
+      return nextPreview
+    })
+    clearResults()
+  }
+
   function clear() {
     files.value = []
     clearPreviews()
@@ -68,8 +94,8 @@ export function useImageTranscoder() {
     try {
       const nextResults: ConvertedImage[] = []
 
-      for (const file of files.value) {
-        const imageData = await fileToImageData(file, options.maxWidth, options.maxHeight, options.preserveDimensions)
+      for (const [index, file] of files.value.entries()) {
+        const imageData = await fileToImageData(file, options.maxWidth, options.maxHeight, options.preserveDimensions, previews.value[index]?.crop)
         const encoded = await encodeImage(imageData, options.format, options)
         const format = imageFormatOptions.find(item => item.value === options.format) ?? imageFormatOptions[0]!
         const blob = new Blob([encoded], { type: format.mimeType })
@@ -115,6 +141,8 @@ export function useImageTranscoder() {
     previews,
     removeFile,
     results,
+    clearCropSelection,
+    setCropSelection,
   }
 }
 

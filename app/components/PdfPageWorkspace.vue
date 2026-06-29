@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { PdfMode, PdfPageItem } from '~/types/file-tool.type'
-import { Check, GripVertical, Trash2 } from '@lucide/vue'
+import { Check, ChevronDown, ChevronsDown, ChevronsUp, ChevronUp, GripVertical, Trash2 } from '@lucide/vue'
+import { VueDraggable } from 'vue-draggable-plus'
 
 const props = defineProps<{
   isLoading: boolean
@@ -11,25 +12,17 @@ const props = defineProps<{
 const emit = defineEmits<{
   move: [fromIndex: number, toIndex: number]
   remove: [id: string]
+  reorder: [pages: PdfPageItem[]]
   selectAll: [selected: boolean]
   toggle: [id: string]
 }>()
 
 const { t } = useI18n()
-const draggedIndex = ref<number | null>(null)
 const selectedCount = computed(() => props.pages.filter(page => page.selected).length)
-
-function handleDragStart(index: number) {
-  draggedIndex.value = index
-}
-
-function handleDrop(index: number) {
-  if (draggedIndex.value === null || draggedIndex.value === index)
-    return
-
-  emit('move', draggedIndex.value, index)
-  draggedIndex.value = null
-}
+const sortablePages = computed({
+  get: () => props.pages,
+  set: pages => emit('reorder', pages),
+})
 </script>
 
 <template>
@@ -65,17 +58,20 @@ function handleDrop(index: number) {
       {{ t('pdf.selectedPages', { count: selectedCount }) }}
     </p>
 
-    <div v-if="pages.length" class="grid max-h-[520px] grid-cols-2 gap-3 overflow-y-auto pr-1 sm:grid-cols-3">
+    <VueDraggable
+      v-if="pages.length"
+      v-model="sortablePages"
+      :animation="180"
+      :disabled="mode !== 'merge'"
+      ghost-class="opacity-35"
+      handle=".pdf-page-drag-handle"
+      class="grid grid-cols-2 gap-3 sm:grid-cols-3"
+    >
       <article
         v-for="(page, index) in pages"
         :key="page.id"
         class="group border bg-grid/80 p-2 transition"
         :class="mode === 'split' && !page.selected ? 'border-line opacity-45' : 'border-line hover:border-lilac'"
-        :draggable="mode === 'merge'"
-        @dragstart="handleDragStart(index)"
-        @dragover.prevent
-        @drop.prevent="handleDrop(index)"
-        @dragend="draggedIndex = null"
       >
         <div class="relative border border-line bg-paper">
           <img :src="page.thumbnailUrl" :alt="`${page.sourceName} ${page.pageNumber}`" class="aspect-[3/4] w-full object-contain">
@@ -88,7 +84,7 @@ function handleDrop(index: number) {
           >
             <Check v-if="page.selected" class="size-4" aria-hidden="true" />
           </button>
-          <span v-if="mode === 'merge'" class="absolute top-2 left-2 grid size-7 place-items-center border border-line bg-panel text-ink/42">
+          <span v-if="mode === 'merge'" class="pdf-page-drag-handle absolute top-2 left-2 grid size-7 cursor-grab place-items-center border border-line bg-panel text-ink/42 active:cursor-grabbing">
             <GripVertical class="size-4" aria-hidden="true" />
           </span>
           <button
@@ -108,8 +104,50 @@ function handleDrop(index: number) {
             {{ t('pdf.pageNumber', { number: page.pageNumber }) }}
           </p>
         </div>
+        <div v-if="mode === 'merge'" class="mt-2 grid grid-cols-4 gap-1">
+          <button
+            type="button"
+            class="focus-ring grid h-8 place-items-center border border-line bg-panel text-ink/52 transition hover:border-lilac hover:text-lilac disabled:opacity-30"
+            :title="t('pdf.moveFirst')"
+            :aria-label="t('pdf.moveFirst')"
+            :disabled="index === 0"
+            @click="emit('move', index, 0)"
+          >
+            <ChevronsUp class="size-4" aria-hidden="true" />
+          </button>
+          <button
+            type="button"
+            class="focus-ring grid h-8 place-items-center border border-line bg-panel text-ink/52 transition hover:border-lilac hover:text-lilac disabled:opacity-30"
+            :title="t('pdf.moveUp')"
+            :aria-label="t('pdf.moveUp')"
+            :disabled="index === 0"
+            @click="emit('move', index, index - 1)"
+          >
+            <ChevronUp class="size-4" aria-hidden="true" />
+          </button>
+          <button
+            type="button"
+            class="focus-ring grid h-8 place-items-center border border-line bg-panel text-ink/52 transition hover:border-lilac hover:text-lilac disabled:opacity-30"
+            :title="t('pdf.moveDown')"
+            :aria-label="t('pdf.moveDown')"
+            :disabled="index === pages.length - 1"
+            @click="emit('move', index, index + 1)"
+          >
+            <ChevronDown class="size-4" aria-hidden="true" />
+          </button>
+          <button
+            type="button"
+            class="focus-ring grid h-8 place-items-center border border-line bg-panel text-ink/52 transition hover:border-lilac hover:text-lilac disabled:opacity-30"
+            :title="t('pdf.moveLast')"
+            :aria-label="t('pdf.moveLast')"
+            :disabled="index === pages.length - 1"
+            @click="emit('move', index, pages.length - 1)"
+          >
+            <ChevronsDown class="size-4" aria-hidden="true" />
+          </button>
+        </div>
       </article>
-    </div>
+    </VueDraggable>
 
     <p v-else class="border border-line bg-grid/70 px-3 py-8 text-center font-mono text-sm font-bold text-ink/42">
       {{ isLoading ? t('pdf.renderingPages') : t('pdf.noPages') }}

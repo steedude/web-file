@@ -104,6 +104,10 @@
     "selectAll": "Select all",
     "clearSelection": "Clear",
     "pageNumber": "Page {number}",
-    "noPages": "Add PDFs to preview pages."
+    "noPages": "Add PDFs to preview pages.",
+    "moveFirst": "Move to first",
+    "moveUp": "Move up",
+    "moveDown": "Move down",
+    "moveLast": "Move to last"
   }
 }

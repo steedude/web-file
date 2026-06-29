@@ -16,6 +16,7 @@ const {
   pages,
   removePage,
   removeFile,
+  reorderPages,
   results,
   run,
   selectAllPages,
@@ -67,6 +68,7 @@ const {
         :pages="pages"
         @move="movePage"
         @remove="removePage"
+        @reorder="reorderPages"
         @select-all="selectAllPages"
         @toggle="togglePageSelection"
       />

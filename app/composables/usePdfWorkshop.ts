@@ -91,6 +91,11 @@ export function usePdfWorkshop() {
     clearResults()
   }
 
+  function reorderPages(nextPages: PdfPageItem[]) {
+    pages.value = nextPages
+    clearResults()
+  }
+
   function togglePageSelection(id: string) {
     pages.value = pages.value.map(page => page.id === id ? { ...page, selected: !page.selected } : page)
     clearResults()
@@ -167,6 +172,7 @@ export function usePdfWorkshop() {
     options,
     removePage,
     removeFile,
+    reorderPages,
     results,
     run,
     selectAllPages,

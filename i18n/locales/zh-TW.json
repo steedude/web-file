@@ -104,6 +104,10 @@
     "selectAll": "全選",
     "clearSelection": "清除",
     "pageNumber": "第 {number} 頁",
-    "noPages": "加入 PDF 後預覽頁面。"
+    "noPages": "加入 PDF 後預覽頁面。",
+    "moveFirst": "移到最前面",
+    "moveUp": "上移",
+    "moveDown": "下移",
+    "moveLast": "移到最後面"
   }
 }

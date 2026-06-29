@@ -63,7 +63,8 @@
     "sourceSize": "Source",
     "outputSizeReference": "Output ref",
     "convertForEstimate": "convert first",
-    "savedReference": "Saved"
+    "savedReference": "Saved",
+    "estimating": "estimating"
   },
   "pdf": {
     "title": "PDF merge / extract / edit",

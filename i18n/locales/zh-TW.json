@@ -63,7 +63,8 @@
     "sourceSize": "來源",
     "outputSizeReference": "輸出參考",
     "convertForEstimate": "先轉檔",
-    "savedReference": "節省"
+    "savedReference": "節省",
+    "estimating": "估算中"
   },
   "pdf": {
     "title": "PDF 合併 / 擷取 / 編輯",

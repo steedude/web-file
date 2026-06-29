@@ -9,6 +9,7 @@ export function useImageTranscoder() {
   const previews = ref<UploadedImagePreview[]>([])
   const results = ref<ConvertedImage[]>([])
   const isProcessing = ref(false)
+  const isEstimating = ref(false)
   const error = ref('')
 
   const canConvert = computed(() => files.value.length > 0 && !isProcessing.value)
@@ -16,8 +17,15 @@ export function useImageTranscoder() {
   async function addFiles(fileList: FileList | File[]) {
     const imageFiles = Array.from(fileList).filter(file => file.type.startsWith('image/'))
     const nextPreviews = await Promise.all(imageFiles.map(createImagePreview))
+    const isFirstUpload = files.value.length === 0
     files.value = [...files.value, ...imageFiles]
     previews.value = [...previews.value, ...nextPreviews]
+
+    if (isFirstUpload && nextPreviews[0]?.width && nextPreviews[0]?.height) {
+      options.maxWidth = nextPreviews[0].width
+      options.maxHeight = nextPreviews[0].height
+      clearResults()
+    }
   }
 
   function removeFile(index: number) {
@@ -146,6 +154,36 @@ export function useImageTranscoder() {
     }
   }
 
+  async function estimateOutputSize(index?: number): Promise<number> {
+    if (files.value.length === 0)
+      return 0
+
+    isEstimating.value = true
+
+    try {
+      const entries = typeof index === 'number'
+        ? [[index, files.value[index]] as const]
+        : files.value.map((file, fileIndex) => [fileIndex, file] as const)
+      let totalSize = 0
+
+      for (const [fileIndex, file] of entries) {
+        if (!file)
+          continue
+
+        const preview = previews.value[fileIndex]
+        const activeOptions = preview?.options ?? options
+        const imageData = await fileToImageData(file, activeOptions.maxWidth, activeOptions.maxHeight, activeOptions.preserveDimensions, preview?.crop)
+        const encoded = await encodeImage(imageData, activeOptions.format, activeOptions)
+        totalSize += encoded.byteLength
+      }
+
+      return totalSize
+    }
+    finally {
+      isEstimating.value = false
+    }
+  }
+
   onBeforeUnmount(() => {
     clearPreviews()
     clearResults()
@@ -159,6 +197,7 @@ export function useImageTranscoder() {
     convert,
     error,
     files,
+    isEstimating,
     isProcessing,
     options,
     previews,
@@ -168,6 +207,7 @@ export function useImageTranscoder() {
     clearPreviewOptions,
     setPreviewOptions,
     setCropSelection,
+    estimateOutputSize,
   }
 }
 

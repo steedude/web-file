@@ -70,7 +70,8 @@
     "waitingEstimate": "等待估算",
     "batchSummary": "總覽",
     "largerReference": "變大",
-    "unchanged": "相同"
+    "unchanged": "相同",
+    "pngQualityTitle": "PNG 品質"
   },
   "pdf": {
     "title": "PDF 合併 / 擷取 / 編輯",

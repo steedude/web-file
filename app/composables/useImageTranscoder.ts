@@ -111,7 +111,7 @@ export function useImageTranscoder() {
     results.value = []
   }
 
-  async function convert() {
+  async function convert(index?: number) {
     if (!canConvert.value)
       return
 
@@ -121,8 +121,14 @@ export function useImageTranscoder() {
 
     try {
       const nextResults: ConvertedImage[] = []
+      const entries = typeof index === 'number'
+        ? [[index, files.value[index]] as const]
+        : files.value.map((file, fileIndex) => [fileIndex, file] as const)
 
-      for (const [index, file] of files.value.entries()) {
+      for (const [index, file] of entries) {
+        if (!file)
+          continue
+
         const preview = previews.value[index]
         const activeOptions = preview?.options ?? options
         const imageData = await fileToImageData(file, activeOptions.maxWidth, activeOptions.maxHeight, activeOptions.preserveDimensions, preview?.crop)

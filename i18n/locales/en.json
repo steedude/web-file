@@ -70,7 +70,8 @@
     "waitingEstimate": "waiting",
     "batchSummary": "Total",
     "largerReference": "Larger",
-    "unchanged": "Unchanged"
+    "unchanged": "Unchanged",
+    "pngQualityTitle": "PNG quality"
   },
   "pdf": {
     "title": "PDF merge / extract / edit",

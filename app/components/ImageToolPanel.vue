@@ -16,7 +16,6 @@ const {
   error,
   estimateOutputSizes,
   files,
-  isEstimating,
   isProcessing,
   options,
   previews,
@@ -30,6 +29,7 @@ const settingsScope = ref<'batch' | 'single'>('batch')
 const selectedPreviewIndex = ref(0)
 const cropEditorIndex = ref<number | null>(null)
 const estimatedOutputSizes = ref<number[]>([])
+const isEstimatePending = ref(false)
 let estimateTimer: ReturnType<typeof setTimeout> | null = null
 let estimateRequestId = 0
 const activeCropPreview = computed(() => cropEditorIndex.value === null ? null : previews.value[cropEditorIndex.value] ?? null)
@@ -79,7 +79,8 @@ const summaryDelta = computed(() => {
   return createSizeDelta(originalSizeReference.value, outputSizeReference.value)
 })
 const previewEstimates = computed(() => previews.value.map((preview, index) => {
-  const outputSize = estimatedOutputSizes.value[index] || results.value[index]?.outputSize || 0
+  const result = results.value.find(item => item.sourceName === preview.file.name)
+  const outputSize = estimatedOutputSizes.value[index] || result?.outputSize || 0
 
   return {
     outputSize,
@@ -192,6 +193,7 @@ function scheduleEstimate() {
 
   const requestId = ++estimateRequestId
   estimateTimer = setTimeout(async () => {
+    isEstimatePending.value = true
     const sizes = await estimateOutputSizes(settingsScope.value === 'single' ? selectedPreviewIndex.value : undefined).catch(() => [])
 
     if (requestId === estimateRequestId) {
@@ -201,13 +203,19 @@ function scheduleEstimate() {
         nextSizes[item.index] = item.size
 
       estimatedOutputSizes.value = nextSizes
+      isEstimatePending.value = false
     }
   }, 450)
 }
 
 function clearEstimate() {
   estimatedOutputSizes.value = []
+  isEstimatePending.value = false
   estimateRequestId += 1
+}
+
+function runConvert() {
+  convert(settingsScope.value === 'single' ? selectedPreviewIndex.value : undefined)
 }
 
 function createSizeDelta(sourceSize: number, outputSize: number) {
@@ -329,7 +337,8 @@ function clearCrop() {
           </label>
 
           <div v-else class="border border-line bg-grid px-3 py-2 font-mono text-xs font-bold text-ink/42">
-            {{ t('image.pngQualityUnavailable') }}
+            <span class="block font-black tracking-widest text-sky uppercase">{{ t('image.pngQualityTitle') }}</span>
+            <span class="mt-1 block">{{ t('image.pngQualityUnavailable') }}</span>
           </div>
         </div>
       </div>
@@ -352,7 +361,7 @@ function clearCrop() {
 
       <div class="grid gap-2 border border-line bg-grid/70 px-3 py-2 font-mono text-xs font-bold text-ink/52 sm:grid-cols-3">
         <span>{{ t('image.batchSummary') }} {{ t('image.sourceSize') }} {{ formatFileSize(originalSizeReference) }}</span>
-        <span>{{ t('image.outputSizeReference') }} {{ isEstimating ? t('image.estimating') : outputSizeReference ? formatFileSize(outputSizeReference) : t('image.waitingEstimate') }}</span>
+        <span>{{ t('image.outputSizeReference') }} {{ isEstimatePending ? t('image.estimating') : outputSizeReference ? formatFileSize(outputSizeReference) : t('image.waitingEstimate') }}</span>
         <span v-if="summaryDelta">{{ getDeltaLabel(summaryDelta) }}</span>
       </div>
 
@@ -401,7 +410,7 @@ function clearCrop() {
         >
           {{ t('image.proportionalResize') }}
         </button>
-        <span v-if="settingsScope === 'batch' && previews.length > 1" class="inline-flex items-center border border-line bg-grid px-3 py-2 font-mono text-xs font-bold text-ink/42">
+        <span v-if="settingsScope === 'batch' && previews.length > 1" class="basis-full font-mono text-xs font-bold text-ink/42">
           {{ t('image.batchRatioHint') }}
         </span>
       </div>
@@ -411,7 +420,7 @@ function clearCrop() {
           type="button"
           class="focus-ring inline-flex items-center gap-2 border border-acid/70 bg-acid px-5 py-3 font-mono text-sm font-black text-paper shadow-[0_0_24px_rgb(109_255_157_/_18%)] transition hover:bg-acid/85 disabled:opacity-50"
           :disabled="!canConvert"
-          @click="convert"
+          @click="runConvert"
         >
           <Play class="size-4" aria-hidden="true" />
           {{ isProcessing ? t('common.processing') : t('image.convert') }}

@@ -1,6 +1,6 @@
-import type { PDFDocument as PdfLibDocument } from 'pdf-lib'
+import type { PDFDocument as PdfLibDocument, PDFPage } from 'pdf-lib'
 import type { PDFDocumentProxy } from 'pdfjs-dist'
-import type { PdfOptions, PdfPageItem, PdfResult } from '~/types/file-tool.type'
+import type { ConvertedImage, PdfOptions, PdfPageItem, PdfResult, PdfWatermarkPosition } from '~/types/file-tool.type'
 import { defaultPdfOptions } from '~/configs/file-tool.config'
 import { appendFileSuffix } from '~/utils/file-name.util'
 
@@ -9,24 +9,19 @@ export function usePdfWorkshop() {
   const files = ref<File[]>([])
   const pages = ref<PdfPageItem[]>([])
   const results = ref<PdfResult[]>([])
+  const imageResults = ref<ConvertedImage[]>([])
   const isProcessing = ref(false)
   const isRenderingPages = ref(false)
   const error = ref('')
 
-  const activePages = computed(() => options.mode === 'split' ? pages.value.filter(page => page.selected) : pages.value)
+  const activePages = computed(() => ['split', 'images'].includes(options.mode) ? pages.value.filter(page => page.selected) : pages.value)
   const canRun = computed(() => activePages.value.length > 0 && !isProcessing.value && !isRenderingPages.value)
 
-  watch(() => options.mode, (mode) => {
+  watch(() => options.mode, () => {
+    files.value = []
+    clearPages()
     clearResults()
     error.value = ''
-
-    if (mode !== 'merge' && files.value.length > 1)
-      files.value = files.value.slice(0, 1)
-
-    if (mode !== 'merge' && files.value[0])
-      pages.value = pages.value.filter(page => page.file === files.value[0])
-
-    pages.value = pages.value.map(page => ({ ...page, selected: mode === 'split' ? page.selected : true }))
   })
 
   async function addFiles(fileList: FileList | File[]) {
@@ -47,7 +42,7 @@ export function usePdfWorkshop() {
     isRenderingPages.value = true
 
     try {
-      const nextPages = await createPdfPageItems(nextFiles, options.mode === 'split')
+      const nextPages = await createPdfPageItems(nextFiles, ['split', 'images'].includes(options.mode))
       files.value = options.mode === 'merge' ? [...files.value, ...nextFiles] : nextFiles
       pages.value = options.mode === 'merge' ? [...pages.value, ...nextPages] : nextPages
     }
@@ -110,7 +105,11 @@ export function usePdfWorkshop() {
     for (const result of results.value)
       URL.revokeObjectURL(result.url)
 
+    for (const result of imageResults.value)
+      URL.revokeObjectURL(result.url)
+
     results.value = []
+    imageResults.value = []
   }
 
   function clearPages() {
@@ -145,6 +144,10 @@ export function usePdfWorkshop() {
         results.value = [await mergePdfPages(activePages.value)]
       else if (options.mode === 'split' && firstFile)
         results.value = await extractPdfPages(firstFile, activePages.value)
+      else if (options.mode === 'watermark' && firstFile)
+        results.value = [await watermarkPdf(firstFile, options)]
+      else if (options.mode === 'images')
+        imageResults.value = await renderPdfPagesAsImages(activePages.value, options)
     }
     catch (cause) {
       error.value = cause instanceof Error ? cause.message : 'PDF processing failed.'
@@ -165,6 +168,7 @@ export function usePdfWorkshop() {
     clear,
     error,
     files,
+    imageResults,
     pages,
     isRenderingPages,
     isProcessing,
@@ -207,6 +211,47 @@ async function extractPdfPages(file: File, selectedPages: PdfPageItem[]): Promis
   return [await pdfDocumentToResult(output, appendFileSuffix(file.name, 'extracted'))]
 }
 
+async function watermarkPdf(file: File, options: PdfOptions): Promise<PdfResult> {
+  const { PDFDocument, StandardFonts, degrees, rgb } = await import('pdf-lib')
+  const document = await PDFDocument.load(await file.arrayBuffer())
+  const font = await document.embedFont(StandardFonts.HelveticaBold)
+  const pages = document.getPages()
+  const text = options.watermarkText.trim() || 'web file'
+
+  for (const page of pages) {
+    const { width, height } = page.getSize()
+    const textWidth = font.widthOfTextAtSize(text, options.watermarkFontSize)
+    const opacity = Math.max(5, Math.min(100, options.watermarkOpacity)) / 100
+    const rotation = degrees(options.watermarkRotation)
+    const draw = (x: number, y: number) => page.drawText(text, {
+      x,
+      y,
+      size: options.watermarkFontSize,
+      font,
+      color: rgb(0.45, 0.98, 0.78),
+      opacity,
+      rotate: rotation,
+    })
+
+    if (options.watermarkPosition === 'tile') {
+      const stepX = Math.max(180, textWidth + 90)
+      const stepY = Math.max(120, options.watermarkFontSize * 3)
+
+      for (let y = -height * 0.1; y < height * 1.1; y += stepY) {
+        for (let x = -width * 0.15; x < width * 1.1; x += stepX)
+          draw(x, y)
+      }
+
+      continue
+    }
+
+    const { x, y } = getWatermarkPosition(page, options.watermarkPosition, textWidth, options.watermarkFontSize)
+    draw(x, y)
+  }
+
+  return pdfDocumentToResult(document, appendFileSuffix(file.name, 'watermark'))
+}
+
 async function getSourceDocument(file: File, sources: Map<File, PdfLibDocument>) {
   const { PDFDocument } = await import('pdf-lib')
   const cachedDocument = sources.get(file)
@@ -217,6 +262,43 @@ async function getSourceDocument(file: File, sources: Map<File, PdfLibDocument>)
   const document = await PDFDocument.load(await file.arrayBuffer())
   sources.set(file, document)
   return document
+}
+
+async function renderPdfPagesAsImages(pages: PdfPageItem[], options: PdfOptions): Promise<ConvertedImage[]> {
+  const results: ConvertedImage[] = []
+
+  for (const page of pages) {
+    const previewDocument = await loadPdfPreviewDocument(page.file)
+    const pdfPage = await previewDocument.getPage(page.pageNumber)
+    const viewport = pdfPage.getViewport({ scale: options.imageScale })
+    const canvas = document.createElement('canvas')
+    const context = canvas.getContext('2d')
+
+    if (!context)
+      throw new Error('Could not render PDF page image.')
+
+    canvas.width = Math.ceil(viewport.width)
+    canvas.height = Math.ceil(viewport.height)
+    await pdfPage.render({ canvas, canvasContext: context, viewport }).promise
+
+    const mimeType = getPdfImageMimeType(options.imageFormat)
+    const blob = await canvasToBlob(canvas, mimeType, options.imageQuality / 100)
+    const extension = options.imageFormat === 'jpeg' ? 'jpg' : options.imageFormat
+
+    results.push({
+      id: crypto.randomUUID(),
+      sourceName: page.sourceName,
+      fileName: appendFileSuffix(page.sourceName, `page-${page.pageNumber}`).replace(/\.pdf$/i, `.${extension}`),
+      originalSize: page.file.size,
+      outputSize: blob.size,
+      width: canvas.width,
+      height: canvas.height,
+      mimeType,
+      url: URL.createObjectURL(blob),
+    })
+  }
+
+  return results
 }
 
 async function createPdfPageItems(files: File[], selected: boolean): Promise<PdfPageItem[]> {
@@ -279,6 +361,46 @@ async function canvasToObjectUrl(canvas: HTMLCanvasElement) {
     throw new Error('Could not create PDF page thumbnail.')
 
   return URL.createObjectURL(blob)
+}
+
+function canvasToBlob(canvas: HTMLCanvasElement, mimeType: string, quality?: number) {
+  return new Promise<Blob>((resolve, reject) => {
+    canvas.toBlob((blob) => {
+      if (blob)
+        resolve(blob)
+      else
+        reject(new Error('Could not create image output.'))
+    }, mimeType, quality)
+  })
+}
+
+function getPdfImageMimeType(format: PdfOptions['imageFormat']) {
+  if (format === 'jpeg')
+    return 'image/jpeg'
+
+  if (format === 'webp')
+    return 'image/webp'
+
+  return 'image/png'
+}
+
+function getWatermarkPosition(page: PDFPage, position: PdfWatermarkPosition, textWidth: number, fontSize: number) {
+  const { width, height } = page.getSize()
+  const edge = Math.max(32, Math.min(width, height) * 0.08)
+
+  if (position === 'topLeft')
+    return { x: edge, y: height - edge - fontSize }
+
+  if (position === 'topRight')
+    return { x: width - edge - textWidth, y: height - edge - fontSize }
+
+  if (position === 'bottomLeft')
+    return { x: edge, y: edge }
+
+  if (position === 'bottomRight')
+    return { x: width - edge - textWidth, y: edge }
+
+  return { x: (width - textWidth) / 2, y: height / 2 }
 }
 
 async function pdfDocumentToResult(document: PdfLibDocument, fileName: string): Promise<PdfResult> {

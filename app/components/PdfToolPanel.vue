@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { FileStack, Play, Trash2 } from '@lucide/vue'
-import { pdfModeOptions } from '~/configs/file-tool.config'
+import { pdfImageFormatOptions, pdfModeOptions, pdfWatermarkPositionOptions } from '~/configs/file-tool.config'
 
 const { t } = useI18n()
 const PdfPageWorkspace = defineAsyncComponent(() => import('~/components/PdfPageWorkspace.vue'))
@@ -10,6 +10,7 @@ const {
   clear,
   error,
   files,
+  imageResults,
   isRenderingPages,
   isProcessing,
   movePage,
@@ -23,6 +24,38 @@ const {
   selectAllPages,
   togglePageSelection,
 } = usePdfWorkshop()
+
+function updateWatermarkText(event: Event) {
+  options.watermarkText = (event.target as HTMLInputElement).value
+}
+
+function updateWatermarkFontSize(event: Event) {
+  options.watermarkFontSize = Math.max(8, Math.min(160, Number((event.target as HTMLInputElement).value) || 48))
+}
+
+function updateWatermarkOpacity(event: Event) {
+  options.watermarkOpacity = Math.max(5, Math.min(100, Number((event.target as HTMLInputElement).value) || 25))
+}
+
+function updateWatermarkRotation(event: Event) {
+  options.watermarkRotation = Math.max(-90, Math.min(90, Number((event.target as HTMLInputElement).value) || 0))
+}
+
+function updateWatermarkPosition(event: Event) {
+  options.watermarkPosition = (event.target as HTMLSelectElement).value as typeof options.watermarkPosition
+}
+
+function updateImageFormat(event: Event) {
+  options.imageFormat = (event.target as HTMLSelectElement).value as typeof options.imageFormat
+}
+
+function updateImageQuality(event: Event) {
+  options.imageQuality = Math.max(1, Math.min(100, Number((event.target as HTMLInputElement).value) || 90))
+}
+
+function updateImageScale(event: Event) {
+  options.imageScale = Math.max(1, Math.min(3, Number((event.target as HTMLInputElement).value) || 2))
+}
 </script>
 
 <template>
@@ -49,7 +82,7 @@ const {
     <div class="space-y-4 border border-line bg-panel/82 p-4 shadow-[0_0_44px_rgb(167_139_250_/_7%)] backdrop-blur">
       <div class="space-y-2">
         <span class="font-mono text-xs font-black tracking-widest text-lilac uppercase">{{ t('pdf.mode') }}</span>
-        <div class="grid grid-cols-2 gap-2">
+        <div class="grid grid-cols-2 gap-2 xl:grid-cols-4">
           <button
             v-for="mode in pdfModeOptions"
             :key="mode"
@@ -61,6 +94,58 @@ const {
             {{ t(`pdf.${mode}`) }}
           </button>
         </div>
+      </div>
+
+      <div v-if="options.mode === 'watermark'" class="grid gap-4 md:grid-cols-2">
+        <label class="space-y-2 md:col-span-2">
+          <span class="font-mono text-xs font-black tracking-widest text-lilac uppercase">{{ t('pdf.watermarkText') }}</span>
+          <input :value="options.watermarkText" class="focus-ring w-full border border-line bg-grid px-3 py-2 font-mono text-sm font-bold text-ink" type="text" autocomplete="off" @input="updateWatermarkText">
+        </label>
+
+        <label class="space-y-2">
+          <span class="font-mono text-xs font-black tracking-widest text-lilac uppercase">{{ t('pdf.watermarkPosition') }}</span>
+          <select :value="options.watermarkPosition" class="focus-ring w-full border border-line bg-grid px-3 py-2 font-mono text-sm font-bold text-ink" @change="updateWatermarkPosition">
+            <option v-for="position in pdfWatermarkPositionOptions" :key="position" :value="position">
+              {{ t(`pdf.watermarkPositions.${position}`) }}
+            </option>
+          </select>
+        </label>
+
+        <label class="space-y-2">
+          <span class="font-mono text-xs font-black tracking-widest text-lilac uppercase">{{ t('pdf.watermarkSize') }} {{ t('common.dot') }} {{ options.watermarkFontSize }}</span>
+          <input :value="options.watermarkFontSize" class="h-9 w-full accent-acid" type="range" min="8" max="160" step="1" @input="updateWatermarkFontSize">
+        </label>
+
+        <label class="space-y-2">
+          <span class="font-mono text-xs font-black tracking-widest text-lilac uppercase">{{ t('pdf.watermarkOpacity') }} {{ t('common.dot') }} {{ options.watermarkOpacity }}{{ t('common.percent') }}</span>
+          <input :value="options.watermarkOpacity" class="h-9 w-full accent-acid" type="range" min="5" max="100" step="1" @input="updateWatermarkOpacity">
+        </label>
+
+        <label class="space-y-2">
+          <span class="font-mono text-xs font-black tracking-widest text-lilac uppercase">{{ t('pdf.watermarkRotation') }} {{ t('common.dot') }} {{ options.watermarkRotation }}{{ t('common.degree') }}</span>
+          <input :value="options.watermarkRotation" class="h-9 w-full accent-acid" type="range" min="-90" max="90" step="1" @input="updateWatermarkRotation">
+        </label>
+      </div>
+
+      <div v-if="options.mode === 'images'" class="grid gap-4 md:grid-cols-3">
+        <label class="space-y-2">
+          <span class="font-mono text-xs font-black tracking-widest text-lilac uppercase">{{ t('pdf.imageFormat') }}</span>
+          <select :value="options.imageFormat" class="focus-ring w-full border border-line bg-grid px-3 py-2 font-mono text-sm font-bold text-ink" @change="updateImageFormat">
+            <option v-for="format in pdfImageFormatOptions" :key="format" :value="format">
+              {{ format.toUpperCase() }}
+            </option>
+          </select>
+        </label>
+
+        <label v-if="options.imageFormat !== 'png'" class="space-y-2">
+          <span class="font-mono text-xs font-black tracking-widest text-lilac uppercase">{{ t('pdf.imageQuality') }} {{ t('common.dot') }} {{ options.imageQuality }}</span>
+          <input :value="options.imageQuality" class="h-9 w-full accent-acid" type="range" min="1" max="100" step="1" @input="updateImageQuality">
+        </label>
+
+        <label class="space-y-2">
+          <span class="font-mono text-xs font-black tracking-widest text-lilac uppercase">{{ t('pdf.imageScale') }} {{ t('common.dot') }} {{ options.imageScale }}{{ t('common.by') }}</span>
+          <input :value="options.imageScale" class="h-9 w-full accent-acid" type="range" min="1" max="3" step="0.5" @input="updateImageScale">
+        </label>
       </div>
 
       <PdfPageWorkspace
@@ -98,10 +183,10 @@ const {
         {{ error }}
       </p>
 
-      <p v-if="!results.length" class="border border-line bg-grid/70 px-3 py-8 text-center font-mono text-sm font-bold text-ink/42">
+      <p v-if="!results.length && !imageResults.length" class="border border-line bg-grid/70 px-3 py-8 text-center font-mono text-sm font-bold text-ink/42">
         {{ t('pdf.empty') }}
       </p>
-      <ResultList v-else :pdf-results="results" />
+      <ResultList v-else :image-results="imageResults" :pdf-results="results" />
     </div>
   </section>
 </template>

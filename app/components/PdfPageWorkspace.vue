@@ -19,6 +19,7 @@ const emit = defineEmits<{
 
 const { t } = useI18n()
 const selectedCount = computed(() => props.pages.filter(page => page.selected).length)
+const selectable = computed(() => ['split', 'images'].includes(props.mode))
 const sortablePages = computed({
   get: () => props.pages,
   set: pages => emit('reorder', pages),
@@ -30,13 +31,13 @@ const sortablePages = computed({
     <div class="flex flex-wrap items-end justify-between gap-3">
       <div>
         <h3 class="font-mono text-sm font-black tracking-widest text-lilac uppercase">
-          {{ mode === 'merge' ? t('pdf.pageQueue') : t('pdf.pageSelection') }}
+          {{ mode === 'merge' ? t('pdf.pageQueue') : selectable ? t('pdf.pageSelection') : t('pdf.pagePreview') }}
         </h3>
         <p class="mt-1 font-mono text-xs font-bold text-ink/42">
           {{ isLoading ? t('pdf.renderingPages') : t('pdf.pageCount', { count: pages.length }) }}
         </p>
       </div>
-      <div v-if="mode === 'split' && pages.length" class="flex gap-2">
+      <div v-if="selectable && pages.length" class="flex gap-2">
         <button
           type="button"
           class="focus-ring border border-line bg-grid px-3 py-2 font-mono text-xs font-black text-ink/62 transition hover:border-lilac hover:text-lilac"
@@ -54,7 +55,7 @@ const sortablePages = computed({
       </div>
     </div>
 
-    <p v-if="mode === 'split' && pages.length" class="font-mono text-xs font-black text-acid">
+    <p v-if="selectable && pages.length" class="font-mono text-xs font-black text-acid">
       {{ t('pdf.selectedPages', { count: selectedCount }) }}
     </p>
 
@@ -71,12 +72,12 @@ const sortablePages = computed({
         v-for="(page, index) in pages"
         :key="page.id"
         class="group border bg-grid/80 p-2 transition"
-        :class="mode === 'split' && !page.selected ? 'border-line opacity-45' : 'border-line hover:border-lilac'"
+        :class="selectable && !page.selected ? 'border-line opacity-45' : 'border-line hover:border-lilac'"
       >
         <div class="relative border border-line bg-paper">
           <img :src="page.thumbnailUrl" :alt="`${page.sourceName} ${page.pageNumber}`" class="aspect-[3/4] w-full object-contain">
           <button
-            v-if="mode === 'split'"
+            v-if="selectable"
             type="button"
             class="focus-ring absolute top-2 left-2 grid size-7 place-items-center border font-mono text-xs font-black transition"
             :class="page.selected ? 'border-acid bg-acid text-paper' : 'border-line bg-panel text-ink/52 hover:border-acid hover:text-acid'"

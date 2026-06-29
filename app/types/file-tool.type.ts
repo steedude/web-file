@@ -1,8 +1,11 @@
 export type ToolMode = 'image' | 'pdf'
 
 export type ImageOutputFormat = 'jpeg' | 'png' | 'webp'
+export type ImageMode = 'batch' | 'single' | 'pdf'
 export type ImageCropPosition = 'none' | 'center' | 'top' | 'bottom' | 'left' | 'right'
 export type ImageResizeMode = 'dimensions' | 'percent'
+export type ImagePdfPageSize = 'image' | 'a4' | 'letter'
+export type ImagePdfFitMode = 'contain' | 'cover'
 
 export interface ImageCropSelection {
   x: number
@@ -37,6 +40,12 @@ export interface ConvertedImage {
   url: string
 }
 
+export interface ImagePdfOptions {
+  pageSize: ImagePdfPageSize
+  fitMode: ImagePdfFitMode
+  margin: number
+}
+
 export interface UploadedImagePreview {
   id: string
   file: File
@@ -46,10 +55,20 @@ export interface UploadedImagePreview {
   crop?: ImageCropSelection
 }
 
-export type PdfMode = 'merge' | 'split'
+export type PdfMode = 'merge' | 'split' | 'watermark' | 'images'
+export type PdfWatermarkPosition = 'center' | 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight' | 'tile'
+export type PdfImageOutputFormat = 'png' | 'jpeg' | 'webp'
 
 export interface PdfOptions {
   mode: PdfMode
+  watermarkText: string
+  watermarkFontSize: number
+  watermarkOpacity: number
+  watermarkRotation: number
+  watermarkPosition: PdfWatermarkPosition
+  imageFormat: PdfImageOutputFormat
+  imageQuality: number
+  imageScale: number
 }
 
 export interface PdfResult {

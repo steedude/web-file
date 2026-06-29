@@ -56,6 +56,7 @@
     "resetCrop": "Reset crop",
     "batchSettings": "Batch",
     "singleSettings": "Single",
+    "pdfSettings": "To PDF",
     "customSettings": "Single settings applied",
     "useBatchSettings": "Use batch",
     "proportionalResize": "Proportional resize",
@@ -86,18 +87,34 @@
       "right": "Right crop"
     },
     "pixels": "px",
-    "outputFileName": "File name"
+    "outputFileName": "File name",
+    "createPdf": "Create PDF",
+    "pdfPageSize": "Page size",
+    "pdfFitMode": "Image fit",
+    "pdfMargin": "Margin",
+    "pdfPageSizes": {
+      "image": "Match image",
+      "a4": "A4",
+      "letter": "Letter"
+    },
+    "pdfFitModes": {
+      "contain": "Fit full image",
+      "cover": "Fill and crop"
+    }
   },
   "pdf": {
-    "title": "PDF merge / extract",
-    "description": "Powered by pdf-lib and PDF.js in the browser. Merge pages by thumbnail order, or extract selected pages locally.",
+    "title": "PDF tools",
+    "description": "Powered by pdf-lib and PDF.js in the browser. Merge, extract, watermark, or export PDF pages as images locally.",
     "mode": "Mode",
     "merge": "Merge",
     "split": "Extract pages",
-    "run": "Generate PDF",
-    "empty": "Add PDFs to build a page queue. Merge uses the visible order, and extract uses checked pages.",
+    "watermark": "Watermark",
+    "images": "To images",
+    "run": "Generate",
+    "empty": "Add PDFs to build a page queue, select pages, or generate outputs.",
     "pageQueue": "Page queue",
     "pageSelection": "Page selection",
+    "pagePreview": "Page preview",
     "renderingPages": "rendering pages",
     "pageCount": "{count} pages",
     "selectedPages": "{count} selected",
@@ -108,6 +125,22 @@
     "moveFirst": "Move to first",
     "moveUp": "Move up",
     "moveDown": "Move down",
-    "moveLast": "Move to last"
+    "moveLast": "Move to last",
+    "watermarkText": "Watermark text",
+    "watermarkPosition": "Position",
+    "watermarkSize": "Size",
+    "watermarkOpacity": "Opacity",
+    "watermarkRotation": "Rotation",
+    "watermarkPositions": {
+      "center": "Center",
+      "topLeft": "Top left",
+      "topRight": "Top right",
+      "bottomLeft": "Bottom left",
+      "bottomRight": "Bottom right",
+      "tile": "Tile"
+    },
+    "imageFormat": "Image format",
+    "imageQuality": "Quality",
+    "imageScale": "Scale"
   }
 }

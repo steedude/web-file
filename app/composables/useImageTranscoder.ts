@@ -3,6 +3,9 @@ import { defaultImageOptions, imageFormatOptions } from '~/configs/file-tool.con
 import { replaceFileExtension } from '~/utils/file-name.util'
 import { fileToImageData } from '~/utils/image-canvas.util'
 
+const supportedImageMimeTypes = new Set(['image/jpeg', 'image/png', 'image/webp'])
+const supportedImageExtensions = new Set(['jpg', 'jpeg', 'png', 'webp'])
+
 export function useImageTranscoder() {
   const options = reactive<ImageTransformOptions>({ ...defaultImageOptions })
   const files = ref<File[]>([])
@@ -15,7 +18,7 @@ export function useImageTranscoder() {
   const canConvert = computed(() => files.value.length > 0 && !isProcessing.value)
 
   async function addFiles(fileList: FileList | File[], replace = false) {
-    const imageFiles = Array.from(fileList).filter(file => file.type.startsWith('image/'))
+    const imageFiles = Array.from(fileList).filter(isSupportedImageFile)
     const nextPreviews = await Promise.all(imageFiles.map(createImagePreview))
     const isFirstUpload = replace || files.value.length === 0
 
@@ -192,6 +195,15 @@ export function useImageTranscoder() {
     estimateOutputSizes,
     estimateOutputSize,
   }
+}
+
+function isSupportedImageFile(file: File) {
+  const extension = file.name.split('.').pop()?.toLowerCase() ?? ''
+
+  if (supportedImageMimeTypes.has(file.type))
+    return supportedImageExtensions.has(extension) || extension === ''
+
+  return supportedImageExtensions.has(extension)
 }
 
 async function createImagePreview(file: File): Promise<UploadedImagePreview> {

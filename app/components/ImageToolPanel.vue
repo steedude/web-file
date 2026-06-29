@@ -317,7 +317,7 @@ function getOutputExtensions(format: ImageOutputFormat) {
         </div>
       </div>
 
-      <FileDropZone accept="image/*" :label="t('common.dropFiles')" :multiple="imageMode === 'batch'" @files="handleImageFiles" />
+      <FileDropZone accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp" :label="t('common.dropFiles')" :multiple="imageMode === 'batch'" @files="handleImageFiles" />
       <ImagePreviewList :allow-crop="imageMode === 'single'" :compact="imageMode === 'batch'" :estimates="previewEstimates" :previews="previews" @remove="removeFile" />
       <FileList v-if="!previews.length" :files="files" @remove="removeFile" />
     </div>

@@ -1,4 +1,4 @@
-import type { ConvertedImage, ImageCropSelection, ImageOutputFormat, ImageTransformOptions, UploadedImagePreview } from '~/types/file-tool.type'
+import type { ConvertedImage, ImageOutputFormat, ImageTransformOptions, UploadedImagePreview } from '~/types/file-tool.type'
 import { defaultImageOptions, imageFormatOptions } from '~/configs/file-tool.config'
 import { replaceFileExtension } from '~/utils/file-name.util'
 import { fileToImageData } from '~/utils/image-canvas.util'
@@ -14,12 +14,19 @@ export function useImageTranscoder() {
 
   const canConvert = computed(() => files.value.length > 0 && !isProcessing.value)
 
-  async function addFiles(fileList: FileList | File[]) {
+  async function addFiles(fileList: FileList | File[], replace = false) {
     const imageFiles = Array.from(fileList).filter(file => file.type.startsWith('image/'))
     const nextPreviews = await Promise.all(imageFiles.map(createImagePreview))
-    const isFirstUpload = files.value.length === 0
-    files.value = [...files.value, ...imageFiles]
-    previews.value = [...previews.value, ...nextPreviews]
+    const isFirstUpload = replace || files.value.length === 0
+
+    if (replace) {
+      files.value = []
+      clearPreviews()
+      clearResults()
+    }
+
+    files.value = replace ? imageFiles : [...files.value, ...imageFiles]
+    previews.value = replace ? nextPreviews : [...previews.value, ...nextPreviews]
 
     if (isFirstUpload && nextPreviews[0]?.width && nextPreviews[0]?.height) {
       options.maxWidth = nextPreviews[0].width
@@ -36,58 +43,6 @@ export function useImageTranscoder() {
 
     files.value = files.value.filter((_, fileIndex) => fileIndex !== index)
     previews.value = previews.value.filter((_, previewIndex) => previewIndex !== index)
-  }
-
-  function setCropSelection(index: number, crop: ImageCropSelection) {
-    const preview = previews.value[index]
-
-    if (!preview)
-      return
-
-    previews.value = previews.value.map((item, previewIndex) => previewIndex === index ? { ...item, crop } : item)
-    clearResults()
-  }
-
-  function clearCropSelection(index: number) {
-    const preview = previews.value[index]
-
-    if (!preview)
-      return
-
-    previews.value = previews.value.map((item, previewIndex) => {
-      if (previewIndex !== index)
-        return item
-
-      const { crop: _crop, ...nextPreview } = item
-      return nextPreview
-    })
-    clearResults()
-  }
-
-  function setPreviewOptions(index: number, nextOptions: ImageTransformOptions) {
-    const preview = previews.value[index]
-
-    if (!preview)
-      return
-
-    previews.value = previews.value.map((item, previewIndex) => previewIndex === index ? { ...item, options: cloneImageOptions(nextOptions) } : item)
-    clearResults()
-  }
-
-  function clearPreviewOptions(index: number) {
-    const preview = previews.value[index]
-
-    if (!preview)
-      return
-
-    previews.value = previews.value.map((item, previewIndex) => {
-      if (previewIndex !== index)
-        return item
-
-      const { options: _options, ...nextPreview } = item
-      return nextPreview
-    })
-    clearResults()
   }
 
   function clear() {
@@ -111,6 +66,11 @@ export function useImageTranscoder() {
     results.value = []
   }
 
+  function resetOptions() {
+    Object.assign(options, defaultImageOptions)
+    clearResults()
+  }
+
   async function convert(index?: number) {
     if (!canConvert.value)
       return
@@ -125,15 +85,13 @@ export function useImageTranscoder() {
         ? [[index, files.value[index]] as const]
         : files.value.map((file, fileIndex) => [fileIndex, file] as const)
 
-      for (const [index, file] of entries) {
+      for (const [_index, file] of entries) {
         if (!file)
           continue
 
-        const preview = previews.value[index]
-        const activeOptions = preview?.options ?? options
-        const imageData = await fileToImageData(file, activeOptions.maxWidth, activeOptions.maxHeight, activeOptions.preserveDimensions, preview?.crop)
-        const encoded = await encodeImage(imageData, activeOptions.format, activeOptions)
-        const format = imageFormatOptions.find(item => item.value === activeOptions.format) ?? imageFormatOptions[0]!
+        const imageData = await fileToImageData(file, options.maxWidth, options.maxHeight, options.preserveDimensions, options.cropPosition)
+        const encoded = await encodeImage(imageData, options.format, options)
+        const format = imageFormatOptions.find(item => item.value === options.format) ?? imageFormatOptions[0]!
         const blob = new Blob([encoded], { type: format.mimeType })
         const fileName = replaceFileExtension(file.name, format.extension)
 
@@ -176,10 +134,8 @@ export function useImageTranscoder() {
         if (!file)
           continue
 
-        const preview = previews.value[fileIndex]
-        const activeOptions = preview?.options ?? options
-        const imageData = await fileToImageData(file, activeOptions.maxWidth, activeOptions.maxHeight, activeOptions.preserveDimensions, preview?.crop)
-        const encoded = await encodeImage(imageData, activeOptions.format, activeOptions)
+        const imageData = await fileToImageData(file, options.maxWidth, options.maxHeight, options.preserveDimensions, options.cropPosition)
+        const encoded = await encodeImage(imageData, options.format, options)
         sizes.push({ index: fileIndex, size: encoded.byteLength })
       }
 
@@ -213,11 +169,8 @@ export function useImageTranscoder() {
     options,
     previews,
     removeFile,
+    resetOptions,
     results,
-    clearCropSelection,
-    clearPreviewOptions,
-    setPreviewOptions,
-    setCropSelection,
     estimateOutputSizes,
     estimateOutputSize,
   }
@@ -245,10 +198,6 @@ async function getImageDimensions(file: File): Promise<{ width: number, height: 
   catch {
     return { width: 0, height: 0 }
   }
-}
-
-function cloneImageOptions(options: ImageTransformOptions): ImageTransformOptions {
-  return { ...options }
 }
 
 async function encodeImage(imageData: ImageData, format: ImageOutputFormat, options: ImageTransformOptions): Promise<ArrayBuffer> {

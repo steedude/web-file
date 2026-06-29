@@ -59,7 +59,7 @@
     "customSettings": "Single settings applied",
     "useBatchSettings": "Use batch",
     "proportionalResize": "Proportional resize",
-    "batchRatioHint": "Multiple images use width and height as shared limits.",
+    "batchRatioHint": "Batch crops use the same size and position for every image.",
     "sourceSize": "Source",
     "outputSizeReference": "Output ref",
     "convertForEstimate": "convert first",
@@ -71,7 +71,17 @@
     "batchSummary": "Total",
     "largerReference": "Larger",
     "unchanged": "Unchanged",
-    "pngQualityTitle": "PNG quality"
+    "pngQualityTitle": "PNG quality",
+    "cropPosition": "Crop",
+    "cropPositions": {
+      "none": "No crop",
+      "center": "Center crop",
+      "top": "Top crop",
+      "bottom": "Bottom crop",
+      "left": "Left crop",
+      "right": "Right crop"
+    },
+    "pixels": "px"
   },
   "pdf": {
     "title": "PDF merge / extract / edit",

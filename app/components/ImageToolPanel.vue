@@ -1,15 +1,13 @@
 <script setup lang="ts">
 import type { ImageOutputFormat, ImageTransformOptions } from '~/types/file-tool.type'
 import { Image, Play, Trash2 } from '@lucide/vue'
-import { imageFormatOptions } from '~/configs/file-tool.config'
+import { imageCropPositionOptions, imageFormatOptions } from '~/configs/file-tool.config'
 import { formatFileSize } from '~/utils/file-size.util'
 
 const { t } = useI18n()
 const {
   addFiles,
   canConvert,
-  clearCropSelection,
-  clearPreviewOptions,
   clear,
   clearResults,
   convert,
@@ -20,55 +18,32 @@ const {
   options,
   previews,
   removeFile,
+  resetOptions,
   results,
-  setPreviewOptions,
-  setCropSelection,
 } = useImageTranscoder()
 
-const settingsScope = ref<'batch' | 'single'>('batch')
-const selectedPreviewIndex = ref(0)
-const cropEditorIndex = ref<number | null>(null)
+const imageMode = ref<'batch' | 'single'>('batch')
 const estimatedOutputSizes = ref<number[]>([])
 const isEstimatePending = ref(false)
 let estimateTimer: ReturnType<typeof setTimeout> | null = null
 let estimateRequestId = 0
-const activeCropPreview = computed(() => cropEditorIndex.value === null ? null : previews.value[cropEditorIndex.value] ?? null)
-const selectedPreview = computed(() => previews.value[selectedPreviewIndex.value] ?? null)
-const currentOptions = computed(() => settingsScope.value === 'single' && selectedPreview.value ? selectedPreview.value.options ?? createPreviewOptions(selectedPreview.value) : options)
-const displayedQuality = computed(() => currentOptions.value.webpLossless ? 100 : currentOptions.value.quality)
-const activeReference = computed(() => {
-  if (settingsScope.value === 'single')
-    return selectedPreview.value
 
-  return previews.value.length === 1 ? previews.value[0] ?? null : null
-})
+const displayedQuality = computed(() => options.webpLossless ? 100 : options.quality)
+const activeReference = computed(() => previews.value.length === 1 ? previews.value[0] ?? null : null)
 const activeAspectRatio = computed(() => {
   const preview = activeReference.value
 
   if (!preview)
     return null
 
-  const width = preview.crop?.width || preview.width
-  const height = preview.crop?.height || preview.height
-
-  return width > 0 && height > 0 ? width / height : null
+  return preview.width > 0 && preview.height > 0 ? preview.width / preview.height : null
 })
-const originalSizeReference = computed(() => {
-  if (settingsScope.value === 'single')
-    return selectedPreview.value?.file.size ?? 0
-
-  return files.value.reduce((total, file) => total + file.size, 0)
-})
+const originalSizeReference = computed(() => files.value.reduce((total, file) => total + file.size, 0))
 const outputSizeReference = computed(() => {
-  const estimatedSize = settingsScope.value === 'single'
-    ? estimatedOutputSizes.value[selectedPreviewIndex.value] ?? 0
-    : estimatedOutputSizes.value.reduce((total, size) => total + size, 0)
+  const estimatedSize = estimatedOutputSizes.value.reduce((total, size) => total + size, 0)
 
   if (estimatedSize)
     return estimatedSize
-
-  if (settingsScope.value === 'single')
-    return results.value[selectedPreviewIndex.value]?.outputSize ?? 0
 
   return results.value.reduce((total, result) => total + result.outputSize, 0)
 })
@@ -88,41 +63,29 @@ const previewEstimates = computed(() => previews.value.map((preview, index) => {
   }
 }))
 
-watch([settingsScope, selectedPreviewIndex, previews], () => {
-  if (selectedPreviewIndex.value >= previews.value.length)
-    selectedPreviewIndex.value = Math.max(0, previews.value.length - 1)
-}, { immediate: true })
-
 watch(() => [
-  settingsScope.value,
-  selectedPreviewIndex.value,
-  previews.value.map(preview => `${preview.id}:${preview.crop?.x ?? 0}:${preview.crop?.y ?? 0}:${preview.crop?.width ?? preview.width}:${preview.crop?.height ?? preview.height}`).join('|'),
+  imageMode.value,
+  previews.value.map(preview => `${preview.id}:${preview.width}:${preview.height}`).join('|'),
 ], scheduleEstimate, { immediate: true })
 
-function setSettingsScope(scope: 'batch' | 'single') {
-  settingsScope.value = scope
+function setImageMode(mode: 'batch' | 'single') {
+  if (imageMode.value === mode)
+    return
+
+  imageMode.value = mode
+  clear()
+  resetOptions()
+  clearEstimate()
 }
 
-function selectSingleImage(index: number) {
-  selectedPreviewIndex.value = index
-  settingsScope.value = 'single'
+function handleImageFiles(fileList: FileList | File[]) {
+  addFiles(fileList, imageMode.value === 'single')
 }
 
 function patchCurrentOptions(patch: Partial<ImageTransformOptions>) {
   clearEstimate()
-
-  if (settingsScope.value === 'single') {
-    const preview = selectedPreview.value
-
-    if (!preview)
-      return
-
-    setPreviewOptions(selectedPreviewIndex.value, { ...(preview.options ?? createPreviewOptions(preview)), ...patch })
-  }
-  else {
-    Object.assign(options, patch)
-    clearResults()
-  }
+  Object.assign(options, patch)
+  clearResults()
 }
 
 function updateWidth(event: Event) {
@@ -145,23 +108,6 @@ function updateHeight(event: Event) {
   patchCurrentOptions(patch)
 }
 
-function setPreserveDimensions(preserveDimensions: boolean) {
-  patchCurrentOptions({ preserveDimensions })
-}
-
-function resetSingleSettings() {
-  clearPreviewOptions(selectedPreviewIndex.value)
-  settingsScope.value = 'batch'
-}
-
-function createPreviewOptions(preview: { width: number, height: number, crop?: { width: number, height: number } }): ImageTransformOptions {
-  return {
-    ...options,
-    maxWidth: preview.crop?.width || preview.width || options.maxWidth,
-    maxHeight: preview.crop?.height || preview.height || options.maxHeight,
-  }
-}
-
 function updateQuality(event: Event) {
   patchCurrentOptions({ quality: Math.max(1, Math.min(100, Number((event.target as HTMLInputElement).value) || 1)) })
   scheduleEstimate()
@@ -169,6 +115,16 @@ function updateQuality(event: Event) {
 
 function updateFormat(event: Event) {
   patchCurrentOptions({ format: (event.target as HTMLSelectElement).value as ImageOutputFormat })
+  scheduleEstimate()
+}
+
+function updateCropPosition(event: Event) {
+  patchCurrentOptions({ cropPosition: (event.target as HTMLSelectElement).value as ImageTransformOptions['cropPosition'] })
+  scheduleEstimate()
+}
+
+function setPreserveDimensions(preserveDimensions: boolean) {
+  patchCurrentOptions({ preserveDimensions, cropPosition: preserveDimensions ? 'none' : options.cropPosition })
   scheduleEstimate()
 }
 
@@ -194,10 +150,10 @@ function scheduleEstimate() {
   const requestId = ++estimateRequestId
   estimateTimer = setTimeout(async () => {
     isEstimatePending.value = true
-    const sizes = await estimateOutputSizes(settingsScope.value === 'single' ? selectedPreviewIndex.value : undefined).catch(() => [])
+    const sizes = await estimateOutputSizes().catch(() => [])
 
     if (requestId === estimateRequestId) {
-      const nextSizes = settingsScope.value === 'single' ? [...estimatedOutputSizes.value] : []
+      const nextSizes: number[] = []
 
       for (const item of sizes)
         nextSizes[item.index] = item.size
@@ -212,10 +168,6 @@ function clearEstimate() {
   estimatedOutputSizes.value = []
   isEstimatePending.value = false
   estimateRequestId += 1
-}
-
-function runConvert() {
-  convert(settingsScope.value === 'single' ? selectedPreviewIndex.value : undefined)
 }
 
 function createSizeDelta(sourceSize: number, outputSize: number) {
@@ -239,22 +191,6 @@ function getDeltaLabel(delta: { type: 'larger' | 'saved' | 'same', percent: numb
 
   return `${delta.type === 'larger' ? t('image.largerReference') : t('image.savedReference')} ${delta.percent}${t('common.percent')}`
 }
-
-function saveCrop(crop: { x: number, y: number, width: number, height: number }) {
-  if (cropEditorIndex.value === null)
-    return
-
-  setCropSelection(cropEditorIndex.value, crop)
-  cropEditorIndex.value = null
-}
-
-function clearCrop() {
-  if (cropEditorIndex.value === null)
-    return
-
-  clearCropSelection(cropEditorIndex.value)
-  cropEditorIndex.value = null
-}
 </script>
 
 <template>
@@ -274,66 +210,52 @@ function clearCrop() {
         </div>
       </div>
 
-      <FileDropZone accept="image/*" :label="t('common.dropFiles')" @files="addFiles" />
-      <ImagePreviewList :estimates="previewEstimates" :previews="previews" @crop="cropEditorIndex = $event" @customise="selectSingleImage" @remove="removeFile" />
+      <FileDropZone accept="image/*" :label="t('common.dropFiles')" :multiple="imageMode === 'batch'" @files="handleImageFiles" />
+      <ImagePreviewList :compact="imageMode === 'batch'" :estimates="previewEstimates" :previews="previews" @remove="removeFile" />
       <FileList v-if="!previews.length" :files="files" @remove="removeFile" />
     </div>
 
     <div class="space-y-4 border border-line bg-panel/82 p-4 shadow-[0_0_44px_rgb(72_215_255_/_7%)] backdrop-blur">
-      <div class="grid gap-3 sm:grid-cols-[auto_minmax(0,1fr)]">
-        <div class="grid grid-cols-2 gap-2">
-          <button
-            type="button"
-            class="focus-ring border px-3 py-2 font-mono text-xs font-black transition"
-            :class="settingsScope === 'batch' ? 'border-sky bg-sky text-paper' : 'border-line bg-grid text-ink/62 hover:border-sky hover:text-sky'"
-            @click="setSettingsScope('batch')"
-          >
-            {{ t('image.batchSettings') }}
-          </button>
-          <button
-            type="button"
-            class="focus-ring border px-3 py-2 font-mono text-xs font-black transition disabled:opacity-40"
-            :class="settingsScope === 'single' ? 'border-sky bg-sky text-paper' : 'border-line bg-grid text-ink/62 hover:border-sky hover:text-sky'"
-            :disabled="!previews.length"
-            @click="setSettingsScope('single')"
-          >
-            {{ t('image.singleSettings') }}
-          </button>
-        </div>
-
-        <div v-if="settingsScope === 'single' && previews.length" class="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto]">
-          <select v-model.number="selectedPreviewIndex" class="focus-ring w-full border border-line bg-grid px-3 py-2 font-mono text-xs font-bold text-ink">
-            <option v-for="(preview, index) in previews" :key="preview.id" :value="index">
-              {{ preview.file.name }}
-            </option>
-          </select>
-          <button type="button" class="focus-ring border border-line bg-grid px-3 py-2 font-mono text-xs font-black text-ink/62 hover:border-coral hover:text-coral" @click="resetSingleSettings">
-            {{ t('image.useBatchSettings') }}
-          </button>
-        </div>
+      <div class="grid grid-cols-2 gap-2 sm:w-max">
+        <button
+          type="button"
+          class="focus-ring border px-3 py-2 font-mono text-xs font-black transition"
+          :class="imageMode === 'batch' ? 'border-sky bg-sky text-paper' : 'border-line bg-grid text-ink/62 hover:border-sky hover:text-sky'"
+          @click="setImageMode('batch')"
+        >
+          {{ t('image.batchSettings') }}
+        </button>
+        <button
+          type="button"
+          class="focus-ring border px-3 py-2 font-mono text-xs font-black transition"
+          :class="imageMode === 'single' ? 'border-sky bg-sky text-paper' : 'border-line bg-grid text-ink/62 hover:border-sky hover:text-sky'"
+          @click="setImageMode('single')"
+        >
+          {{ t('image.singleSettings') }}
+        </button>
       </div>
 
       <div class="grid gap-4 sm:grid-cols-2">
         <label class="space-y-2">
           <span class="font-mono text-xs font-black tracking-widest text-sky uppercase">{{ t('image.outputFormat') }}</span>
-          <select :value="currentOptions.format" class="focus-ring w-full border border-line bg-grid px-3 py-2 font-mono text-sm font-bold text-ink" @change="updateFormat">
+          <select :value="options.format" class="focus-ring w-full border border-line bg-grid px-3 py-2 font-mono text-sm font-bold text-ink" @change="updateFormat">
             <option v-for="format in imageFormatOptions" :key="format.value" :value="format.value">
               {{ format.value.toUpperCase() }}
             </option>
           </select>
         </label>
 
-        <div class="min-h-[4.25rem] space-y-2">
-          <div v-if="currentOptions.format === 'webp'" class="space-y-2">
+        <div class="space-y-2">
+          <div v-if="options.format === 'webp'" class="space-y-2">
             <label class="block space-y-2">
               <span class="font-mono text-xs font-black tracking-widest text-sky uppercase">{{ t('image.quality') }} {{ t('common.dot') }} {{ displayedQuality }}</span>
-              <input :value="displayedQuality" class="w-full accent-acid disabled:opacity-40" type="range" min="1" max="100" :disabled="currentOptions.webpLossless" @input="updateQuality">
+              <input :value="displayedQuality" class="w-full accent-acid disabled:opacity-40" type="range" min="1" max="100" :disabled="options.webpLossless" @input="updateQuality">
             </label>
           </div>
 
-          <label v-else-if="currentOptions.format === 'jpeg'" class="block space-y-2">
-            <span class="font-mono text-xs font-black tracking-widest text-sky uppercase">{{ t('image.quality') }} {{ t('common.dot') }} {{ currentOptions.quality }}</span>
-            <input :value="currentOptions.quality" class="w-full accent-acid" type="range" min="1" max="100" @input="updateQuality">
+          <label v-else-if="options.format === 'jpeg'" class="block space-y-2">
+            <span class="font-mono text-xs font-black tracking-widest text-sky uppercase">{{ t('image.quality') }} {{ t('common.dot') }} {{ options.quality }}</span>
+            <input :value="options.quality" class="w-full accent-acid" type="range" min="1" max="100" @input="updateQuality">
           </label>
 
           <div v-else class="border border-line bg-grid px-3 py-2 font-mono text-xs font-bold text-ink/42">
@@ -343,18 +265,18 @@ function clearCrop() {
         </div>
       </div>
 
-      <label v-if="currentOptions.format === 'png'" class="block space-y-2">
+      <label v-if="options.format === 'png'" class="block space-y-2">
         <span class="font-mono text-xs font-black tracking-widest text-sky uppercase">{{ t('image.losslessPng') }}</span>
         <span class="inline-flex w-full items-center gap-2 border border-line bg-grid px-3 py-2 font-mono text-xs font-black text-ink/70">
-          <input :checked="currentOptions.optimisePng" type="checkbox" class="size-4 accent-acid" @change="setOptimisePng(($event.target as HTMLInputElement).checked)">
+          <input :checked="options.optimisePng" type="checkbox" class="size-4 accent-acid" @change="setOptimisePng(($event.target as HTMLInputElement).checked)">
           {{ t('image.optimisePng') }}
         </span>
       </label>
 
-      <label v-if="currentOptions.format === 'webp'" class="block space-y-2">
+      <label v-if="options.format === 'webp'" class="block space-y-2">
         <span class="font-mono text-xs font-black tracking-widest text-sky uppercase">{{ t('image.webpLossless') }}</span>
         <span class="inline-flex w-full items-center gap-2 border border-line bg-grid px-3 py-2 font-mono text-xs font-black text-ink/70">
-          <input :checked="currentOptions.webpLossless" type="checkbox" class="size-4 accent-acid" @change="setWebpLossless(($event.target as HTMLInputElement).checked)">
+          <input :checked="options.webpLossless" type="checkbox" class="size-4 accent-acid" @change="setWebpLossless(($event.target as HTMLInputElement).checked)">
           {{ t('image.enableWebpLossless') }}
         </span>
       </label>
@@ -369,12 +291,12 @@ function clearCrop() {
         <label class="space-y-2">
           <span class="font-mono text-xs font-black tracking-widest text-sky uppercase">{{ t('image.width') }}</span>
           <input
-            :value="currentOptions.maxWidth"
+            :value="options.maxWidth"
             class="focus-ring w-full border border-line bg-grid px-3 py-2 font-mono text-sm font-bold text-ink disabled:opacity-40"
             type="number"
             min="1"
             step="1"
-            :disabled="currentOptions.preserveDimensions"
+            :disabled="options.preserveDimensions"
             @input="updateWidth"
           >
         </label>
@@ -382,12 +304,12 @@ function clearCrop() {
         <label class="space-y-2">
           <span class="font-mono text-xs font-black tracking-widest text-sky uppercase">{{ t('image.height') }}</span>
           <input
-            :value="currentOptions.maxHeight"
+            :value="options.maxHeight"
             class="focus-ring w-full border border-line bg-grid px-3 py-2 font-mono text-sm font-bold text-ink disabled:opacity-40"
             type="number"
             min="1"
             step="1"
-            :disabled="currentOptions.preserveDimensions"
+            :disabled="options.preserveDimensions"
             @input="updateHeight"
           >
         </label>
@@ -397,7 +319,7 @@ function clearCrop() {
         <button
           type="button"
           class="focus-ring border px-3 py-2 font-mono text-xs font-black transition"
-          :class="currentOptions.preserveDimensions ? 'border-sky bg-sky text-paper' : 'border-line bg-grid text-ink/62 hover:border-sky hover:text-sky'"
+          :class="options.preserveDimensions ? 'border-sky bg-sky text-paper' : 'border-line bg-grid text-ink/62 hover:border-sky hover:text-sky'"
           @click="setPreserveDimensions(true)"
         >
           {{ t('image.keepOriginal') }}
@@ -405,22 +327,31 @@ function clearCrop() {
         <button
           type="button"
           class="focus-ring border px-3 py-2 font-mono text-xs font-black transition"
-          :class="!currentOptions.preserveDimensions ? 'border-sky bg-sky text-paper' : 'border-line bg-grid text-ink/62 hover:border-sky hover:text-sky'"
+          :class="!options.preserveDimensions ? 'border-sky bg-sky text-paper' : 'border-line bg-grid text-ink/62 hover:border-sky hover:text-sky'"
           @click="setPreserveDimensions(false)"
         >
           {{ t('image.proportionalResize') }}
         </button>
-        <span v-if="settingsScope === 'batch' && previews.length > 1" class="basis-full font-mono text-xs font-bold text-ink/42">
+      </div>
+
+      <label v-if="!options.preserveDimensions" class="block space-y-2">
+        <span class="font-mono text-xs font-black tracking-widest text-sky uppercase">{{ t('image.cropPosition') }}</span>
+        <select :value="options.cropPosition" class="focus-ring w-full border border-line bg-grid px-3 py-2 font-mono text-sm font-bold text-ink" @change="updateCropPosition">
+          <option v-for="position in imageCropPositionOptions" :key="position" :value="position">
+            {{ t(`image.cropPositions.${position}`) }}
+          </option>
+        </select>
+        <span v-if="imageMode === 'batch' && previews.length > 1" class="block font-mono text-xs font-bold text-ink/42">
           {{ t('image.batchRatioHint') }}
         </span>
-      </div>
+      </label>
 
       <div class="flex flex-wrap gap-3">
         <button
           type="button"
           class="focus-ring inline-flex items-center gap-2 border border-acid/70 bg-acid px-5 py-3 font-mono text-sm font-black text-paper shadow-[0_0_24px_rgb(109_255_157_/_18%)] transition hover:bg-acid/85 disabled:opacity-50"
           :disabled="!canConvert"
-          @click="runConvert"
+          @click="() => convert()"
         >
           <Play class="size-4" aria-hidden="true" />
           {{ isProcessing ? t('common.processing') : t('image.convert') }}
@@ -444,13 +375,5 @@ function clearCrop() {
       </p>
       <ResultList v-else :image-results="results" />
     </div>
-
-    <ImageCropEditor
-      v-if="activeCropPreview"
-      :preview="activeCropPreview"
-      @clear="clearCrop"
-      @close="cropEditorIndex = null"
-      @save="saveCrop"
-    />
   </section>
 </template>

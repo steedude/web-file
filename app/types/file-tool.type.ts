@@ -1,6 +1,7 @@
 export type ToolMode = 'image' | 'pdf'
 
 export type ImageOutputFormat = 'jpeg' | 'png' | 'webp'
+export type ImageCropPosition = 'none' | 'center' | 'top' | 'bottom' | 'left' | 'right'
 
 export interface ImageTransformOptions {
   format: ImageOutputFormat
@@ -8,6 +9,7 @@ export interface ImageTransformOptions {
   maxWidth: number
   maxHeight: number
   preserveDimensions: boolean
+  cropPosition: ImageCropPosition
   optimisePng: boolean
   webpLossless: boolean
 }
@@ -24,21 +26,12 @@ export interface ConvertedImage {
   url: string
 }
 
-export interface ImageCropSelection {
-  x: number
-  y: number
-  width: number
-  height: number
-}
-
 export interface UploadedImagePreview {
   id: string
   file: File
   url: string
   width: number
   height: number
-  crop?: ImageCropSelection
-  options?: ImageTransformOptions
 }
 
 export type PdfMode = 'merge' | 'split' | 'edit'

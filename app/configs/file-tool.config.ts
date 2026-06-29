@@ -1,4 +1,4 @@
-import type { ImageOutputFormat, ImageTransformOptions, PdfMode, PdfOptions } from '~/types/file-tool.type'
+import type { ImageCropPosition, ImageOutputFormat, ImageTransformOptions, PdfMode, PdfOptions } from '~/types/file-tool.type'
 
 export const imageFormatOptions: Array<{ value: ImageOutputFormat, mimeType: string, extension: string }> = [
   { value: 'jpeg', mimeType: 'image/jpeg', extension: 'jpg' },
@@ -12,9 +12,12 @@ export const defaultImageOptions: ImageTransformOptions = {
   maxWidth: 1920,
   maxHeight: 1920,
   preserveDimensions: false,
+  cropPosition: 'none',
   optimisePng: true,
   webpLossless: false,
 }
+
+export const imageCropPositionOptions: ImageCropPosition[] = ['none', 'center', 'top', 'bottom', 'left', 'right']
 
 export const pdfModeOptions: PdfMode[] = ['merge', 'split', 'edit']
 

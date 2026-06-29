@@ -59,7 +59,7 @@
     "customSettings": "已套用單張設定",
     "useBatchSettings": "改用批次",
     "proportionalResize": "等比縮放",
-    "batchRatioHint": "多張圖片會將寬高當作共同上限。",
+    "batchRatioHint": "批次裁切會對每張圖片套用相同尺寸與位置。",
     "sourceSize": "來源",
     "outputSizeReference": "輸出參考",
     "convertForEstimate": "先轉檔",
@@ -71,7 +71,17 @@
     "batchSummary": "總覽",
     "largerReference": "變大",
     "unchanged": "相同",
-    "pngQualityTitle": "PNG 品質"
+    "pngQualityTitle": "PNG 品質",
+    "cropPosition": "裁切",
+    "cropPositions": {
+      "none": "不裁切",
+      "center": "置中裁切",
+      "top": "上方裁切",
+      "bottom": "下方裁切",
+      "left": "左側裁切",
+      "right": "右側裁切"
+    },
+    "pixels": "px"
   },
   "pdf": {
     "title": "PDF 合併 / 擷取 / 編輯",

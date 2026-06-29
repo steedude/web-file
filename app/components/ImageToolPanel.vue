@@ -119,7 +119,6 @@ function updateHeight(event: Event) {
 
 function updateResizePercent(event: Event) {
   patchCurrentOptions({ resizePercent: Math.max(1, Math.min(100, Number((event.target as HTMLInputElement).value) || 100)) })
-  scheduleEstimate()
 }
 
 function setResizeMode(resizeMode: ImageTransformOptions['resizeMode']) {
@@ -129,6 +128,9 @@ function setResizeMode(resizeMode: ImageTransformOptions['resizeMode']) {
 
 function updateQuality(event: Event) {
   patchCurrentOptions({ quality: Math.max(1, Math.min(100, Number((event.target as HTMLInputElement).value) || 1)) })
+}
+
+function commitEstimate() {
   scheduleEstimate()
 }
 
@@ -198,6 +200,11 @@ function scheduleEstimate() {
   const requestId = ++estimateRequestId
   estimateTimer = setTimeout(async () => {
     isEstimatePending.value = true
+    await waitForEstimateSlot()
+
+    if (requestId !== estimateRequestId)
+      return
+
     const sizes = await estimateOutputSizes().catch(() => [])
 
     if (requestId === estimateRequestId) {
@@ -210,6 +217,22 @@ function scheduleEstimate() {
       isEstimatePending.value = false
     }
   }, 450)
+}
+
+function waitForEstimateSlot() {
+  if (!import.meta.client)
+    return Promise.resolve()
+
+  return new Promise<void>((resolve) => {
+    const resolveAfterFrame = () => window.requestAnimationFrame(() => resolve())
+
+    if ('requestIdleCallback' in window) {
+      window.requestIdleCallback(resolveAfterFrame, { timeout: 500 })
+      return
+    }
+
+    globalThis.setTimeout(resolveAfterFrame, 0)
+  })
 }
 
 function clearEstimate() {
@@ -314,13 +337,13 @@ function getOutputExtensions(format: ImageOutputFormat) {
           <div v-if="options.format === 'webp'">
             <label class="grid grid-rows-[auto_2.25rem] gap-2">
               <span class="flex h-4 items-center font-mono text-xs font-black tracking-widest text-sky uppercase">{{ t('image.quality') }} {{ t('common.dot') }} {{ displayedQuality }}</span>
-              <input :value="displayedQuality" class="h-9 w-full accent-acid disabled:opacity-40" type="range" min="1" max="100" :disabled="options.webpLossless" @input="updateQuality">
+              <input :value="displayedQuality" class="h-9 w-full accent-acid disabled:opacity-40" type="range" min="1" max="100" :disabled="options.webpLossless" @change="commitEstimate" @input="updateQuality">
             </label>
           </div>
 
           <label v-else-if="options.format === 'jpeg'" class="grid grid-rows-[auto_2.25rem] gap-2">
             <span class="flex h-4 items-center font-mono text-xs font-black tracking-widest text-sky uppercase">{{ t('image.quality') }} {{ t('common.dot') }} {{ options.quality }}</span>
-            <input :value="options.quality" class="h-9 w-full accent-acid" type="range" min="1" max="100" @input="updateQuality">
+            <input :value="options.quality" class="h-9 w-full accent-acid" type="range" min="1" max="100" @change="commitEstimate" @input="updateQuality">
           </label>
 
           <div v-else class="grid grid-rows-[auto_2.25rem] gap-2">
@@ -417,7 +440,7 @@ function getOutputExtensions(format: ImageOutputFormat) {
 
       <label v-if="!options.preserveDimensions && options.resizeMode === 'percent'" class="block space-y-2">
         <span class="font-mono text-xs font-black tracking-widest text-sky uppercase">{{ t('image.resizePercent') }} {{ t('common.dot') }} {{ options.resizePercent }}{{ t('common.percent') }}</span>
-        <input :value="options.resizePercent" class="w-full accent-acid" type="range" min="1" max="100" step="1" @input="updateResizePercent">
+        <input :value="options.resizePercent" class="w-full accent-acid" type="range" min="1" max="100" step="1" @change="commitEstimate" @input="updateResizePercent">
       </label>
 
       <div v-if="imageMode === 'single' && options.resizeMode === 'dimensions'" class="grid gap-4 sm:grid-cols-2">

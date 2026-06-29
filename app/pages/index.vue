@@ -14,21 +14,21 @@ useSeoMeta({
 
 <template>
   <div class="mx-auto w-full max-w-7xl px-5 pt-8 pb-20 lg:px-10 lg:pt-14">
-    <section class="grid gap-8 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-end">
+    <section class="grid gap-8 lg:grid-cols-[minmax(0,1fr)_390px] lg:items-end">
       <div>
-        <p class="font-mono text-xs font-black tracking-[0.22em] text-ink/50 uppercase">
+        <p class="font-mono text-xs font-black tracking-[0.24em] text-sky uppercase">
           {{ t('home.eyebrow') }}
         </p>
-        <h1 class="mt-5 max-w-4xl text-5xl leading-[0.94] font-black lg:text-7xl">
+        <h1 class="mt-5 max-w-4xl text-5xl leading-[0.94] font-black text-ink lg:text-7xl">
           {{ t('home.title') }}
         </h1>
-        <p class="mt-6 max-w-3xl text-base leading-7 font-semibold text-ink/64 lg:text-lg">
+        <p class="mt-6 max-w-3xl text-base leading-7 font-semibold text-ink/58 lg:text-lg">
           {{ t('home.summary') }}
         </p>
       </div>
 
-      <div class="grid gap-3 rounded-lg border-2 border-ink bg-white p-4 shadow-[4px_4px_0_#171714]">
-        <div class="flex items-center gap-2 text-xs font-black tracking-widest uppercase text-ink/55">
+      <div class="grid gap-3 border border-line bg-panel/80 p-4 shadow-[0_0_44px_rgb(72_215_255_/_8%)] backdrop-blur">
+        <div class="flex items-center gap-2 font-mono text-xs font-black tracking-widest text-acid uppercase">
           <Sparkles class="size-4" aria-hidden="true" />
           {{ t('home.stackSignals') }}
         </div>
@@ -36,7 +36,7 @@ useSeoMeta({
           <span
             v-for="badge in techBadges"
             :key="badge"
-            class="rounded-md border-2 border-ink bg-paper px-3 py-2 text-xs font-black"
+            class="border border-line bg-grid/80 px-3 py-2 font-mono text-xs font-black text-ink/70"
           >
             {{ t(`tech.${badge}`) }}
           </span>
@@ -45,11 +45,11 @@ useSeoMeta({
     </section>
 
     <section class="mt-10">
-      <div class="inline-grid w-full grid-cols-2 gap-2 rounded-full border-2 border-ink bg-white p-1 shadow-[3px_3px_0_#171714] sm:w-auto">
+      <div class="inline-grid w-full grid-cols-2 border border-line bg-panel/75 p-1 shadow-[0_0_32px_rgb(72_215_255_/_8%)] sm:w-auto">
         <button
           type="button"
-          class="focus-ring inline-flex items-center justify-center gap-2 rounded-full px-5 py-3 text-sm font-black transition"
-          :class="activeTool === 'image' ? 'bg-sky' : 'hover:bg-paper'"
+          class="focus-ring inline-flex items-center justify-center gap-2 px-5 py-3 font-mono text-sm font-black tracking-wide transition"
+          :class="activeTool === 'image' ? 'bg-sky text-paper' : 'text-ink/58 hover:bg-panel-soft hover:text-sky'"
           @click="activeTool = 'image'"
         >
           <Image class="size-4" aria-hidden="true" />
@@ -57,8 +57,8 @@ useSeoMeta({
         </button>
         <button
           type="button"
-          class="focus-ring inline-flex items-center justify-center gap-2 rounded-full px-5 py-3 text-sm font-black transition"
-          :class="activeTool === 'pdf' ? 'bg-lilac' : 'hover:bg-paper'"
+          class="focus-ring inline-flex items-center justify-center gap-2 px-5 py-3 font-mono text-sm font-black tracking-wide transition"
+          :class="activeTool === 'pdf' ? 'bg-lilac text-paper' : 'text-ink/58 hover:bg-panel-soft hover:text-lilac'"
           @click="activeTool = 'pdf'"
         >
           <FileText class="size-4" aria-hidden="true" />

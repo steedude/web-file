@@ -1,5 +1,5 @@
 {
-  "brand": "Web File Lab",
+  "brand": "web file",
   "common": {
     "switchToChinese": "切換中文",
     "switchToEnglish": "Switch to English",
@@ -29,10 +29,10 @@
   },
   "home": {
     "metaTitle": "{brand} - WASM PWA file tools",
-    "description": "A local-first file workbench: WASM image codecs for conversion and compression, browser-side PDF merge, split, and edit flows, plus PWA offline support.",
+    "description": "A local-first file workstation: WASM image codecs for conversion and compression, browser-side PDF merge, split, and edit flows, plus PWA offline support.",
     "eyebrow": "Nuxt 4 / TypeScript / WASM / PWA",
-    "title": "A file utility polished enough for interviews.",
-    "summary": "Files never leave the browser. This project ties together practical frontend engineering topics: WASM codecs, worker-friendly architecture, client-side PDF workflows, PWA installability, i18n, and testable utility modules.",
+    "title": "Local file processing workstation",
+    "summary": "Files never leave the browser. web file ties WASM codecs, client-side PDF workflows, PWA installability, i18n, and testable utility modules into one browser-native conversion console.",
     "imageTab": "Image tools",
     "pdfTab": "PDF tools",
     "stackSignals": "Stack signals"

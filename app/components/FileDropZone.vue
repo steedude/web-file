@@ -36,8 +36,8 @@ function handleDrop(event: DragEvent) {
 
 <template>
   <div
-    class="rounded-lg border-2 border-dashed border-ink bg-white/75 p-6 transition"
-    :class="isDragging ? 'translate-y-[-2px] bg-sky/35 shadow-[5px_5px_0_#171714]' : 'shadow-[3px_3px_0_#171714]'"
+    class="border border-dashed border-line bg-grid/70 p-6 transition"
+    :class="isDragging ? 'border-sky bg-sky/10 shadow-[0_0_36px_rgb(72_215_255_/_18%)]' : 'shadow-[0_0_24px_rgb(0_0_0_/_18%)]'"
     @dragenter.prevent="isDragging = true"
     @dragover.prevent="isDragging = true"
     @dragleave.prevent="isDragging = false"
@@ -46,13 +46,13 @@ function handleDrop(event: DragEvent) {
     <input ref="input" class="sr-only" type="file" multiple :accept="accept" @change="handleInput">
     <button
       type="button"
-      class="focus-ring flex w-full flex-col items-center justify-center gap-3 rounded-md py-8 text-center"
+      class="focus-ring flex w-full flex-col items-center justify-center gap-3 py-8 text-center"
       @click="openPicker"
     >
-      <span class="grid size-12 place-items-center rounded-full border-2 border-ink bg-acid">
+      <span class="grid size-12 place-items-center border border-acid/60 bg-acid/12 text-acid shadow-[0_0_24px_rgb(109_255_157_/_16%)]">
         <UploadCloud class="size-6" aria-hidden="true" />
       </span>
-      <span class="text-base font-black">{{ label }}</span>
+      <span class="font-mono text-base font-black text-ink/76">{{ label }}</span>
     </button>
   </div>
 </template>

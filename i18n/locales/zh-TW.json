@@ -1,5 +1,5 @@
 {
-  "brand": "Web File Lab",
+  "brand": "web file",
   "common": {
     "switchToChinese": "切換中文",
     "switchToEnglish": "Switch to English",
@@ -29,10 +29,10 @@
   },
   "home": {
     "metaTitle": "{brand} - WASM PWA 線上轉檔工具",
-    "description": "一個本機優先的轉檔工作台：圖片用 WASM codecs 壓縮與轉檔，PDF 在瀏覽器內完成合併、拆分和編輯，並支援 PWA 離線使用。",
+    "description": "一個本機優先的轉檔工作站：圖片用 WASM codecs 壓縮與轉檔，PDF 在瀏覽器內完成合併、拆分和編輯，並支援 PWA 離線使用。",
     "eyebrow": "Nuxt 4 / TypeScript / WASM / PWA",
-    "title": "把檔案工具做成能面試展示的產品。",
-    "summary": "檔案不離開瀏覽器。這個專案展示前端工程中較少被完整串起來的能力：WASM codec、Web Worker 友善架構、PDF client-side workflow、PWA installability、i18n 與可測試工具函式。",
+    "title": "本機檔案處理工作站",
+    "summary": "檔案不離開瀏覽器。web file 把 WASM codec、PDF client-side workflow、PWA installability、i18n 與可測試工具函式串成一個瀏覽器內的轉檔控制台。",
     "imageTab": "圖片工具",
     "pdfTab": "PDF 工具",
     "stackSignals": "技術亮點"

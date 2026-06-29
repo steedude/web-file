@@ -56,7 +56,7 @@
     "resetCrop": "重設裁切",
     "batchSettings": "批次",
     "singleSettings": "單張",
-    "customSettings": "自訂設定",
+    "customSettings": "已套用單張設定",
     "useBatchSettings": "改用批次",
     "proportionalResize": "等比縮放",
     "batchRatioHint": "多張圖片會將寬高當作共同上限。",
@@ -64,7 +64,10 @@
     "outputSizeReference": "輸出參考",
     "convertForEstimate": "先轉檔",
     "savedReference": "節省",
-    "estimating": "估算中"
+    "estimating": "估算中",
+    "enableWebpLossless": "使用 WebP 無損模式",
+    "pngQualityUnavailable": "PNG 使用無損最佳化，不使用品質滑桿。",
+    "waitingEstimate": "等待估算"
   },
   "pdf": {
     "title": "PDF 合併 / 擷取 / 編輯",

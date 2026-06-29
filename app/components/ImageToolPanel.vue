@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ImageTransformOptions } from '~/types/file-tool.type'
+import type { ImageOutputFormat, ImageTransformOptions } from '~/types/file-tool.type'
 import { Image, Play, Trash2 } from '@lucide/vue'
 import { imageFormatOptions } from '~/configs/file-tool.config'
 import { formatFileSize } from '~/utils/file-size.util'
@@ -34,7 +34,7 @@ let estimateTimer: ReturnType<typeof setTimeout> | null = null
 let estimateRequestId = 0
 const activeCropPreview = computed(() => cropEditorIndex.value === null ? null : previews.value[cropEditorIndex.value] ?? null)
 const selectedPreview = computed(() => previews.value[selectedPreviewIndex.value] ?? null)
-const currentOptions = computed(() => settingsScope.value === 'single' ? selectedPreview.value?.options ?? options : options)
+const currentOptions = computed(() => settingsScope.value === 'single' && selectedPreview.value ? selectedPreview.value.options ?? createPreviewOptions(selectedPreview.value) : options)
 const displayedQuality = computed(() => currentOptions.value.webpLossless ? 100 : currentOptions.value.quality)
 const activeReference = computed(() => {
   if (settingsScope.value === 'single')
@@ -78,40 +78,38 @@ const savedPercentReference = computed(() => {
 watch([settingsScope, selectedPreviewIndex, previews], () => {
   if (selectedPreviewIndex.value >= previews.value.length)
     selectedPreviewIndex.value = Math.max(0, previews.value.length - 1)
-
-  if (settingsScope.value === 'single' && selectedPreview.value && !selectedPreview.value.options)
-    setPreviewOptions(selectedPreviewIndex.value, createPreviewOptions(selectedPreview.value))
 }, { immediate: true })
 
 watch(() => [
   settingsScope.value,
   selectedPreviewIndex.value,
-  previews.value.map(preview => `${preview.id}:${preview.crop?.x ?? 0}:${preview.crop?.y ?? 0}:${preview.crop?.width ?? preview.width}:${preview.crop?.height ?? preview.height}:${preview.options ? JSON.stringify(preview.options) : 'batch'}`).join('|'),
-  JSON.stringify(options),
+  previews.value.map(preview => `${preview.id}:${preview.crop?.x ?? 0}:${preview.crop?.y ?? 0}:${preview.crop?.width ?? preview.width}:${preview.crop?.height ?? preview.height}`).join('|'),
 ], scheduleEstimate, { immediate: true })
 
 function setSettingsScope(scope: 'batch' | 'single') {
   settingsScope.value = scope
-
-  if (scope === 'single' && selectedPreview.value && !selectedPreview.value.options)
-    setPreviewOptions(selectedPreviewIndex.value, createPreviewOptions(selectedPreview.value))
 }
 
 function selectSingleImage(index: number) {
   selectedPreviewIndex.value = index
   settingsScope.value = 'single'
-
-  if (previews.value[index] && !previews.value[index]?.options)
-    setPreviewOptions(index, createPreviewOptions(previews.value[index]))
 }
 
 function patchCurrentOptions(patch: Partial<ImageTransformOptions>) {
-  Object.assign(currentOptions.value, patch)
+  clearEstimate()
 
-  if (settingsScope.value === 'single')
-    setPreviewOptions(selectedPreviewIndex.value, currentOptions.value)
-  else
+  if (settingsScope.value === 'single') {
+    const preview = selectedPreview.value
+
+    if (!preview)
+      return
+
+    setPreviewOptions(selectedPreviewIndex.value, { ...(preview.options ?? createPreviewOptions(preview)), ...patch })
+  }
+  else {
+    Object.assign(options, patch)
     clearResults()
+  }
 }
 
 function updateWidth(event: Event) {
@@ -153,14 +151,26 @@ function createPreviewOptions(preview: { width: number, height: number, crop?: {
 
 function updateQuality(event: Event) {
   patchCurrentOptions({ quality: Math.max(1, Math.min(100, Number((event.target as HTMLInputElement).value) || 1)) })
+  scheduleEstimate()
+}
+
+function updateFormat(event: Event) {
+  patchCurrentOptions({ format: (event.target as HTMLSelectElement).value as ImageOutputFormat })
+  scheduleEstimate()
+}
+
+function setOptimisePng(optimisePng: boolean) {
+  patchCurrentOptions({ optimisePng })
+  scheduleEstimate()
 }
 
 function setWebpLossless(webpLossless: boolean) {
   patchCurrentOptions(webpLossless ? { webpLossless, quality: 100 } : { webpLossless })
+  scheduleEstimate()
 }
 
 function scheduleEstimate() {
-  estimatedOutputSize.value = 0
+  clearEstimate()
 
   if (estimateTimer)
     clearTimeout(estimateTimer)
@@ -175,6 +185,11 @@ function scheduleEstimate() {
     if (requestId === estimateRequestId)
       estimatedOutputSize.value = size
   }, 450)
+}
+
+function clearEstimate() {
+  estimatedOutputSize.value = 0
+  estimateRequestId += 1
 }
 
 function saveCrop(crop: { x: number, y: number, width: number, height: number }) {
@@ -253,7 +268,7 @@ function clearCrop() {
       <div class="grid gap-4 sm:grid-cols-2">
         <label class="space-y-2">
           <span class="font-mono text-xs font-black tracking-widest text-sky uppercase">{{ t('image.outputFormat') }}</span>
-          <select v-model="currentOptions.format" class="focus-ring w-full border border-line bg-grid px-3 py-2 font-mono text-sm font-bold text-ink" @change="patchCurrentOptions({})">
+          <select :value="currentOptions.format" class="focus-ring w-full border border-line bg-grid px-3 py-2 font-mono text-sm font-bold text-ink" @change="updateFormat">
             <option v-for="format in imageFormatOptions" :key="format.value" :value="format.value">
               {{ format.value.toUpperCase() }}
             </option>
@@ -261,35 +276,43 @@ function clearCrop() {
         </label>
 
         <div class="min-h-[4.25rem] space-y-2">
-          <label v-if="currentOptions.format === 'png'" class="block space-y-2">
-            <span class="font-mono text-xs font-black tracking-widest text-sky uppercase">{{ t('image.losslessPng') }}</span>
-            <span class="inline-flex w-full items-center gap-2 border border-line bg-grid px-3 py-2 font-mono text-xs font-black text-ink/70">
-              <input v-model="currentOptions.optimisePng" type="checkbox" class="size-4 accent-acid" @change="patchCurrentOptions({})">
-              {{ t('image.optimisePng') }}
-            </span>
-          </label>
-
-          <div v-else-if="currentOptions.format === 'webp'" class="space-y-2">
+          <div v-if="currentOptions.format === 'webp'" class="space-y-2">
             <label class="block space-y-2">
               <span class="font-mono text-xs font-black tracking-widest text-sky uppercase">{{ t('image.quality') }} {{ t('common.dot') }} {{ displayedQuality }}</span>
               <input :value="displayedQuality" class="w-full accent-acid disabled:opacity-40" type="range" min="1" max="100" :disabled="currentOptions.webpLossless" @input="updateQuality">
             </label>
-            <label class="inline-flex w-full items-center gap-2 border border-line bg-grid px-3 py-2 font-mono text-xs font-black text-ink/70">
-              <input :checked="currentOptions.webpLossless" type="checkbox" class="size-4 accent-acid" @change="setWebpLossless(($event.target as HTMLInputElement).checked)">
-              {{ t('image.webpLossless') }}
-            </label>
           </div>
 
-          <label v-else class="block space-y-2">
+          <label v-else-if="currentOptions.format === 'jpeg'" class="block space-y-2">
             <span class="font-mono text-xs font-black tracking-widest text-sky uppercase">{{ t('image.quality') }} {{ t('common.dot') }} {{ currentOptions.quality }}</span>
             <input :value="currentOptions.quality" class="w-full accent-acid" type="range" min="1" max="100" @input="updateQuality">
           </label>
+
+          <div v-else class="border border-line bg-grid px-3 py-2 font-mono text-xs font-bold text-ink/42">
+            {{ t('image.pngQualityUnavailable') }}
+          </div>
         </div>
       </div>
 
+      <label v-if="currentOptions.format === 'png'" class="block space-y-2">
+        <span class="font-mono text-xs font-black tracking-widest text-sky uppercase">{{ t('image.losslessPng') }}</span>
+        <span class="inline-flex w-full items-center gap-2 border border-line bg-grid px-3 py-2 font-mono text-xs font-black text-ink/70">
+          <input :checked="currentOptions.optimisePng" type="checkbox" class="size-4 accent-acid" @change="setOptimisePng(($event.target as HTMLInputElement).checked)">
+          {{ t('image.optimisePng') }}
+        </span>
+      </label>
+
+      <label v-if="currentOptions.format === 'webp'" class="block space-y-2">
+        <span class="font-mono text-xs font-black tracking-widest text-sky uppercase">{{ t('image.webpLossless') }}</span>
+        <span class="inline-flex w-full items-center gap-2 border border-line bg-grid px-3 py-2 font-mono text-xs font-black text-ink/70">
+          <input :checked="currentOptions.webpLossless" type="checkbox" class="size-4 accent-acid" @change="setWebpLossless(($event.target as HTMLInputElement).checked)">
+          {{ t('image.enableWebpLossless') }}
+        </span>
+      </label>
+
       <div class="grid gap-2 border border-line bg-grid/70 px-3 py-2 font-mono text-xs font-bold text-ink/52 sm:grid-cols-3">
         <span>{{ t('image.sourceSize') }} {{ formatFileSize(originalSizeReference) }}</span>
-        <span>{{ t('image.outputSizeReference') }} {{ isEstimating ? t('image.estimating') : outputSizeReference ? formatFileSize(outputSizeReference) : t('image.convertForEstimate') }}</span>
+        <span>{{ t('image.outputSizeReference') }} {{ isEstimating ? t('image.estimating') : outputSizeReference ? formatFileSize(outputSizeReference) : t('image.waitingEstimate') }}</span>
         <span v-if="savedPercentReference !== null">{{ t('image.savedReference') }} {{ savedPercentReference }}{{ t('common.percent') }}</span>
       </div>
 

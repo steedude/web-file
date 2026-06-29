@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { UploadedImagePreview } from '~/types/file-tool.type'
-import { Scissors, X } from '@lucide/vue'
+import { X } from '@lucide/vue'
 import { formatFileSize } from '~/utils/file-size.util'
 
 withDefaults(defineProps<{
@@ -18,7 +18,6 @@ withDefaults(defineProps<{
 })
 
 const emit = defineEmits<{
-  crop: [index: number]
   remove: [index: number]
 }>()
 
@@ -72,15 +71,6 @@ function getDeltaLabel(delta: { type: 'larger' | 'saved' | 'same', percent: numb
         >
           {{ getDeltaLabel(estimates[index]!.delta) }}
         </p>
-        <button
-          v-if="allowCrop"
-          type="button"
-          class="focus-ring mt-3 inline-flex items-center gap-2 border border-line bg-paper/80 px-3 py-2 font-mono text-xs font-black text-ink/70 transition hover:border-sky hover:text-sky"
-          @click="emit('crop', index)"
-        >
-          <Scissors class="size-4" aria-hidden="true" />
-          {{ $t('image.crop') }}
-        </button>
       </div>
       <button
         type="button"

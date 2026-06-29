@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { ImageCropSelection, ImageOutputFormat, ImageTransformOptions } from '~/types/file-tool.type'
-import { Image, Play, Trash2 } from '@lucide/vue'
+import { Image, Play, Scissors, Trash2 } from '@lucide/vue'
 import { imageCropPositionOptions, imageFormatOptions } from '~/configs/file-tool.config'
 import { formatFileSize } from '~/utils/file-size.util'
 
@@ -295,7 +295,7 @@ function getOutputExtensions(format: ImageOutputFormat) {
       </div>
 
       <FileDropZone accept="image/*" :label="t('common.dropFiles')" :multiple="imageMode === 'batch'" @files="handleImageFiles" />
-      <ImagePreviewList :allow-crop="imageMode === 'single'" :compact="imageMode === 'batch'" :estimates="previewEstimates" :previews="previews" @crop="cropEditorIndex = $event" @remove="removeFile" />
+      <ImagePreviewList :allow-crop="imageMode === 'single'" :compact="imageMode === 'batch'" :estimates="previewEstimates" :previews="previews" @remove="removeFile" />
       <FileList v-if="!previews.length" :files="files" @remove="removeFile" />
     </div>
 
@@ -352,7 +352,7 @@ function getOutputExtensions(format: ImageOutputFormat) {
         {{ t('image.sameExtensionWarning') }}
       </p>
 
-      <div class="grid gap-2 border border-sky/60 bg-sky/10 p-3 font-mono text-xs font-bold text-ink shadow-[0_0_30px_rgb(72_215_255_/_10%)] sm:grid-cols-3">
+      <div class="grid gap-2 font-mono text-xs font-bold text-ink sm:grid-cols-3">
         <span class="border border-line/70 bg-paper/70 px-3 py-2">
           <span class="block text-ink/42"><template v-if="imageMode === 'batch'">{{ t('image.batchSummary') }} </template>{{ t('image.sourceSize') }}</span>
           <span class="mt-1 block text-sm font-black text-ink">{{ formatFileSize(originalSizeReference) }}</span>
@@ -366,6 +366,16 @@ function getOutputExtensions(format: ImageOutputFormat) {
           <span class="mt-1 block text-sm font-black">{{ getDeltaLabel(summaryDelta) }}</span>
         </span>
       </div>
+
+      <button
+        v-if="imageMode === 'single' && previews.length"
+        type="button"
+        class="focus-ring inline-flex w-max items-center gap-2 border border-line bg-grid px-4 py-2 font-mono text-xs font-black text-ink/70 transition hover:border-sky hover:text-sky"
+        @click="cropEditorIndex = 0"
+      >
+        <Scissors class="size-4" aria-hidden="true" />
+        {{ t('image.crop') }}
+      </button>
 
       <div class="flex flex-wrap gap-3">
         <button

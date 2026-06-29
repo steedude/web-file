@@ -22,14 +22,9 @@ export const defaultImageOptions: ImageTransformOptions = {
 
 export const imageCropPositionOptions: ImageCropPosition[] = ['none', 'center', 'top', 'bottom', 'left', 'right']
 
-export const pdfModeOptions: PdfMode[] = ['merge', 'split', 'edit']
+export const pdfModeOptions: PdfMode[] = ['merge', 'split']
 
 export const defaultPdfOptions: PdfOptions = {
   mode: 'merge',
   ranges: '1-end',
-  rotation: 0,
-  title: '',
-  author: '',
 }
-
-export const rotationOptions = [0, 90, 180, 270]

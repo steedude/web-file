@@ -29,7 +29,7 @@
   },
   "home": {
     "metaTitle": "{brand} - WASM PWA 檔案工具",
-    "description": "本機優先的檔案處理工作站：使用 WASM 圖片 codec 做轉檔與壓縮，在瀏覽器端完成 PDF 合併、拆分與編輯，並支援 PWA 離線安裝。",
+    "description": "本機優先的檔案工作站：WASM 圖片 codec 用於轉檔與壓縮，PDF 合併與拆分流程在瀏覽器端完成，並支援 PWA 離線使用。",
     "title": "本機檔案處理工作站",
     "summary": "檔案不離開瀏覽器。web file 把 WASM codec、PDF client-side workflow、PWA installability、i18n 與可測試工具模組串成一個瀏覽器內的轉檔控制台。",
     "imageTab": "圖片工具",
@@ -86,21 +86,17 @@
       "right": "靠右裁切"
     },
     "pixels": "px",
-    "outputFileName": "\u6a94\u6848\u540d\u7a31"
+    "outputFileName": "檔案名稱"
   },
   "pdf": {
-    "title": "PDF 合併 / 拆分 / 編輯",
-    "description": "使用 pdf-lib 在瀏覽器端處理。可以合併多個檔案、擷取指定頁面，或調整文件資訊。",
+    "title": "PDF 合併 / 拆分",
+    "description": "使用 pdf-lib 在瀏覽器內處理。可以合併多個檔案，或將指定頁面拆分匯出。",
     "mode": "模式",
     "merge": "合併",
     "split": "擷取頁面",
-    "edit": "旋轉 / 資訊",
     "pageRanges": "頁面範圍",
     "pageRangesHelp": "例如：1-3,5,8-end",
-    "rotation": "旋轉",
-    "titleField": "標題",
-    "author": "作者",
     "run": "產生 PDF",
-    "empty": "加入 PDF 後選擇工作流程。拆分與編輯一次處理一個檔案。"
+    "empty": "加入 PDF 後，選擇合併或拆分流程。拆分一次處理一個檔案。"
   }
 }

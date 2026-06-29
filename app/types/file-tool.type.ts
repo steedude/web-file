@@ -46,14 +46,11 @@ export interface UploadedImagePreview {
   crop?: ImageCropSelection
 }
 
-export type PdfMode = 'merge' | 'split' | 'edit'
+export type PdfMode = 'merge' | 'split'
 
 export interface PdfOptions {
   mode: PdfMode
   ranges: string
-  rotation: number
-  title: string
-  author: string
 }
 
 export interface PdfResult {

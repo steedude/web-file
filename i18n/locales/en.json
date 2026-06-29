@@ -29,7 +29,7 @@
   },
   "home": {
     "metaTitle": "{brand} - WASM PWA file tools",
-    "description": "A local-first file workstation: WASM image codecs for conversion and compression, browser-side PDF merge, split, and edit flows, plus PWA offline support.",
+    "description": "A local-first file workstation: WASM image codecs for conversion and compression, browser-side PDF merge and split flows, plus PWA offline support.",
     "title": "Local file processing workstation",
     "summary": "Files never leave the browser. web file ties WASM codecs, client-side PDF workflows, PWA installability, i18n, and testable utility modules into one browser-native conversion console.",
     "imageTab": "Image tools",
@@ -89,18 +89,14 @@
     "outputFileName": "File name"
   },
   "pdf": {
-    "title": "PDF merge / extract / edit",
-    "description": "Powered by pdf-lib in the browser. Merge multiple files, extract selected pages, or adjust document info locally.",
+    "title": "PDF merge / extract",
+    "description": "Powered by pdf-lib in the browser. Merge multiple files or extract selected pages locally.",
     "mode": "Mode",
     "merge": "Merge",
     "split": "Extract pages",
-    "edit": "Rotate / info",
     "pageRanges": "Page ranges",
     "pageRangesHelp": "Example: 1-3,5,8-end",
-    "rotation": "Rotation",
-    "titleField": "Title",
-    "author": "Author",
     "run": "Generate PDF",
-    "empty": "Add PDFs, then choose a workflow. Extract and edit use one file at a time."
+    "empty": "Add PDFs, then choose merge or extract. Extract uses one file at a time."
   }
 }

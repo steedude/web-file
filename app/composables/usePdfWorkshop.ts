@@ -1,5 +1,5 @@
 import type { PdfOptions, PdfResult } from '~/types/file-tool.type'
-import { degrees, PDFDocument } from 'pdf-lib'
+import { PDFDocument } from 'pdf-lib'
 import { defaultPdfOptions } from '~/configs/file-tool.config'
 import { appendFileSuffix } from '~/utils/file-name.util'
 import { parsePageRanges } from '~/utils/pdf-range.util'
@@ -64,8 +64,6 @@ export function usePdfWorkshop() {
         results.value = [await mergePdfs(files.value)]
       else if (options.mode === 'split' && firstFile)
         results.value = await extractPdfPages(firstFile, options.ranges)
-      else if (firstFile)
-        results.value = [await editPdf(firstFile, options)]
     }
     catch (cause) {
       error.value = cause instanceof Error ? cause.message : 'PDF processing failed.'
@@ -111,23 +109,6 @@ async function extractPdfPages(file: File, ranges: string): Promise<PdfResult[]>
   copiedPages.forEach(page => output.addPage(page))
 
   return [await pdfDocumentToResult(output, appendFileSuffix(file.name, 'extracted'))]
-}
-
-async function editPdf(file: File, options: PdfOptions): Promise<PdfResult> {
-  const output = await PDFDocument.load(await file.arrayBuffer())
-
-  if (options.title.trim())
-    output.setTitle(options.title.trim())
-
-  if (options.author.trim())
-    output.setAuthor(options.author.trim())
-
-  if (options.rotation !== 0) {
-    for (const page of output.getPages())
-      page.setRotation(degrees(options.rotation))
-  }
-
-  return pdfDocumentToResult(output, appendFileSuffix(file.name, 'edited'))
 }
 
 async function pdfDocumentToResult(document: PDFDocument, fileName: string): Promise<PdfResult> {

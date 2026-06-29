@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { FileStack, Play, Trash2 } from '@lucide/vue'
-import { pdfModeOptions, rotationOptions } from '~/configs/file-tool.config'
+import { pdfModeOptions } from '~/configs/file-tool.config'
 
 const { t } = useI18n()
 const {
@@ -41,7 +41,7 @@ const {
     <div class="space-y-4 border border-line bg-panel/82 p-4 shadow-[0_0_44px_rgb(167_139_250_/_7%)] backdrop-blur">
       <div class="space-y-2">
         <span class="font-mono text-xs font-black tracking-widest text-lilac uppercase">{{ t('pdf.mode') }}</span>
-        <div class="grid grid-cols-3 gap-2">
+        <div class="grid grid-cols-2 gap-2">
           <button
             v-for="mode in pdfModeOptions"
             :key="mode"
@@ -60,25 +60,6 @@ const {
         <input v-model="options.ranges" class="focus-ring w-full border border-line bg-grid px-3 py-2 font-mono text-sm font-bold text-ink" type="text">
         <span class="font-mono text-xs font-bold text-ink/42">{{ t('pdf.pageRangesHelp') }}</span>
       </label>
-
-      <div v-if="options.mode === 'edit'" class="grid gap-4 sm:grid-cols-2">
-        <label class="space-y-2">
-          <span class="font-mono text-xs font-black tracking-widest text-lilac uppercase">{{ t('pdf.rotation') }}</span>
-          <select v-model.number="options.rotation" class="focus-ring w-full border border-line bg-grid px-3 py-2 font-mono text-sm font-bold text-ink">
-            <option v-for="rotation in rotationOptions" :key="rotation" :value="rotation">
-              {{ rotation }}{{ t('common.degree') }}
-            </option>
-          </select>
-        </label>
-        <label class="space-y-2">
-          <span class="font-mono text-xs font-black tracking-widest text-lilac uppercase">{{ t('pdf.titleField') }}</span>
-          <input v-model="options.title" class="focus-ring w-full border border-line bg-grid px-3 py-2 font-mono text-sm font-bold text-ink" type="text">
-        </label>
-        <label class="space-y-2 sm:col-span-2">
-          <span class="font-mono text-xs font-black tracking-widest text-lilac uppercase">{{ t('pdf.author') }}</span>
-          <input v-model="options.author" class="focus-ring w-full border border-line bg-grid px-3 py-2 font-mono text-sm font-bold text-ink" type="text">
-        </label>
-      </div>
 
       <div class="flex flex-wrap gap-3">
         <button

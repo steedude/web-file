@@ -3,6 +3,7 @@ import { FileStack, Play, Trash2 } from '@lucide/vue'
 import { pdfModeOptions } from '~/configs/file-tool.config'
 
 const { t } = useI18n()
+const PdfPageWorkspace = defineAsyncComponent(() => import('~/components/PdfPageWorkspace.vue'))
 const {
   addFiles,
   canRun,

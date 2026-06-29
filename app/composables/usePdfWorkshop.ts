@@ -1,6 +1,6 @@
+import type { PDFDocument as PdfLibDocument } from 'pdf-lib'
 import type { PDFDocumentProxy } from 'pdfjs-dist'
 import type { PdfOptions, PdfPageItem, PdfResult } from '~/types/file-tool.type'
-import { PDFDocument } from 'pdf-lib'
 import { defaultPdfOptions } from '~/configs/file-tool.config'
 import { appendFileSuffix } from '~/utils/file-name.util'
 
@@ -181,8 +181,9 @@ export function usePdfWorkshop() {
 }
 
 async function mergePdfPages(pages: PdfPageItem[]): Promise<PdfResult> {
+  const { PDFDocument } = await import('pdf-lib')
   const output = await PDFDocument.create()
-  const sources = new Map<File, PDFDocument>()
+  const sources = new Map<File, PdfLibDocument>()
 
   for (const page of pages) {
     const source = await getSourceDocument(page.file, sources)
@@ -196,6 +197,7 @@ async function mergePdfPages(pages: PdfPageItem[]): Promise<PdfResult> {
 }
 
 async function extractPdfPages(file: File, selectedPages: PdfPageItem[]): Promise<PdfResult[]> {
+  const { PDFDocument } = await import('pdf-lib')
   const source = await PDFDocument.load(await file.arrayBuffer())
   const indexes = selectedPages.map(page => page.pageIndex)
   const output = await PDFDocument.create()
@@ -205,7 +207,8 @@ async function extractPdfPages(file: File, selectedPages: PdfPageItem[]): Promis
   return [await pdfDocumentToResult(output, appendFileSuffix(file.name, 'extracted'))]
 }
 
-async function getSourceDocument(file: File, sources: Map<File, PDFDocument>) {
+async function getSourceDocument(file: File, sources: Map<File, PdfLibDocument>) {
+  const { PDFDocument } = await import('pdf-lib')
   const cachedDocument = sources.get(file)
 
   if (cachedDocument)
@@ -278,7 +281,7 @@ async function canvasToObjectUrl(canvas: HTMLCanvasElement) {
   return URL.createObjectURL(blob)
 }
 
-async function pdfDocumentToResult(document: PDFDocument, fileName: string): Promise<PdfResult> {
+async function pdfDocumentToResult(document: PdfLibDocument, fileName: string): Promise<PdfResult> {
   const bytes = await document.save()
   const buffer = new ArrayBuffer(bytes.byteLength)
   new Uint8Array(buffer).set(bytes)

@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import type { ToolMode } from '~/types/file-tool.type'
 import { FileText, Image } from '@lucide/vue'
-import ImageToolPanel from '~/components/ImageToolPanel.vue'
-import PdfToolPanel from '~/components/PdfToolPanel.vue'
 
 const { t } = useI18n()
 const activeTool = ref<ToolMode>('image')
+const ImageToolPanel = defineAsyncComponent(() => import('~/components/ImageToolPanel.vue'))
+const PdfToolPanel = defineAsyncComponent(() => import('~/components/PdfToolPanel.vue'))
 
 useSeoMeta({
   title: () => t('home.metaTitle', { brand: t('brand') }),

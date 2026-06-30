@@ -3,10 +3,13 @@ import type { ConvertedImage, PdfResult } from '~/types/file-tool.type'
 import { Download } from '@lucide/vue'
 import { formatFileSize, percentSaved } from '~/utils/file-size.util'
 
-defineProps<{
+withDefaults(defineProps<{
   imageResults?: ConvertedImage[]
   pdfResults?: PdfResult[]
-}>()
+  showImageDetails?: boolean
+}>(), {
+  showImageDetails: true,
+})
 
 const { t } = useI18n()
 </script>
@@ -23,10 +26,10 @@ const { t } = useI18n()
         <h3 class="truncate font-mono text-sm font-black text-ink">
           {{ result.fileName }}
         </h3>
-        <p class="mt-1 font-mono text-xs font-bold text-ink/46">
+        <p v-if="showImageDetails" class="mt-1 font-mono text-xs font-bold text-ink/46">
           {{ result.width }} {{ t('common.by') }} {{ result.height }} {{ t('common.dot') }} {{ formatFileSize(result.originalSize) }} {{ t('common.arrow') }} {{ formatFileSize(result.outputSize) }}
         </p>
-        <p class="mt-1 font-mono text-xs font-black" :class="percentSaved(result.originalSize, result.outputSize) >= 0 ? 'text-mint' : 'text-coral'">
+        <p v-if="showImageDetails" class="mt-1 font-mono text-xs font-black" :class="percentSaved(result.originalSize, result.outputSize) >= 0 ? 'text-mint' : 'text-coral'">
           {{ percentSaved(result.originalSize, result.outputSize) }}{{ t('common.percent') }}
         </p>
       </div>

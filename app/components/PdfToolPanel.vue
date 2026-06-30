@@ -25,6 +25,28 @@ const {
   togglePageSelection,
 } = usePdfWorkshop()
 
+const watermarkPreviewStyle = computed(() => ({
+  color: options.watermarkColor,
+  opacity: options.watermarkOpacity / 100,
+  fontSize: `${Math.max(14, Math.min(56, options.watermarkFontSize * 0.7))}px`,
+  transform: `rotate(${options.watermarkRotation}deg)`,
+}))
+const watermarkPreviewPositionClass = computed(() => {
+  if (options.watermarkPosition === 'topLeft')
+    return 'items-start justify-start'
+
+  if (options.watermarkPosition === 'topRight')
+    return 'items-start justify-end'
+
+  if (options.watermarkPosition === 'bottomLeft')
+    return 'items-end justify-start'
+
+  if (options.watermarkPosition === 'bottomRight')
+    return 'items-end justify-end'
+
+  return 'items-center justify-center'
+})
+
 function updateWatermarkText(event: Event) {
   options.watermarkText = (event.target as HTMLInputElement).value
 }
@@ -43,6 +65,10 @@ function updateWatermarkRotation(event: Event) {
 
 function updateWatermarkPosition(event: Event) {
   options.watermarkPosition = (event.target as HTMLSelectElement).value as typeof options.watermarkPosition
+}
+
+function updateWatermarkColor(event: Event) {
+  options.watermarkColor = (event.target as HTMLInputElement).value
 }
 
 function updateImageFormat(event: Event) {
@@ -102,6 +128,14 @@ function updateImageScale(event: Event) {
           <input :value="options.watermarkText" class="focus-ring w-full border border-line bg-grid px-3 py-2 font-mono text-sm font-bold text-ink" type="text" autocomplete="off" @input="updateWatermarkText">
         </label>
 
+        <div class="space-y-2">
+          <span class="font-mono text-xs font-black tracking-widest text-lilac uppercase">{{ t('pdf.watermarkColor') }}</span>
+          <label class="flex h-10 items-center gap-3 border border-line bg-grid px-3">
+            <input :value="options.watermarkColor" class="size-6 border border-line bg-transparent" type="color" @input="updateWatermarkColor">
+            <span class="font-mono text-sm font-black text-ink">{{ options.watermarkColor.toUpperCase() }}</span>
+          </label>
+        </div>
+
         <label class="space-y-2">
           <span class="font-mono text-xs font-black tracking-widest text-lilac uppercase">{{ t('pdf.watermarkPosition') }}</span>
           <select :value="options.watermarkPosition" class="focus-ring w-full border border-line bg-grid px-3 py-2 font-mono text-sm font-bold text-ink" @change="updateWatermarkPosition">
@@ -125,6 +159,24 @@ function updateImageScale(event: Event) {
           <span class="font-mono text-xs font-black tracking-widest text-lilac uppercase">{{ t('pdf.watermarkRotation') }} {{ t('common.dot') }} {{ options.watermarkRotation }}{{ t('common.degree') }}</span>
           <input :value="options.watermarkRotation" class="h-9 w-full accent-acid" type="range" min="-90" max="90" step="1" @input="updateWatermarkRotation">
         </label>
+
+        <div class="space-y-2 md:col-span-2">
+          <span class="font-mono text-xs font-black tracking-widest text-lilac uppercase">{{ t('pdf.watermarkPreview') }}</span>
+          <div class="relative flex min-h-40 overflow-hidden border border-line bg-paper">
+            <div class="absolute inset-0 bg-[linear-gradient(rgb(223_253_242_/_6%)_1px,transparent_1px),linear-gradient(90deg,rgb(223_253_242_/_6%)_1px,transparent_1px)] bg-[length:24px_24px]" />
+            <div class="absolute inset-4 border border-line/70 bg-grid/38" />
+            <div v-if="options.watermarkPosition === 'tile'" class="absolute inset-0 grid grid-cols-2 place-items-center gap-4 overflow-hidden p-8">
+              <span v-for="item in 6" :key="item" class="font-mono font-black whitespace-nowrap" :style="watermarkPreviewStyle">
+                {{ options.watermarkText || 'web file' }}
+              </span>
+            </div>
+            <div v-else class="absolute inset-0 flex p-6" :class="watermarkPreviewPositionClass">
+              <span class="font-mono font-black whitespace-nowrap" :style="watermarkPreviewStyle">
+                {{ options.watermarkText || 'web file' }}
+              </span>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div v-if="options.mode === 'images'" class="grid gap-4 md:grid-cols-3">
@@ -186,7 +238,7 @@ function updateImageScale(event: Event) {
       <p v-if="!results.length && !imageResults.length" class="border border-line bg-grid/70 px-3 py-8 text-center font-mono text-sm font-bold text-ink/42">
         {{ t('pdf.empty') }}
       </p>
-      <ResultList v-else :image-results="imageResults" :pdf-results="results" />
+      <ResultList v-else :image-results="imageResults" :pdf-results="results" :show-image-details="options.mode !== 'images'" />
     </div>
   </section>
 </template>

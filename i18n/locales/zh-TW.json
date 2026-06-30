@@ -131,6 +131,8 @@
     "watermarkSize": "大小",
     "watermarkOpacity": "透明度",
     "watermarkRotation": "角度",
+    "watermarkColor": "顏色",
+    "watermarkPreview": "浮水印預覽",
     "watermarkPositions": {
       "center": "置中",
       "topLeft": "左上",

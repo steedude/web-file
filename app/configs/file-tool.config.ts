@@ -42,6 +42,7 @@ export const defaultPdfOptions: PdfOptions = {
   watermarkOpacity: 25,
   watermarkRotation: -30,
   watermarkPosition: 'center',
+  watermarkColor: '#6dff9d',
   imageFormat: 'png',
   imageQuality: 90,
   imageScale: 2,

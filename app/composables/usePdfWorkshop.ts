@@ -217,6 +217,7 @@ async function watermarkPdf(file: File, options: PdfOptions): Promise<PdfResult>
   const font = await document.embedFont(StandardFonts.HelveticaBold)
   const pages = document.getPages()
   const text = options.watermarkText.trim() || 'web file'
+  const color = hexToRgb(options.watermarkColor)
 
   for (const page of pages) {
     const { width, height } = page.getSize()
@@ -228,7 +229,7 @@ async function watermarkPdf(file: File, options: PdfOptions): Promise<PdfResult>
       y,
       size: options.watermarkFontSize,
       font,
-      color: rgb(0.45, 0.98, 0.78),
+      color: rgb(color.r, color.g, color.b),
       opacity,
       rotate: rotation,
     })
@@ -250,6 +251,17 @@ async function watermarkPdf(file: File, options: PdfOptions): Promise<PdfResult>
   }
 
   return pdfDocumentToResult(document, appendFileSuffix(file.name, 'watermark'))
+}
+
+function hexToRgb(hex: string) {
+  const cleanHex = hex.replace('#', '')
+  const value = /^[\da-f]{6}$/i.test(cleanHex) ? cleanHex : '6dff9d'
+
+  return {
+    r: Number.parseInt(value.slice(0, 2), 16) / 255,
+    g: Number.parseInt(value.slice(2, 4), 16) / 255,
+    b: Number.parseInt(value.slice(4, 6), 16) / 255,
+  }
 }
 
 async function getSourceDocument(file: File, sources: Map<File, PdfLibDocument>) {

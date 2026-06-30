@@ -66,6 +66,7 @@ export interface PdfOptions {
   watermarkOpacity: number
   watermarkRotation: number
   watermarkPosition: PdfWatermarkPosition
+  watermarkColor: string
   imageFormat: PdfImageOutputFormat
   imageQuality: number
   imageScale: number

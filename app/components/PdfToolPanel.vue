@@ -28,7 +28,7 @@ const {
 const watermarkPreviewStyle = computed(() => ({
   color: options.watermarkColor,
   opacity: options.watermarkOpacity / 100,
-  fontSize: `${Math.max(14, Math.min(56, options.watermarkFontSize * 0.7))}px`,
+  fontSize: `${Math.max(14, options.watermarkFontSize * 0.6)}px`,
   transform: `rotate(${options.watermarkRotation}deg)`,
 }))
 const watermarkPreviewPositionClass = computed(() => {

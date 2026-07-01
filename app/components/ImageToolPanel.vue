@@ -9,7 +9,7 @@ const {
   addFiles,
   canConvert,
   clear,
-  clearCropSelection,
+  clearSingleCropSelection,
   clearResults,
   convert,
   convertToPdf,
@@ -23,19 +23,19 @@ const {
   removeFile,
   resetOptions,
   results,
-  setCropSelection,
+  setSingleCropSelection,
 } = useImageTranscoder()
 
 const imageMode = ref<ImageMode>(ImageModeValue.Batch)
 const imagePdfOptions = reactive({ ...defaultImagePdfOptions })
 const estimatedOutputSizes = ref<number[]>([])
 const isEstimatePending = ref(false)
-const cropEditorIndex = ref<number | null>(null)
+const isCropEditorOpen = ref(false)
 let estimateTimer: ReturnType<typeof setTimeout> | null = null
 let estimateRequestId = 0
 
 const activeReference = computed(() => previews.value.length === 1 ? previews.value[0] ?? null : null)
-const activeCropPreview = computed(() => cropEditorIndex.value === null ? null : previews.value[cropEditorIndex.value] ?? null)
+const activeCropPreview = computed(() => isCropEditorOpen.value ? previews.value[0] ?? null : null)
 const outputExtensions = computed(() => getOutputExtensions(options.format))
 const hasSameExtensionWarning = computed(() => files.value.some(file => getFileExtension(file.name) !== '' && outputExtensions.value.includes(getFileExtension(file.name))))
 const activeAspectRatio = computed(() => {
@@ -85,13 +85,13 @@ function setImageMode(mode: ImageMode) {
   resetOptions()
   options.resizeMode = mode === ImageModeValue.Single ? ImageResizeModeValue.Dimensions : ImageResizeModeValue.Percent
   Object.assign(imagePdfOptions, defaultImagePdfOptions)
-  cropEditorIndex.value = null
+  isCropEditorOpen.value = false
   clearEstimate()
 }
 
 function handleImageFiles(fileList: FileList | File[]) {
   addFiles(fileList, imageMode.value === ImageModeValue.Single)
-  cropEditorIndex.value = null
+  isCropEditorOpen.value = false
 }
 
 function patchCurrentOptions(patch: Partial<ImageTransformOptions>) {
@@ -160,20 +160,20 @@ function setProportionalResize() {
 }
 
 function saveCrop(crop: ImageCropSelection) {
-  if (cropEditorIndex.value === null)
+  if (!activeCropPreview.value)
     return
 
-  setCropSelection(cropEditorIndex.value, crop)
-  cropEditorIndex.value = null
+  setSingleCropSelection(crop)
+  isCropEditorOpen.value = false
   scheduleEstimate()
 }
 
 function clearCrop() {
-  if (cropEditorIndex.value === null)
+  if (!activeCropPreview.value)
     return
 
-  clearCropSelection(cropEditorIndex.value)
-  cropEditorIndex.value = null
+  clearSingleCropSelection()
+  isCropEditorOpen.value = false
   scheduleEstimate()
 }
 
@@ -292,7 +292,7 @@ function runImageAction() {
 
 <template>
   <section class="grid gap-5 xl:grid-cols-[minmax(340px,0.9fr)_minmax(0,1.35fr)]">
-    <ImageSourcePanel :files="files" :image-mode="imageMode" :preview-estimates="previewEstimates" :previews="previews" @files-added="handleImageFiles" @mode-changed="setImageMode" @remove-file="removeFile" />
+    <ImageSourcePanel :image-mode="imageMode" :preview-estimates="previewEstimates" :previews="previews" @files-added="handleImageFiles" @mode-changed="setImageMode" @remove-file="removeFile" />
 
     <div class="space-y-4 border border-line bg-panel/82 p-4 shadow-[0_0_44px_var(--fx-sky-7)] backdrop-blur">
       <template v-if="imageMode !== ImageModeValue.Pdf">
@@ -306,7 +306,7 @@ function runImageAction() {
           :previews="previews"
           :summary-delta="summaryDelta"
           @commit-estimate="commitEstimate"
-          @open-crop="cropEditorIndex = 0"
+          @open-crop="isCropEditorOpen = true"
           @set-optimise-png="setOptimisePng"
           @set-preserve-dimensions="setPreserveDimensions"
           @set-proportional-resize="setProportionalResize"
@@ -353,6 +353,6 @@ function runImageAction() {
       <ResultList v-else :image-results="results" :pdf-results="pdfResults" />
     </div>
 
-    <ImageCropEditor v-if="activeCropPreview" :preview="activeCropPreview" @clear="clearCrop" @close="cropEditorIndex = null" @save="saveCrop" />
+    <ImageCropEditor v-if="activeCropPreview" :preview="activeCropPreview" @clear="clearCrop" @close="isCropEditorOpen = false" @save="saveCrop" />
   </section>
 </template>

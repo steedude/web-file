@@ -11,7 +11,6 @@ export function useImageTranscoder() {
   const results = ref<ConvertedImage[]>([])
   const pdfResults = ref<PdfResult[]>([])
   const isProcessing = ref(false)
-  const isEstimating = ref(false)
   const error = ref('')
 
   const canConvert = computed(() => files.value.length > 0 && !isProcessing.value)
@@ -50,19 +49,24 @@ export function useImageTranscoder() {
     previews.value = previews.value.filter((_, previewIndex) => previewIndex !== index)
   }
 
-  function setCropSelection(index: number, crop: ImageCropSelection) {
-    previews.value = previews.value.map((preview, previewIndex) => previewIndex === index ? { ...preview, crop } : preview)
+  function setSingleCropSelection(crop: ImageCropSelection) {
+    const preview = previews.value[0]
+
+    if (!preview)
+      return
+
+    previews.value = [{ ...preview, crop }]
     clearResults()
   }
 
-  function clearCropSelection(index: number) {
-    previews.value = previews.value.map((preview, previewIndex) => {
-      if (previewIndex !== index)
-        return preview
+  function clearSingleCropSelection() {
+    const preview = previews.value[0]
 
-      const { crop: _crop, ...rest } = preview
-      return rest
-    })
+    if (!preview)
+      return
+
+    const { crop: _crop, ...rest } = preview
+    previews.value = [rest]
     clearResults()
   }
 
@@ -96,7 +100,7 @@ export function useImageTranscoder() {
     clearResults()
   }
 
-  async function convert(index?: number) {
+  async function convert() {
     if (!canConvert.value)
       return
 
@@ -105,7 +109,7 @@ export function useImageTranscoder() {
     clearResults()
 
     try {
-      const entries = getFileEntries(index)
+      const entries = getFileEntries()
       const nextResults: ConvertedImage[] = []
 
       for (const [fileIndex, file] of entries) {
@@ -144,39 +148,22 @@ export function useImageTranscoder() {
     }
   }
 
-  async function estimateOutputSizes(index?: number): Promise<Array<{ index: number, size: number }>> {
+  async function estimateOutputSizes(): Promise<Array<{ index: number, size: number }>> {
     if (files.value.length === 0)
       return []
 
-    isEstimating.value = true
+    const sizes: Array<{ index: number, size: number }> = []
 
-    try {
-      const sizes: Array<{ index: number, size: number }> = []
-
-      for (const [fileIndex, file] of getFileEntries(index)) {
-        const imageData = await createTransformedImageData(fileIndex, file)
-        const encoded = await encodeImage(imageData, options.format, options)
-        sizes.push({ index: fileIndex, size: encoded.byteLength })
-      }
-
-      return sizes
+    for (const [fileIndex, file] of getFileEntries()) {
+      const imageData = await createTransformedImageData(fileIndex, file)
+      const encoded = await encodeImage(imageData, options.format, options)
+      sizes.push({ index: fileIndex, size: encoded.byteLength })
     }
-    finally {
-      isEstimating.value = false
-    }
+
+    return sizes
   }
 
-  async function estimateOutputSize(index?: number): Promise<number> {
-    const sizes = await estimateOutputSizes(index)
-    return sizes.reduce((total, item) => total + item.size, 0)
-  }
-
-  function getFileEntries(index?: number) {
-    if (typeof index === 'number') {
-      const file = files.value[index]
-      return file ? [[index, file] as const] : []
-    }
-
+  function getFileEntries() {
     return files.value.map((file, fileIndex) => [fileIndex, file] as const)
   }
 
@@ -195,12 +182,11 @@ export function useImageTranscoder() {
     canConvert,
     clear,
     clearResults,
-    clearCropSelection,
+    clearSingleCropSelection,
     convert,
     convertToPdf,
     error,
     files,
-    isEstimating,
     isProcessing,
     options,
     pdfResults,
@@ -208,8 +194,7 @@ export function useImageTranscoder() {
     removeFile,
     resetOptions,
     results,
-    setCropSelection,
+    setSingleCropSelection,
     estimateOutputSizes,
-    estimateOutputSize,
   }
 }

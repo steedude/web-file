@@ -24,16 +24,6 @@ const { t } = useI18n()
 </script>
 
 <template>
-  <button
-    v-if="imageMode === ImageModeValue.Single && previews.length"
-    type="button"
-    class="focus-ring inline-flex w-max items-center gap-2 border border-line bg-grid px-4 py-2 font-mono text-xs font-black text-ink/70 transition hover:border-sky hover:text-sky"
-    @click="emit('openCrop')"
-  >
-    <Scissors class="size-4" aria-hidden="true" />
-    {{ t('image.crop') }}
-  </button>
-
   <div class="flex flex-wrap gap-3">
     <button
       type="button"
@@ -50,6 +40,15 @@ const { t } = useI18n()
       @click="emit('setProportionalResize')"
     >
       {{ t('image.proportionalResize') }}
+    </button>
+    <button
+      v-if="imageMode === ImageModeValue.Single && previews.length"
+      type="button"
+      class="focus-ring inline-flex items-center gap-2 border border-line bg-grid px-3 py-2 font-mono text-xs font-black text-ink/70 transition hover:border-sky hover:text-sky"
+      @click="emit('openCrop')"
+    >
+      <Scissors class="size-4" aria-hidden="true" />
+      {{ t('image.crop') }}
     </button>
   </div>
 

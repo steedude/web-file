@@ -4,7 +4,6 @@ import { Image } from '@lucide/vue'
 import { ImageModeValue } from '~/types/file-tool.type'
 
 defineProps<{
-  files: File[]
   imageMode: ImageMode
   previewEstimates: Array<{
     outputSize: number
@@ -72,6 +71,5 @@ const { t } = useI18n()
 
     <FileDropZone accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp" :label="t('common.dropFiles')" :multiple="imageMode !== ImageModeValue.Single" @files="emit('filesAdded', $event)" />
     <ImagePreviewList :allow-crop="imageMode === ImageModeValue.Single" :compact="imageMode !== ImageModeValue.Single" :estimates="previewEstimates" :previews="previews" @remove="emit('removeFile', $event)" />
-    <FileList v-if="!previews.length" :files="files" @remove="emit('removeFile', $event)" />
   </div>
 </template>

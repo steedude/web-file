@@ -1,4 +1,5 @@
 import type { ImageCropPosition, ImageCropSelection, ImageResizeMode } from '~/types/file-tool.type'
+import { ImageCropPositionValue, ImageResizeModeValue } from '~/types/file-tool.type'
 
 interface SourceRect {
   x: number
@@ -9,8 +10,8 @@ interface SourceRect {
 
 export async function fileToImageData(file: File, maxWidth: number, maxHeight: number, preserveDimensions: boolean, cropPosition: ImageCropPosition, crop: ImageCropSelection | undefined, resizeMode: ImageResizeMode, resizePercent: number): Promise<ImageData> {
   const bitmap = await createImageBitmap(file)
-  const effectiveCropPosition = resizeMode === 'percent' ? 'none' : cropPosition
-  const source = crop ? getManualCropRect(bitmap.width, bitmap.height, crop) : getSourceRect(bitmap.width, bitmap.height, maxWidth, maxHeight, preserveDimensions ? 'none' : effectiveCropPosition)
+  const effectiveCropPosition = resizeMode === ImageResizeModeValue.Percent ? ImageCropPositionValue.None : cropPosition
+  const source = crop ? getManualCropRect(bitmap.width, bitmap.height, crop) : getSourceRect(bitmap.width, bitmap.height, maxWidth, maxHeight, preserveDimensions ? ImageCropPositionValue.None : effectiveCropPosition)
   const scale = getScale(source, maxWidth, maxHeight, preserveDimensions, resizeMode, resizePercent)
   const width = Math.max(1, Math.round(source.width * scale))
   const height = Math.max(1, Math.round(source.height * scale))
@@ -32,7 +33,7 @@ function getScale(source: SourceRect, maxWidth: number, maxHeight: number, prese
   if (preserveDimensions)
     return 1
 
-  if (resizeMode === 'percent')
+  if (resizeMode === ImageResizeModeValue.Percent)
     return Math.min(1, Math.max(1, Math.min(100, resizePercent)) / 100)
 
   return Math.min(1, maxWidth / source.width, maxHeight / source.height)
@@ -48,7 +49,7 @@ function getManualCropRect(imageWidth: number, imageHeight: number, crop: ImageC
 }
 
 function getSourceRect(imageWidth: number, imageHeight: number, targetWidth: number, targetHeight: number, cropPosition: ImageCropPosition): SourceRect {
-  if (cropPosition === 'none')
+  if (cropPosition === ImageCropPositionValue.None)
     return { x: 0, y: 0, width: imageWidth, height: imageHeight }
 
   const imageRatio = imageWidth / imageHeight
@@ -68,10 +69,10 @@ function getSourceRect(imageWidth: number, imageHeight: number, targetWidth: num
 }
 
 function getCropOffset(sourceSize: number, cropSize: number, cropPosition: ImageCropPosition, axis: 'x' | 'y'): number {
-  if ((axis === 'x' && cropPosition === 'left') || (axis === 'y' && cropPosition === 'top'))
+  if ((axis === 'x' && cropPosition === ImageCropPositionValue.Left) || (axis === 'y' && cropPosition === ImageCropPositionValue.Top))
     return 0
 
-  if ((axis === 'x' && cropPosition === 'right') || (axis === 'y' && cropPosition === 'bottom'))
+  if ((axis === 'x' && cropPosition === ImageCropPositionValue.Right) || (axis === 'y' && cropPosition === ImageCropPositionValue.Bottom))
     return sourceSize - cropSize
 
   return Math.round((sourceSize - cropSize) / 2)

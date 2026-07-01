@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { FileStack, Play, Trash2 } from '@lucide/vue'
 import { pdfImageFormatOptions, pdfModeOptions, pdfWatermarkPreviewScaleOptions } from '~/configs/file-tool.config'
+import { PdfImageOutputFormatValue, PdfModeValue } from '~/types/file-tool.type'
 
 const { t } = useI18n()
+const { getPdfModeLabel } = useFileToolLang()
 const PdfPageWorkspace = defineAsyncComponent(() => import('~/components/PdfPageWorkspace.vue'))
 const {
   addFiles,
@@ -88,7 +90,7 @@ function updateImageScale(event: Event) {
         </div>
       </div>
 
-      <FileDropZone accept="application/pdf,.pdf" :label="t('common.dropFiles')" :multiple="options.mode === 'merge'" @files="addFiles" />
+      <FileDropZone accept="application/pdf,.pdf" :label="t('common.dropFiles')" :multiple="options.mode === PdfModeValue.Merge" @files="addFiles" />
       <FileList :files="files" @remove="removeFile" />
     </div>
 
@@ -104,12 +106,12 @@ function updateImageScale(event: Event) {
             :class="options.mode === mode ? 'border-lilac bg-lilac text-paper shadow-[0_0_20px_rgb(167_139_250_/_18%)]' : 'border-line bg-grid text-ink/62 hover:border-lilac hover:text-lilac'"
             @click="options.mode = mode"
           >
-            {{ t(`pdf.${mode}`) }}
+            {{ getPdfModeLabel(mode) }}
           </button>
         </div>
       </div>
 
-      <div v-if="options.mode === 'watermark'" class="grid gap-4 md:grid-cols-2">
+      <div v-if="options.mode === PdfModeValue.Watermark" class="grid gap-4 md:grid-cols-2">
         <label class="space-y-2 md:col-span-2">
           <span class="font-mono text-xs font-black tracking-widest text-lilac uppercase">{{ t('pdf.watermarkText') }}</span>
           <input :value="options.watermarkText" class="focus-ring w-full border border-line bg-grid px-3 py-2 font-mono text-sm font-bold text-ink" type="text" autocomplete="off" @input="updateWatermarkText">
@@ -165,7 +167,7 @@ function updateImageScale(event: Event) {
         </div>
       </div>
 
-      <div v-if="options.mode === 'images'" class="grid gap-4 md:grid-cols-3">
+      <div v-if="options.mode === PdfModeValue.Images" class="grid gap-4 md:grid-cols-3">
         <label class="space-y-2">
           <span class="font-mono text-xs font-black tracking-widest text-lilac uppercase">{{ t('pdf.imageFormat') }}</span>
           <select :value="options.imageFormat" class="focus-ring w-full border border-line bg-grid px-3 py-2 font-mono text-sm font-bold text-ink" @change="updateImageFormat">
@@ -175,7 +177,7 @@ function updateImageScale(event: Event) {
           </select>
         </label>
 
-        <label v-if="options.imageFormat !== 'png'" class="space-y-2">
+        <label v-if="options.imageFormat !== PdfImageOutputFormatValue.Png" class="space-y-2">
           <span class="font-mono text-xs font-black tracking-widest text-lilac uppercase">{{ t('pdf.imageQuality') }} {{ t('common.dot') }} {{ options.imageQuality }}</span>
           <input :value="options.imageQuality" class="h-9 w-full accent-acid" type="range" min="1" max="100" step="1" @input="updateImageQuality">
         </label>
@@ -224,7 +226,7 @@ function updateImageScale(event: Event) {
       <p v-if="!results.length && !imageResults.length" class="border border-line bg-grid/70 px-3 py-8 text-center font-mono text-sm font-bold text-ink/42">
         {{ t('pdf.empty') }}
       </p>
-      <ResultList v-else :image-results="imageResults" :pdf-results="results" :show-image-details="options.mode !== 'images'" />
+      <ResultList v-else :image-results="imageResults" :pdf-results="results" :show-image-details="options.mode !== PdfModeValue.Images" />
     </div>
   </section>
 </template>

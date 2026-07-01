@@ -1,49 +1,50 @@
-import type { ImageCropPosition, ImageOutputFormat, ImagePdfFitMode, ImagePdfOptions, ImagePdfPageSize, ImageTransformOptions, PdfImageOutputFormat, PdfMode, PdfOptions, PdfWatermarkPreviewScale } from '~/types/file-tool.type'
+import type { ImagePdfOptions, ImageTransformOptions, PdfOptions } from '~/types/file-tool.type'
+import { ImageCropPositionValue, ImageOutputFormatValue, ImagePdfFitModeValue, ImagePdfPageSizeValue, ImageResizeModeValue, PdfImageOutputFormatValue, PdfModeValue, PdfWatermarkPreviewScaleValue } from '~/types/file-tool.type'
 
-export const imageFormatOptions: Array<{ value: ImageOutputFormat, mimeType: string, extension: string }> = [
-  { value: 'jpeg', mimeType: 'image/jpeg', extension: 'jpg' },
-  { value: 'png', mimeType: 'image/png', extension: 'png' },
-  { value: 'webp', mimeType: 'image/webp', extension: 'webp' },
+export const imageFormatOptions = [
+  { value: ImageOutputFormatValue.Jpeg, mimeType: 'image/jpeg', extension: 'jpg' },
+  { value: ImageOutputFormatValue.Png, mimeType: 'image/png', extension: 'png' },
+  { value: ImageOutputFormatValue.Webp, mimeType: 'image/webp', extension: 'webp' },
 ]
 
 export const defaultImageOptions: ImageTransformOptions = {
-  format: 'webp',
+  format: ImageOutputFormatValue.Webp,
   outputFileName: '',
   quality: 78,
   maxWidth: 1920,
   maxHeight: 1920,
-  resizeMode: 'percent',
+  resizeMode: ImageResizeModeValue.Percent,
   resizePercent: 100,
   preserveDimensions: false,
-  cropPosition: 'none',
+  cropPosition: ImageCropPositionValue.None,
   optimisePng: true,
   webpLossless: false,
 }
 
-export const imageCropPositionOptions: ImageCropPosition[] = ['none', 'center', 'top', 'bottom', 'left', 'right']
+export const imageCropPositionOptions = Object.values(ImageCropPositionValue)
 
-export const imagePdfPageSizeOptions: ImagePdfPageSize[] = ['image', 'a4', 'letter']
-export const imagePdfFitModeOptions: ImagePdfFitMode[] = ['contain', 'cover']
+export const imagePdfPageSizeOptions = Object.values(ImagePdfPageSizeValue)
+export const imagePdfFitModeOptions = Object.values(ImagePdfFitModeValue)
 
 export const defaultImagePdfOptions: ImagePdfOptions = {
-  pageSize: 'image',
-  fitMode: 'contain',
+  pageSize: ImagePdfPageSizeValue.Image,
+  fitMode: ImagePdfFitModeValue.Contain,
   margin: 0,
 }
 
-export const pdfModeOptions: PdfMode[] = ['merge', 'split', 'watermark', 'images']
-export const pdfWatermarkPreviewScaleOptions: PdfWatermarkPreviewScale[] = [25, 50, 75, 100]
-export const pdfImageFormatOptions: PdfImageOutputFormat[] = ['png', 'jpeg', 'webp']
+export const pdfModeOptions = Object.values(PdfModeValue)
+export const pdfWatermarkPreviewScaleOptions = Object.values(PdfWatermarkPreviewScaleValue)
+export const pdfImageFormatOptions = Object.values(PdfImageOutputFormatValue)
 
 export const defaultPdfOptions: PdfOptions = {
-  mode: 'merge',
+  mode: PdfModeValue.Merge,
   watermarkText: 'web file',
   watermarkFontSize: 48,
   watermarkOpacity: 25,
   watermarkRotation: -30,
   watermarkColor: '#6dff9d',
-  watermarkPreviewScale: 100,
-  imageFormat: 'png',
+  watermarkPreviewScale: PdfWatermarkPreviewScaleValue.Full,
+  imageFormat: PdfImageOutputFormatValue.Png,
   imageQuality: 90,
   imageScale: 2,
 }

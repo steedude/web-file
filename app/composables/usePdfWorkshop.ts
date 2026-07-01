@@ -2,7 +2,10 @@ import type { PDFDocument as PdfLibDocument, PDFPage } from 'pdf-lib'
 import type { PDFDocumentProxy } from 'pdfjs-dist'
 import type { ConvertedImage, PdfOptions, PdfPageItem, PdfResult } from '~/types/file-tool.type'
 import { defaultPdfOptions } from '~/configs/file-tool.config'
+import { PdfImageOutputFormatValue, PdfModeValue } from '~/types/file-tool.type'
 import { appendFileSuffix } from '~/utils/file-name.util'
+
+const selectablePdfModes = new Set<PdfOptions['mode']>([PdfModeValue.Split, PdfModeValue.Images])
 
 export function usePdfWorkshop() {
   const options = reactive<PdfOptions>({ ...defaultPdfOptions })
@@ -14,7 +17,7 @@ export function usePdfWorkshop() {
   const isRenderingPages = ref(false)
   const error = ref('')
 
-  const activePages = computed(() => ['split', 'images'].includes(options.mode) ? pages.value.filter(page => page.selected) : pages.value)
+  const activePages = computed(() => selectablePdfModes.has(options.mode) ? pages.value.filter(page => page.selected) : pages.value)
   const canRun = computed(() => activePages.value.length > 0 && !isProcessing.value && !isRenderingPages.value)
 
   watch(() => options.mode, () => {
@@ -32,9 +35,9 @@ export function usePdfWorkshop() {
 
     clearResults()
     error.value = ''
-    const nextFiles = options.mode === 'merge' ? pdfFiles : pdfFiles.slice(0, 1)
+    const nextFiles = options.mode === PdfModeValue.Merge ? pdfFiles : pdfFiles.slice(0, 1)
 
-    if (options.mode !== 'merge') {
+    if (options.mode !== PdfModeValue.Merge) {
       clearPages()
       files.value = []
     }
@@ -42,9 +45,9 @@ export function usePdfWorkshop() {
     isRenderingPages.value = true
 
     try {
-      const nextPages = await createPdfPageItems(nextFiles, ['split', 'images'].includes(options.mode))
-      files.value = options.mode === 'merge' ? [...files.value, ...nextFiles] : nextFiles
-      pages.value = options.mode === 'merge' ? [...pages.value, ...nextPages] : nextPages
+      const nextPages = await createPdfPageItems(nextFiles, selectablePdfModes.has(options.mode))
+      files.value = options.mode === PdfModeValue.Merge ? [...files.value, ...nextFiles] : nextFiles
+      pages.value = options.mode === PdfModeValue.Merge ? [...pages.value, ...nextPages] : nextPages
     }
     catch (cause) {
       error.value = cause instanceof Error ? cause.message : 'PDF preview failed.'
@@ -140,13 +143,13 @@ export function usePdfWorkshop() {
     try {
       const firstFile = files.value[0]
 
-      if (options.mode === 'merge')
+      if (options.mode === PdfModeValue.Merge)
         results.value = [await mergePdfPages(activePages.value)]
-      else if (options.mode === 'split' && firstFile)
+      else if (options.mode === PdfModeValue.Split && firstFile)
         results.value = await extractPdfPages(firstFile, activePages.value)
-      else if (options.mode === 'watermark' && firstFile)
+      else if (options.mode === PdfModeValue.Watermark && firstFile)
         results.value = [await watermarkPdf(firstFile, options)]
-      else if (options.mode === 'images')
+      else if (options.mode === PdfModeValue.Images)
         imageResults.value = await renderPdfPagesAsImages(activePages.value, options)
     }
     catch (cause) {
@@ -282,7 +285,7 @@ async function renderPdfPagesAsImages(pages: PdfPageItem[], options: PdfOptions)
 
     const mimeType = getPdfImageMimeType(options.imageFormat)
     const blob = await canvasToBlob(canvas, mimeType, options.imageQuality / 100)
-    const extension = options.imageFormat === 'jpeg' ? 'jpg' : options.imageFormat
+    const extension = options.imageFormat === PdfImageOutputFormatValue.Jpeg ? 'jpg' : options.imageFormat
 
     results.push({
       id: crypto.randomUUID(),
@@ -374,10 +377,10 @@ function canvasToBlob(canvas: HTMLCanvasElement, mimeType: string, quality?: num
 }
 
 function getPdfImageMimeType(format: PdfOptions['imageFormat']) {
-  if (format === 'jpeg')
+  if (format === PdfImageOutputFormatValue.Jpeg)
     return 'image/jpeg'
 
-  if (format === 'webp')
+  if (format === PdfImageOutputFormatValue.Webp)
     return 'image/webp'
 
   return 'image/png'

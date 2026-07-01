@@ -2,9 +2,11 @@
 import type { ImageCropSelection, ImageMode, ImageOutputFormat, ImageTransformOptions } from '~/types/file-tool.type'
 import { Image, Play, Scissors, Trash2 } from '@lucide/vue'
 import { defaultImagePdfOptions, imageCropPositionOptions, imageFormatOptions, imagePdfFitModeOptions, imagePdfPageSizeOptions } from '~/configs/file-tool.config'
+import { ImageModeValue, ImageOutputFormatValue, ImageResizeModeValue } from '~/types/file-tool.type'
 import { formatFileSize } from '~/utils/file-size.util'
 
 const { t } = useI18n()
+const { getImageCropPositionLabel, getImagePdfFitModeLabel, getImagePdfPageSizeLabel } = useFileToolLang()
 const {
   addFiles,
   canConvert,
@@ -26,7 +28,7 @@ const {
   setCropSelection,
 } = useImageTranscoder()
 
-const imageMode = ref<ImageMode>('batch')
+const imageMode = ref<ImageMode>(ImageModeValue.Batch)
 const imagePdfOptions = reactive({ ...defaultImagePdfOptions })
 const estimatedOutputSizes = ref<number[]>([])
 const isEstimatePending = ref(false)
@@ -84,14 +86,14 @@ function setImageMode(mode: ImageMode) {
   imageMode.value = mode
   clear()
   resetOptions()
-  options.resizeMode = mode === 'single' ? 'dimensions' : 'percent'
+  options.resizeMode = mode === ImageModeValue.Single ? ImageResizeModeValue.Dimensions : ImageResizeModeValue.Percent
   Object.assign(imagePdfOptions, defaultImagePdfOptions)
   cropEditorIndex.value = null
   clearEstimate()
 }
 
 function handleImageFiles(fileList: FileList | File[]) {
-  addFiles(fileList, imageMode.value === 'single')
+  addFiles(fileList, imageMode.value === ImageModeValue.Single)
   cropEditorIndex.value = null
 }
 
@@ -148,7 +150,7 @@ function updateOutputFileName(event: Event) {
 }
 
 function updateCropPosition(event: Event) {
-  if (imageMode.value !== 'batch')
+  if (imageMode.value !== ImageModeValue.Batch)
     return
 
   patchCurrentOptions({ cropPosition: (event.target as HTMLSelectElement).value as ImageTransformOptions['cropPosition'] })
@@ -163,7 +165,7 @@ function setPreserveDimensions(preserveDimensions: boolean) {
 function setProportionalResize() {
   patchCurrentOptions({
     preserveDimensions: false,
-    resizeMode: imageMode.value === 'batch' ? 'percent' : 'dimensions',
+    resizeMode: imageMode.value === ImageModeValue.Batch ? ImageResizeModeValue.Percent : ImageResizeModeValue.Dimensions,
   })
   scheduleEstimate()
 }
@@ -202,7 +204,7 @@ function scheduleEstimate() {
   if (estimateTimer)
     clearTimeout(estimateTimer)
 
-  if (!files.value.length || imageMode.value === 'pdf')
+  if (!files.value.length || imageMode.value === ImageModeValue.Pdf)
     return
 
   const requestId = ++estimateRequestId
@@ -278,7 +280,7 @@ function getFileExtension(fileName: string) {
 }
 
 function getOutputExtensions(format: ImageOutputFormat) {
-  if (format === 'jpeg')
+  if (format === ImageOutputFormatValue.Jpeg)
     return ['jpg', 'jpeg']
 
   return [format]
@@ -300,7 +302,7 @@ function updateImagePdfMargin(event: Event) {
 }
 
 function runImageAction() {
-  if (imageMode.value === 'pdf') {
+  if (imageMode.value === ImageModeValue.Pdf) {
     convertToPdf(imagePdfOptions)
     return
   }
@@ -331,40 +333,40 @@ function runImageAction() {
           <button
             type="button"
             class="focus-ring min-h-12 border px-4 py-3 font-mono text-sm font-black transition"
-            :aria-pressed="imageMode === 'batch'"
-            :class="imageMode === 'batch' ? 'border-sky bg-sky text-paper shadow-[0_0_22px_rgb(72_215_255_/_18%)]' : 'border-transparent bg-grid/70 text-ink/62 hover:border-sky/70 hover:text-sky'"
-            @click="setImageMode('batch')"
+            :aria-pressed="imageMode === ImageModeValue.Batch"
+            :class="imageMode === ImageModeValue.Batch ? 'border-sky bg-sky text-paper shadow-[0_0_22px_rgb(72_215_255_/_18%)]' : 'border-transparent bg-grid/70 text-ink/62 hover:border-sky/70 hover:text-sky'"
+            @click="setImageMode(ImageModeValue.Batch)"
           >
             {{ t('image.batchSettings') }}
           </button>
           <button
             type="button"
             class="focus-ring min-h-12 border px-4 py-3 font-mono text-sm font-black transition"
-            :aria-pressed="imageMode === 'single'"
-            :class="imageMode === 'single' ? 'border-sky bg-sky text-paper shadow-[0_0_22px_rgb(72_215_255_/_18%)]' : 'border-transparent bg-grid/70 text-ink/62 hover:border-sky/70 hover:text-sky'"
-            @click="setImageMode('single')"
+            :aria-pressed="imageMode === ImageModeValue.Single"
+            :class="imageMode === ImageModeValue.Single ? 'border-sky bg-sky text-paper shadow-[0_0_22px_rgb(72_215_255_/_18%)]' : 'border-transparent bg-grid/70 text-ink/62 hover:border-sky/70 hover:text-sky'"
+            @click="setImageMode(ImageModeValue.Single)"
           >
             {{ t('image.singleSettings') }}
           </button>
           <button
             type="button"
             class="focus-ring min-h-12 border px-4 py-3 font-mono text-sm font-black transition"
-            :aria-pressed="imageMode === 'pdf'"
-            :class="imageMode === 'pdf' ? 'border-sky bg-sky text-paper shadow-[0_0_22px_rgb(72_215_255_/_18%)]' : 'border-transparent bg-grid/70 text-ink/62 hover:border-sky/70 hover:text-sky'"
-            @click="setImageMode('pdf')"
+            :aria-pressed="imageMode === ImageModeValue.Pdf"
+            :class="imageMode === ImageModeValue.Pdf ? 'border-sky bg-sky text-paper shadow-[0_0_22px_rgb(72_215_255_/_18%)]' : 'border-transparent bg-grid/70 text-ink/62 hover:border-sky/70 hover:text-sky'"
+            @click="setImageMode(ImageModeValue.Pdf)"
           >
             {{ t('image.pdfSettings') }}
           </button>
         </div>
       </div>
 
-      <FileDropZone accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp" :label="t('common.dropFiles')" :multiple="imageMode !== 'single'" @files="handleImageFiles" />
-      <ImagePreviewList :allow-crop="imageMode === 'single'" :compact="imageMode !== 'single'" :estimates="previewEstimates" :previews="previews" @remove="removeFile" />
+      <FileDropZone accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp" :label="t('common.dropFiles')" :multiple="imageMode !== ImageModeValue.Single" @files="handleImageFiles" />
+      <ImagePreviewList :allow-crop="imageMode === ImageModeValue.Single" :compact="imageMode !== ImageModeValue.Single" :estimates="previewEstimates" :previews="previews" @remove="removeFile" />
       <FileList v-if="!previews.length" :files="files" @remove="removeFile" />
     </div>
 
     <div class="space-y-4 border border-line bg-panel/82 p-4 shadow-[0_0_44px_rgb(72_215_255_/_7%)] backdrop-blur">
-      <template v-if="imageMode !== 'pdf'">
+      <template v-if="imageMode !== ImageModeValue.Pdf">
         <div class="grid gap-4 md:grid-cols-2">
           <label class="grid grid-rows-[auto_2.25rem] gap-2">
             <span class="flex h-4 items-center font-mono text-xs font-black tracking-widest text-sky uppercase">{{ t('image.outputFormat') }}</span>
@@ -376,14 +378,14 @@ function runImageAction() {
           </label>
 
           <div>
-            <div v-if="options.format === 'webp'">
+            <div v-if="options.format === ImageOutputFormatValue.Webp">
               <label class="grid grid-rows-[auto_2.25rem] gap-2">
                 <span class="flex h-4 items-center font-mono text-xs font-black tracking-widest text-sky uppercase">{{ t('image.quality') }} {{ t('common.dot') }} {{ displayedQuality }}</span>
                 <input :value="displayedQuality" class="h-9 w-full accent-acid disabled:opacity-40" type="range" min="1" max="100" :disabled="options.webpLossless" @change="commitEstimate" @input="updateQuality">
               </label>
             </div>
 
-            <label v-else-if="options.format === 'jpeg'" class="grid grid-rows-[auto_2.25rem] gap-2">
+            <label v-else-if="options.format === ImageOutputFormatValue.Jpeg" class="grid grid-rows-[auto_2.25rem] gap-2">
               <span class="flex h-4 items-center font-mono text-xs font-black tracking-widest text-sky uppercase">{{ t('image.quality') }} {{ t('common.dot') }} {{ options.quality }}</span>
               <input :value="options.quality" class="h-9 w-full accent-acid" type="range" min="1" max="100" @change="commitEstimate" @input="updateQuality">
             </label>
@@ -397,7 +399,7 @@ function runImageAction() {
           </div>
         </div>
 
-        <label v-if="options.format === 'png'" class="block space-y-2">
+        <label v-if="options.format === ImageOutputFormatValue.Png" class="block space-y-2">
           <span class="font-mono text-xs font-black tracking-widest text-sky uppercase">{{ t('image.losslessPng') }}</span>
           <span class="inline-flex w-full items-center gap-2 border border-line bg-grid px-3 py-2 font-mono text-xs font-black text-ink/70">
             <input :checked="options.optimisePng" type="checkbox" class="size-4 accent-acid" @change="setOptimisePng(($event.target as HTMLInputElement).checked)">
@@ -405,7 +407,7 @@ function runImageAction() {
           </span>
         </label>
 
-        <label v-if="options.format === 'webp'" class="block space-y-2">
+        <label v-if="options.format === ImageOutputFormatValue.Webp" class="block space-y-2">
           <span class="font-mono text-xs font-black tracking-widest text-sky uppercase">{{ t('image.webpLossless') }}</span>
           <span class="inline-flex w-full items-center gap-2 border border-line bg-grid px-3 py-2 font-mono text-xs font-black text-ink/70">
             <input :checked="options.webpLossless" type="checkbox" class="size-4 accent-acid" @change="setWebpLossless(($event.target as HTMLInputElement).checked)">
@@ -417,7 +419,7 @@ function runImageAction() {
           {{ t('image.sameExtensionWarning') }}
         </p>
 
-        <label v-if="imageMode === 'single' && previews.length" class="block space-y-2">
+        <label v-if="imageMode === ImageModeValue.Single && previews.length" class="block space-y-2">
           <span class="font-mono text-xs font-black tracking-widest text-sky uppercase">{{ t('image.outputFileName') }}</span>
           <input
             :value="options.outputFileName"
@@ -431,7 +433,7 @@ function runImageAction() {
 
         <div class="grid gap-2 font-mono text-xs font-bold text-ink md:grid-cols-3">
           <span class="border border-line/70 bg-paper/70 px-3 py-2">
-            <span class="block text-ink/42"><template v-if="imageMode === 'batch'">{{ t('image.batchSummary') }} </template>{{ t('image.sourceSize') }}</span>
+            <span class="block text-ink/42"><template v-if="imageMode === ImageModeValue.Batch">{{ t('image.batchSummary') }} </template>{{ t('image.sourceSize') }}</span>
             <span class="mt-1 block text-sm font-black text-ink">{{ formatFileSize(originalSizeReference) }}</span>
           </span>
           <span class="border border-line/70 bg-paper/70 px-3 py-2">
@@ -445,7 +447,7 @@ function runImageAction() {
         </div>
 
         <button
-          v-if="imageMode === 'single' && previews.length"
+          v-if="imageMode === ImageModeValue.Single && previews.length"
           type="button"
           class="focus-ring inline-flex w-max items-center gap-2 border border-line bg-grid px-4 py-2 font-mono text-xs font-black text-ink/70 transition hover:border-sky hover:text-sky"
           @click="cropEditorIndex = 0"
@@ -473,31 +475,31 @@ function runImageAction() {
           </button>
         </div>
 
-        <div v-if="imageMode === 'single' && !options.preserveDimensions" class="grid grid-cols-2 gap-2 md:w-max">
+        <div v-if="imageMode === ImageModeValue.Single && !options.preserveDimensions" class="grid grid-cols-2 gap-2 md:w-max">
           <button
             type="button"
             class="focus-ring border px-3 py-2 font-mono text-xs font-black transition"
-            :class="options.resizeMode === 'dimensions' ? 'border-sky bg-sky text-paper' : 'border-line bg-grid text-ink/62 hover:border-sky hover:text-sky'"
-            @click="setResizeMode('dimensions')"
+            :class="options.resizeMode === ImageResizeModeValue.Dimensions ? 'border-sky bg-sky text-paper' : 'border-line bg-grid text-ink/62 hover:border-sky hover:text-sky'"
+            @click="setResizeMode(ImageResizeModeValue.Dimensions)"
           >
             {{ t('image.resizeByPixels') }}
           </button>
           <button
             type="button"
             class="focus-ring border px-3 py-2 font-mono text-xs font-black transition"
-            :class="options.resizeMode === 'percent' ? 'border-sky bg-sky text-paper' : 'border-line bg-grid text-ink/62 hover:border-sky hover:text-sky'"
-            @click="setResizeMode('percent')"
+            :class="options.resizeMode === ImageResizeModeValue.Percent ? 'border-sky bg-sky text-paper' : 'border-line bg-grid text-ink/62 hover:border-sky hover:text-sky'"
+            @click="setResizeMode(ImageResizeModeValue.Percent)"
           >
             {{ t('image.resizeByPercent') }}
           </button>
         </div>
 
-        <label v-if="!options.preserveDimensions && options.resizeMode === 'percent'" class="block space-y-2">
+        <label v-if="!options.preserveDimensions && options.resizeMode === ImageResizeModeValue.Percent" class="block space-y-2">
           <span class="font-mono text-xs font-black tracking-widest text-sky uppercase">{{ t('image.resizePercent') }} {{ t('common.dot') }} {{ options.resizePercent }}{{ t('common.percent') }}</span>
           <input :value="options.resizePercent" class="w-full accent-acid" type="range" min="1" max="100" step="1" @change="commitEstimate" @input="updateResizePercent">
         </label>
 
-        <div v-if="imageMode === 'single' && options.resizeMode === 'dimensions'" class="grid gap-4 md:grid-cols-2">
+        <div v-if="imageMode === ImageModeValue.Single && options.resizeMode === ImageResizeModeValue.Dimensions" class="grid gap-4 md:grid-cols-2">
           <label class="space-y-2">
             <span class="font-mono text-xs font-black tracking-widest text-sky uppercase">{{ t('image.width') }}</span>
             <input
@@ -525,14 +527,14 @@ function runImageAction() {
           </label>
         </div>
 
-        <label v-if="imageMode === 'batch' && !options.preserveDimensions && options.resizeMode === 'dimensions'" class="block space-y-2">
+        <label v-if="imageMode === ImageModeValue.Batch && !options.preserveDimensions && options.resizeMode === ImageResizeModeValue.Dimensions" class="block space-y-2">
           <span class="font-mono text-xs font-black tracking-widest text-sky uppercase">{{ t('image.cropPosition') }}</span>
           <select :value="options.cropPosition" class="focus-ring w-full border border-line bg-grid px-3 py-2 font-mono text-sm font-bold text-ink" @change="updateCropPosition">
             <option v-for="position in imageCropPositionOptions" :key="position" :value="position">
-              {{ t(`image.cropPositions.${position}`) }}
+              {{ getImageCropPositionLabel(position) }}
             </option>
           </select>
-          <span v-if="imageMode === 'batch' && previews.length > 1" class="block font-mono text-xs font-bold text-ink/42">
+          <span v-if="imageMode === ImageModeValue.Batch && previews.length > 1" class="block font-mono text-xs font-bold text-ink/42">
             {{ t('image.batchRatioHint') }}
           </span>
         </label>
@@ -543,7 +545,7 @@ function runImageAction() {
           <span class="font-mono text-xs font-black tracking-widest text-sky uppercase">{{ t('image.pdfPageSize') }}</span>
           <select :value="imagePdfOptions.pageSize" class="focus-ring w-full border border-line bg-grid px-3 py-2 font-mono text-sm font-bold text-ink" @change="updateImagePdfPageSize">
             <option v-for="pageSize in imagePdfPageSizeOptions" :key="pageSize" :value="pageSize">
-              {{ t(`image.pdfPageSizes.${pageSize}`) }}
+              {{ getImagePdfPageSizeLabel(pageSize) }}
             </option>
           </select>
         </label>
@@ -552,7 +554,7 @@ function runImageAction() {
           <span class="font-mono text-xs font-black tracking-widest text-sky uppercase">{{ t('image.pdfFitMode') }}</span>
           <select :value="imagePdfOptions.fitMode" class="focus-ring w-full border border-line bg-grid px-3 py-2 font-mono text-sm font-bold text-ink" @change="updateImagePdfFitMode">
             <option v-for="fitMode in imagePdfFitModeOptions" :key="fitMode" :value="fitMode">
-              {{ t(`image.pdfFitModes.${fitMode}`) }}
+              {{ getImagePdfFitModeLabel(fitMode) }}
             </option>
           </select>
         </label>
@@ -571,7 +573,7 @@ function runImageAction() {
           @click="runImageAction"
         >
           <Play class="size-4" aria-hidden="true" />
-          {{ isProcessing ? t('common.processing') : imageMode === 'pdf' ? t('image.createPdf') : t('image.convert') }}
+          {{ isProcessing ? t('common.processing') : imageMode === ImageModeValue.Pdf ? t('image.createPdf') : t('image.convert') }}
         </button>
         <button
           type="button"

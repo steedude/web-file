@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import type { ToolMode } from '~/types/file-tool.type'
 import { FileText, Image } from '@lucide/vue'
+import { ToolModeValue } from '~/types/file-tool.type'
 
 const { t } = useI18n()
-const activeTool = ref<ToolMode>('image')
+const activeTool = ref<ToolMode>(ToolModeValue.Image)
 const ImageToolPanel = defineAsyncComponent(() => import('~/components/ImageToolPanel.vue'))
 const PdfToolPanel = defineAsyncComponent(() => import('~/components/PdfToolPanel.vue'))
 
@@ -29,8 +30,8 @@ useSeoMeta({
         <button
           type="button"
           class="focus-ring inline-flex items-center justify-center gap-2 px-5 py-3 font-mono text-sm font-black tracking-wide transition"
-          :class="activeTool === 'image' ? 'bg-sky text-paper' : 'text-ink/58 hover:bg-panel-soft hover:text-sky'"
-          @click="activeTool = 'image'"
+          :class="activeTool === ToolModeValue.Image ? 'bg-sky text-paper' : 'text-ink/58 hover:bg-panel-soft hover:text-sky'"
+          @click="activeTool = ToolModeValue.Image"
         >
           <Image class="size-4" aria-hidden="true" />
           {{ t('home.imageTab') }}
@@ -38,8 +39,8 @@ useSeoMeta({
         <button
           type="button"
           class="focus-ring inline-flex items-center justify-center gap-2 px-5 py-3 font-mono text-sm font-black tracking-wide transition"
-          :class="activeTool === 'pdf' ? 'bg-lilac text-paper' : 'text-ink/58 hover:bg-panel-soft hover:text-lilac'"
-          @click="activeTool = 'pdf'"
+          :class="activeTool === ToolModeValue.Pdf ? 'bg-lilac text-paper' : 'text-ink/58 hover:bg-panel-soft hover:text-lilac'"
+          @click="activeTool = ToolModeValue.Pdf"
         >
           <FileText class="size-4" aria-hidden="true" />
           {{ t('home.pdfTab') }}
@@ -48,7 +49,7 @@ useSeoMeta({
     </section>
 
     <div class="mt-6">
-      <ImageToolPanel v-if="activeTool === 'image'" />
+      <ImageToolPanel v-if="activeTool === ToolModeValue.Image" />
       <PdfToolPanel v-else />
     </div>
   </div>

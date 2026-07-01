@@ -1,6 +1,7 @@
 import type { PDFDocument as PdfLibDocument } from 'pdf-lib'
 import type { ConvertedImage, ImageCropSelection, ImageOutputFormat, ImagePdfOptions, ImageTransformOptions, PdfResult, UploadedImagePreview } from '~/types/file-tool.type'
 import { defaultImageOptions, imageFormatOptions } from '~/configs/file-tool.config'
+import { ImageOutputFormatValue, ImagePdfFitModeValue, ImagePdfPageSizeValue } from '~/types/file-tool.type'
 import { replaceFileExtension } from '~/utils/file-name.util'
 import { fileToImageData } from '~/utils/image-canvas.util'
 
@@ -311,17 +312,17 @@ async function getImageDimensions(file: File): Promise<{ width: number, height: 
 }
 
 function getImagePdfPageSize(pageSize: ImagePdfOptions['pageSize'], imageWidth: number, imageHeight: number) {
-  if (pageSize === 'a4')
+  if (pageSize === ImagePdfPageSizeValue.A4)
     return { width: 595, height: 842 }
 
-  if (pageSize === 'letter')
+  if (pageSize === ImagePdfPageSizeValue.Letter)
     return { width: 612, height: 792 }
 
   return { width: imageWidth, height: imageHeight }
 }
 
 function fitRect(sourceWidth: number, sourceHeight: number, targetWidth: number, targetHeight: number, fitMode: ImagePdfOptions['fitMode']) {
-  const scale = fitMode === 'cover'
+  const scale = fitMode === ImagePdfFitModeValue.Cover
     ? Math.max(targetWidth / sourceWidth, targetHeight / sourceHeight)
     : Math.min(targetWidth / sourceWidth, targetHeight / sourceHeight)
 
@@ -356,7 +357,7 @@ async function embedImage(pdfDocument: PdfLibDocument, file: File, bitmap: Image
 }
 
 async function encodeImage(imageData: ImageData, format: ImageOutputFormat, options: ImageTransformOptions): Promise<ArrayBuffer> {
-  if (format === 'jpeg') {
+  if (format === ImageOutputFormatValue.Jpeg) {
     const { encode } = await import('@jsquash/jpeg')
     return encode(imageData, {
       quality: options.quality,
@@ -365,7 +366,7 @@ async function encodeImage(imageData: ImageData, format: ImageOutputFormat, opti
     })
   }
 
-  if (format === 'webp') {
+  if (format === ImageOutputFormatValue.Webp) {
     const { encode } = await import('@jsquash/webp')
     return encode(imageData, {
       quality: options.webpLossless ? 100 : options.quality,

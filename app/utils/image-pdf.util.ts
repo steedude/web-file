@@ -9,22 +9,26 @@ export async function createImagePdf(files: File[], pdfOptions: ImagePdfOptions)
 
   for (const file of files) {
     const bitmap = await createImageBitmap(file)
-    const pageSize = getImagePdfPageSize(pdfOptions.pageSize, bitmap.width, bitmap.height)
-    const page = document.addPage([pageSize.width, pageSize.height])
-    const margin = Math.min(Math.max(pdfOptions.margin, 0), Math.min(pageSize.width, pageSize.height) / 3)
-    const targetWidth = pageSize.width - margin * 2
-    const targetHeight = pageSize.height - margin * 2
-    const fitted = fitRect(bitmap.width, bitmap.height, targetWidth, targetHeight, pdfOptions.fitMode)
-    const image = await embedImage(document, file, bitmap)
 
-    page.drawImage(image, {
-      x: margin + (targetWidth - fitted.width) / 2,
-      y: margin + (targetHeight - fitted.height) / 2,
-      width: fitted.width,
-      height: fitted.height,
-    })
+    try {
+      const pageSize = getImagePdfPageSize(pdfOptions.pageSize, bitmap.width, bitmap.height)
+      const page = document.addPage([pageSize.width, pageSize.height])
+      const margin = Math.min(Math.max(pdfOptions.margin, 0), Math.min(pageSize.width, pageSize.height) / 3)
+      const targetWidth = pageSize.width - margin * 2
+      const targetHeight = pageSize.height - margin * 2
+      const fitted = fitRect(bitmap.width, bitmap.height, targetWidth, targetHeight, pdfOptions.fitMode)
+      const image = await embedImage(document, file, bitmap)
 
-    bitmap.close()
+      page.drawImage(image, {
+        x: margin + (targetWidth - fitted.width) / 2,
+        y: margin + (targetHeight - fitted.height) / 2,
+        width: fitted.width,
+        height: fitted.height,
+      })
+    }
+    finally {
+      bitmap.close()
+    }
   }
 
   const fileName = files.length === 1 ? replaceFileExtension(files[0]?.name ?? 'image', 'pdf') : 'images.pdf'

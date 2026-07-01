@@ -7,6 +7,7 @@ import { createPdfPageItems, extractPdfPages, mergePdfPages, renderPdfPagesAsIma
 const selectablePdfModes = new Set<PdfOptions['mode']>([PdfModeValue.Split, PdfModeValue.Images])
 
 export function usePdfWorkshop() {
+  const { t } = useI18n()
   const options = reactive<PdfOptions>({ ...defaultPdfOptions })
   const files = ref<File[]>([])
   const pages = ref<PdfPageItem[]>([])
@@ -28,13 +29,16 @@ export function usePdfWorkshop() {
   })
 
   async function addFiles(fileList: FileList | File[]) {
-    const pdfFiles = Array.from(fileList).filter(isPdfFile)
+    const incomingFiles = Array.from(fileList)
+    const pdfFiles = incomingFiles.filter(isPdfFile)
+    const skippedCount = incomingFiles.length - pdfFiles.length
+
+    error.value = skippedCount ? t('pdf.unsupportedFiles', { count: skippedCount }) : ''
 
     if (pdfFiles.length === 0)
       return
 
     clearResults()
-    error.value = ''
 
     // 合併可以收多份 PDF；其他模式先收單份，避免頁碼來源變得難判斷。
     const nextFiles = options.mode === PdfModeValue.Merge ? pdfFiles : pdfFiles.slice(0, 1)

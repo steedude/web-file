@@ -28,11 +28,7 @@ const {
 
 const imageMode = ref<ImageMode>(ImageModeValue.Batch)
 const imagePdfOptions = reactive({ ...defaultImagePdfOptions })
-const estimatedOutputSizes = ref<number[]>([])
-const isEstimatePending = ref(false)
 const isCropEditorOpen = ref(false)
-let estimateTimer: ReturnType<typeof setTimeout> | null = null
-let estimateRequestId = 0
 
 const activeReference = computed(() => previews.value.length === 1 ? previews.value[0] ?? null : null)
 const activeCropPreview = computed(() => isCropEditorOpen.value ? previews.value[0] ?? null : null)
@@ -44,7 +40,34 @@ const activeAspectRatio = computed(() => {
   if (!preview)
     return null
 
-  return preview.width > 0 && preview.height > 0 ? preview.width / preview.height : null
+  const width = preview.crop?.width ?? preview.width
+  const height = preview.crop?.height ?? preview.height
+
+  return width > 0 && height > 0 ? width / height : null
+})
+const estimateSignature = computed(() => JSON.stringify({
+  crops: previews.value.map(preview => preview.crop ?? null),
+  files: files.value.map(file => `${file.name}:${file.size}:${file.lastModified}`),
+  format: options.format,
+  maxHeight: options.maxHeight,
+  maxWidth: options.maxWidth,
+  optimisePng: options.optimisePng,
+  preserveDimensions: options.preserveDimensions,
+  quality: options.quality,
+  resizeMode: options.resizeMode,
+  resizePercent: options.resizePercent,
+  webpLossless: options.webpLossless,
+}))
+const {
+  clearEstimate,
+  estimatedOutputSizes,
+  isEstimatePending,
+  scheduleEstimate,
+} = useImageEstimate({
+  estimateOutputSizes,
+  files,
+  imageMode,
+  signature: estimateSignature,
 })
 const originalSizeReference = computed(() => files.value.reduce((total, file) => total + file.size, 0))
 const outputSizeReference = computed(() => {
@@ -71,11 +94,6 @@ const previewEstimates = computed(() => previews.value.map((preview, index) => {
   }
 }))
 
-watch(() => [
-  imageMode.value,
-  previews.value.map(preview => `${preview.id}:${preview.width}:${preview.height}`).join('|'),
-], scheduleEstimate, { immediate: true })
-
 function setImageMode(mode: ImageMode) {
   if (imageMode.value === mode)
     return
@@ -83,13 +101,15 @@ function setImageMode(mode: ImageMode) {
   imageMode.value = mode
   clear()
   resetOptions()
-  options.resizeMode = mode === ImageModeValue.Single ? ImageResizeModeValue.Dimensions : ImageResizeModeValue.Percent
   Object.assign(imagePdfOptions, defaultImagePdfOptions)
   isCropEditorOpen.value = false
   clearEstimate()
 }
 
 function handleImageFiles(fileList: FileList | File[]) {
+  if (imageMode.value === ImageModeValue.Single || files.value.length === 0)
+    resetOptions()
+
   addFiles(fileList, imageMode.value === ImageModeValue.Single)
   isCropEditorOpen.value = false
 }
@@ -126,7 +146,6 @@ function updateResizePercent(event: Event) {
 
 function setResizeMode(resizeMode: ImageTransformOptions['resizeMode']) {
   patchCurrentOptions({ resizeMode })
-  scheduleEstimate()
 }
 
 function updateQuality(event: Event) {
@@ -139,7 +158,6 @@ function commitEstimate() {
 
 function updateFormat(event: Event) {
   patchCurrentOptions({ format: (event.target as HTMLSelectElement).value as ImageOutputFormat })
-  scheduleEstimate()
 }
 
 function updateOutputFileName(event: Event) {
@@ -148,7 +166,6 @@ function updateOutputFileName(event: Event) {
 
 function setPreserveDimensions(preserveDimensions: boolean) {
   patchCurrentOptions({ preserveDimensions })
-  scheduleEstimate()
 }
 
 function setProportionalResize() {
@@ -156,16 +173,18 @@ function setProportionalResize() {
     preserveDimensions: false,
     resizeMode: imageMode.value === ImageModeValue.Batch ? ImageResizeModeValue.Percent : ImageResizeModeValue.Dimensions,
   })
-  scheduleEstimate()
 }
 
 function saveCrop(crop: ImageCropSelection) {
   if (!activeCropPreview.value)
     return
 
+  patchCurrentOptions({
+    maxHeight: crop.height,
+    maxWidth: crop.width,
+  })
   setSingleCropSelection(crop)
   isCropEditorOpen.value = false
-  scheduleEstimate()
 }
 
 function clearCrop() {
@@ -174,76 +193,14 @@ function clearCrop() {
 
   clearSingleCropSelection()
   isCropEditorOpen.value = false
-  scheduleEstimate()
 }
 
 function setOptimisePng(optimisePng: boolean) {
   patchCurrentOptions({ optimisePng })
-  scheduleEstimate()
 }
 
 function setWebpLossless(webpLossless: boolean) {
   patchCurrentOptions(webpLossless ? { webpLossless, quality: 100 } : { webpLossless })
-  scheduleEstimate()
-}
-
-function scheduleEstimate() {
-  clearEstimate()
-
-  if (estimateTimer)
-    clearTimeout(estimateTimer)
-
-  if (!files.value.length || imageMode.value === ImageModeValue.Pdf)
-    return
-
-  // requestId 用來擋已經開始但過期的 async 估算。
-  const requestId = ++estimateRequestId
-  estimateTimer = setTimeout(async () => {
-    isEstimatePending.value = true
-    await waitForEstimateSlot()
-
-    // 檢查這次估算的版本號是不是最新版本。
-    if (requestId !== estimateRequestId)
-      return
-
-    const sizes = await estimateOutputSizes().catch(() => [])
-
-    // encode 回來時再確認一次，避免慢回來的舊結果覆蓋新設定。
-    if (requestId === estimateRequestId) {
-      const nextSizes: number[] = []
-
-      for (const item of sizes)
-        nextSizes[item.index] = item.size
-
-      estimatedOutputSizes.value = nextSizes
-      isEstimatePending.value = false
-    }
-  }, 450)
-}
-
-function waitForEstimateSlot() {
-  if (!import.meta.client)
-    return Promise.resolve()
-
-  return new Promise<void>((resolve) => {
-    // 先等下一個 frame，讓「估算中」狀態有機會畫到畫面上。
-    const resolveAfterFrame = () => window.requestAnimationFrame(() => resolve())
-
-    // 有空閒時間就晚一點做重的 encode；最多等 500ms，避免一直不估算。
-    if ('requestIdleCallback' in window) {
-      window.requestIdleCallback(resolveAfterFrame, { timeout: 500 })
-      return
-    }
-
-    // Safari 等環境沒有 requestIdleCallback，至少先讓出目前這輪 JS。
-    globalThis.setTimeout(resolveAfterFrame, 0)
-  })
-}
-
-function clearEstimate() {
-  estimatedOutputSizes.value = []
-  isEstimatePending.value = false
-  estimateRequestId += 1
 }
 
 function createSizeDelta(sourceSize: number, outputSize: number) {

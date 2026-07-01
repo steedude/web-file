@@ -5,6 +5,7 @@ import { createImagePdf } from '~/utils/image-pdf.util'
 import { createConvertedImage, createImagePreview, encodeImage, getFileBaseName, isSupportedImageFile } from '~/utils/image-transcode.util'
 
 export function useImageTranscoder() {
+  const { t } = useI18n()
   const options = reactive<ImageTransformOptions>({ ...defaultImageOptions })
   const files = ref<File[]>([])
   const previews = ref<UploadedImagePreview[]>([])
@@ -17,7 +18,15 @@ export function useImageTranscoder() {
 
   async function addFiles(fileList: FileList | File[], replace = false) {
     // 單張模式會整批替換，批次模式則累加；兩邊共用同一個 preview 結構。
-    const imageFiles = Array.from(fileList).filter(isSupportedImageFile)
+    const incomingFiles = Array.from(fileList)
+    const imageFiles = incomingFiles.filter(isSupportedImageFile)
+    const skippedCount = incomingFiles.length - imageFiles.length
+
+    error.value = skippedCount ? t('image.unsupportedFiles', { count: skippedCount }) : ''
+
+    if (imageFiles.length === 0)
+      return
+
     const nextPreviews = await Promise.all(imageFiles.map(createImagePreview))
     const isFirstUpload = replace || files.value.length === 0
 
@@ -47,6 +56,7 @@ export function useImageTranscoder() {
 
     files.value = files.value.filter((_, fileIndex) => fileIndex !== index)
     previews.value = previews.value.filter((_, previewIndex) => previewIndex !== index)
+    clearResults()
   }
 
   function setSingleCropSelection(crop: ImageCropSelection) {

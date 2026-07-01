@@ -86,7 +86,8 @@
     "pdfFitModes": {
       "contain": "完整放入",
       "cover": "填滿裁切"
-    }
+    },
+    "unsupportedFiles": "已略過 {count} 個不支援的圖片檔。"
   },
   "pdf": {
     "title": "PDF 工具",
@@ -120,6 +121,15 @@
     "watermarkPreview": "浮水印預覽",
     "imageFormat": "圖片格式",
     "imageQuality": "品質",
-    "imageScale": "倍率"
+    "imageScale": "倍率",
+    "unsupportedFiles": "已略過 {count} 個非 PDF 檔案。"
+  },
+  "error": {
+    "backHome": "回到工作站",
+    "description": "這個路徑沒有可用的工具或頁面，回到首頁就能繼續處理圖片與 PDF。",
+    "fallbackDescription": "頁面暫時無法載入，回到首頁後可以重新開始操作。",
+    "notFound": "找不到頁面",
+    "statusLabel": "錯誤代碼",
+    "title": "訊號中斷"
   }
 }

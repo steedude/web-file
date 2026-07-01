@@ -86,7 +86,8 @@
     "pdfFitModes": {
       "contain": "Fit full image",
       "cover": "Fill and crop"
-    }
+    },
+    "unsupportedFiles": "Skipped {count} unsupported image file(s)."
   },
   "pdf": {
     "title": "PDF tools",
@@ -120,6 +121,15 @@
     "watermarkPreview": "Watermark preview",
     "imageFormat": "Image format",
     "imageQuality": "Quality",
-    "imageScale": "Scale"
+    "imageScale": "Scale",
+    "unsupportedFiles": "Skipped {count} non-PDF file(s)."
+  },
+  "error": {
+    "backHome": "Back to workstation",
+    "description": "This route does not have an available tool or page. Return home to keep working with images and PDFs.",
+    "fallbackDescription": "This page could not load right now. Return home and start again.",
+    "notFound": "Page not found",
+    "statusLabel": "Error code",
+    "title": "Signal lost"
   }
 }

@@ -61,9 +61,10 @@ export async function watermarkPdf(file: File, options: PdfOptions): Promise<Pdf
 
 export async function renderPdfPagesAsImages(pages: PdfPageItem[], options: PdfOptions): Promise<ConvertedImage[]> {
   const results: ConvertedImage[] = []
+  const documents = new Map<File, PDFDocumentProxy>()
 
   for (const page of pages) {
-    const previewDocument = await loadPdfPreviewDocument(page.file)
+    const previewDocument = await getPreviewDocument(page.file, documents)
     const pdfPage = await previewDocument.getPage(page.pageNumber)
     const viewport = pdfPage.getViewport({ scale: options.imageScale })
     const canvas = document.createElement('canvas')
@@ -160,6 +161,17 @@ async function getSourceDocument(file: File, sources: Map<File, PdfLibDocument>)
 
   const document = await PDFDocument.load(await file.arrayBuffer())
   sources.set(file, document)
+  return document
+}
+
+async function getPreviewDocument(file: File, documents: Map<File, PDFDocumentProxy>) {
+  const cachedDocument = documents.get(file)
+
+  if (cachedDocument)
+    return cachedDocument
+
+  const document = await loadPdfPreviewDocument(file)
+  documents.set(file, document)
   return document
 }
 

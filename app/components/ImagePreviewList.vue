@@ -3,7 +3,7 @@ import type { UploadedImagePreview } from '~/types/file-tool.type'
 import { X } from '@lucide/vue'
 import { formatFileSize } from '~/utils/file-size.util'
 
-withDefaults(defineProps<{
+const props = withDefaults(defineProps<{
   allowCrop?: boolean
   compact?: boolean
   estimates?: Array<{
@@ -22,6 +22,37 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
+
+function getPreviewFrameStyle(preview: UploadedImagePreview) {
+  if (!preview.crop)
+    return {}
+
+  return {
+    aspectRatio: `${preview.crop.width} / ${preview.crop.height}`,
+  }
+}
+
+function getCroppedImageStyle(preview: UploadedImagePreview) {
+  if (!preview.crop)
+    return {}
+
+  return {
+    height: `${preview.height / preview.crop.height * 100}%`,
+    left: `${-preview.crop.x / preview.crop.width * 100}%`,
+    top: `${-preview.crop.y / preview.crop.height * 100}%`,
+    width: `${preview.width / preview.crop.width * 100}%`,
+  }
+}
+
+function getPreviewFrameClass(preview: UploadedImagePreview) {
+  if (props.compact)
+    return 'h-full min-h-24 w-20'
+
+  if (props.allowCrop)
+    return preview.crop ? 'w-full' : 'max-h-[520px] min-h-72 w-full'
+
+  return 'aspect-video w-full'
+}
 
 function getDeltaLabel(delta: { type: 'larger' | 'saved' | 'same', percent: number } | null) {
   if (!delta)
@@ -42,12 +73,19 @@ function getDeltaLabel(delta: { type: 'larger' | 'saved' | 'same', percent: numb
       class="group relative overflow-hidden border border-line bg-panel/80 shadow-[0_0_24px_var(--fx-black-20)]"
       :class="compact ? 'grid grid-cols-[5rem_minmax(0,1fr)]' : ''"
     >
-      <img
-        :src="preview.url"
-        :alt="preview.file.name"
-        class="bg-grid object-contain"
-        :class="compact ? 'h-full min-h-24 w-20' : allowCrop ? 'max-h-[520px] min-h-72 w-full' : 'aspect-video w-full'"
+      <div
+        class="relative overflow-hidden bg-grid"
+        :class="getPreviewFrameClass(preview)"
+        :style="getPreviewFrameStyle(preview)"
       >
+        <img
+          :src="preview.url"
+          :alt="preview.file.name"
+          class="absolute object-contain"
+          :class="preview.crop ? 'max-w-none' : 'inset-0 h-full w-full'"
+          :style="getCroppedImageStyle(preview)"
+        >
+      </div>
       <div class="border-line bg-grid/90 p-3" :class="compact ? 'border-l' : 'border-t'">
         <p class="truncate font-mono text-sm font-black text-ink/84">
           {{ preview.file.name }}

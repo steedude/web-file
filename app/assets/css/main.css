@@ -23,6 +23,7 @@
   --rgb-ink: 223 253 242;
   --rgb-black: 0 0 0;
   --rgb-acid: 109 255 157;
+  --rgb-coral: 255 95 122;
   --rgb-sky: 72 215 255;
   --rgb-mint: 23 241 198;
   --rgb-lilac: 167 139 250;
@@ -32,6 +33,7 @@
   --fx-acid-12: rgb(var(--rgb-acid) / 12%);
   --fx-acid-16: rgb(var(--rgb-acid) / 16%);
   --fx-acid-18: rgb(var(--rgb-acid) / 18%);
+  --fx-coral-16: rgb(var(--rgb-coral) / 16%);
   --fx-sky-5: rgb(var(--rgb-sky) / 5%);
   --fx-sky-7: rgb(var(--rgb-sky) / 7%);
   --fx-sky-8: rgb(var(--rgb-sky) / 8%);

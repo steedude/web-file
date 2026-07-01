@@ -3,7 +3,7 @@ import type { ImageMode, ImageTransformOptions, UploadedImagePreview } from '~/t
 import { Scissors } from '@lucide/vue'
 import { ImageModeValue, ImageResizeModeValue } from '~/types/file-tool.type'
 
-defineProps<{
+const props = defineProps<{
   imageMode: ImageMode
   options: ImageTransformOptions
   previews: UploadedImagePreview[]
@@ -21,6 +21,7 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
+const hasActiveCrop = computed(() => props.imageMode === ImageModeValue.Single && !!props.previews[0]?.crop)
 </script>
 
 <template>
@@ -44,7 +45,8 @@ const { t } = useI18n()
     <button
       v-if="imageMode === ImageModeValue.Single"
       type="button"
-      class="focus-ring inline-flex items-center gap-2 border border-line bg-grid px-3 py-2 font-mono text-sm font-black text-ink/76 transition hover:border-sky hover:text-sky disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-line disabled:hover:text-ink/76"
+      class="focus-ring inline-flex items-center gap-2 border px-3 py-2 font-mono text-sm font-black transition disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-line disabled:hover:text-ink/76"
+      :class="hasActiveCrop ? 'border-sky bg-sky text-paper' : 'border-line bg-grid text-ink/76 hover:border-sky hover:text-sky'"
       :disabled="!previews.length"
       @click="emit('openCrop')"
     >

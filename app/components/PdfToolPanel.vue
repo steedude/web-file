@@ -25,6 +25,7 @@ const {
   togglePageSelection,
 } = usePdfWorkshop()
 
+const watermarkPreviewStage = ref<HTMLElement | null>(null)
 const watermarkPreviewCanvas = ref<HTMLCanvasElement | null>(null)
 const watermarkPreviewText = computed(() => options.watermarkText || 'web file')
 const watermarkPreviewFontSize = computed(() => Math.max(8, options.watermarkFontSize * options.watermarkPreviewScale / 100))
@@ -32,6 +33,7 @@ let watermarkPreviewFrameId = 0
 
 watch(
   () => [
+    options.mode,
     watermarkPreviewText.value,
     options.watermarkColor,
     options.watermarkFontSize,
@@ -44,6 +46,10 @@ watch(
 )
 
 onMounted(drawWatermarkPreview)
+onBeforeUnmount(() => {
+  if (watermarkPreviewFrameId)
+    window.cancelAnimationFrame(watermarkPreviewFrameId)
+})
 
 function updateWatermarkText(event: Event) {
   options.watermarkText = (event.target as HTMLInputElement).value
@@ -90,9 +96,10 @@ function drawWatermarkPreview() {
 
   watermarkPreviewFrameId = window.requestAnimationFrame(() => {
     watermarkPreviewFrameId = 0
+    const stage = watermarkPreviewStage.value
     const canvas = watermarkPreviewCanvas.value
 
-    if (!canvas)
+    if (!stage || !canvas)
       return
 
     const context = canvas.getContext('2d')
@@ -100,26 +107,18 @@ function drawWatermarkPreview() {
     if (!context)
       return
 
+    const rect = stage.getBoundingClientRect()
+    const width = Math.max(1, Math.floor(rect.width))
+    const height = Math.max(1, Math.floor(rect.height))
+    const pixelRatio = window.devicePixelRatio || 1
     const fontSize = watermarkPreviewFontSize.value
     const font = `900 ${fontSize}px "JetBrains Mono", "Cascadia Code", monospace`
-    context.font = font
-
     const text = watermarkPreviewText.value
-    const metrics = context.measureText(text)
-    const textWidth = Math.max(1, metrics.width)
-    const textHeight = Math.max(1, (metrics.actualBoundingBoxAscent || fontSize * 0.8) + (metrics.actualBoundingBoxDescent || fontSize * 0.25))
-    const radians = Math.abs(options.watermarkRotation) * Math.PI / 180
-    const rotatedWidth = Math.abs(textWidth * Math.cos(radians)) + Math.abs(textHeight * Math.sin(radians))
-    const rotatedHeight = Math.abs(textWidth * Math.sin(radians)) + Math.abs(textHeight * Math.cos(radians))
-    const padding = 48
-    const width = Math.ceil(rotatedWidth + padding * 2)
-    const height = Math.ceil(rotatedHeight + padding * 2)
-    const pixelRatio = window.devicePixelRatio || 1
 
     canvas.width = Math.ceil(width * pixelRatio)
     canvas.height = Math.ceil(height * pixelRatio)
-    canvas.style.width = `${width}px`
-    canvas.style.height = `${height}px`
+    canvas.style.width = '100%'
+    canvas.style.height = '100%'
 
     context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0)
     context.clearRect(0, 0, width, height)
@@ -222,13 +221,12 @@ function drawWatermarkPreview() {
           </div>
           <div class="relative h-56 overflow-hidden border border-line bg-paper">
             <div class="absolute inset-0 bg-[linear-gradient(rgb(223_253_242_/_6%)_1px,transparent_1px),linear-gradient(90deg,rgb(223_253_242_/_6%)_1px,transparent_1px)] bg-[length:24px_24px]" />
-            <div class="absolute inset-4 overflow-auto border border-line/70 bg-grid/38">
-              <div class="box-border flex min-h-full min-w-full items-center justify-center p-8">
-                <canvas
-                  ref="watermarkPreviewCanvas"
-                  aria-hidden="true"
-                />
-              </div>
+            <div ref="watermarkPreviewStage" class="absolute inset-4 overflow-hidden border border-line/70 bg-grid/38">
+              <canvas
+                ref="watermarkPreviewCanvas"
+                class="block size-full"
+                aria-hidden="true"
+              />
             </div>
           </div>
         </div>

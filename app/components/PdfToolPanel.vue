@@ -25,11 +25,20 @@ const {
   togglePageSelection,
 } = usePdfWorkshop()
 
+const watermarkPreviewFrame = ref<HTMLElement | null>(null)
+const watermarkPreviewMeasure = ref<HTMLElement | null>(null)
+const watermarkPreviewScale = ref(1)
+const watermarkPreviewText = computed(() => options.watermarkText || 'web file')
+const watermarkPreviewFontSize = computed(() => Math.max(14, options.watermarkFontSize * 0.6))
 const watermarkPreviewStyle = computed(() => ({
   color: options.watermarkColor,
   opacity: options.watermarkOpacity / 100,
-  fontSize: `${Math.max(14, options.watermarkFontSize * 0.6)}px`,
-  transform: `rotate(${options.watermarkRotation}deg)`,
+  fontSize: `${watermarkPreviewFontSize.value}px`,
+  transform: `rotate(${options.watermarkRotation}deg) scale(${watermarkPreviewScale.value})`,
+  transformOrigin: 'center',
+}))
+const watermarkPreviewMeasureStyle = computed(() => ({
+  fontSize: `${watermarkPreviewFontSize.value}px`,
 }))
 const watermarkPreviewPositionClass = computed(() => {
   if (options.watermarkPosition === 'topLeft')
@@ -45,6 +54,21 @@ const watermarkPreviewPositionClass = computed(() => {
     return 'items-end justify-end'
 
   return 'items-center justify-center'
+})
+
+watch(
+  () => [watermarkPreviewText.value, options.watermarkFontSize, options.watermarkRotation],
+  updateWatermarkPreviewScale,
+  { flush: 'post', immediate: true },
+)
+
+onMounted(() => {
+  window.addEventListener('resize', updateWatermarkPreviewScale)
+  updateWatermarkPreviewScale()
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', updateWatermarkPreviewScale)
 })
 
 function updateWatermarkText(event: Event) {
@@ -81,6 +105,30 @@ function updateImageQuality(event: Event) {
 
 function updateImageScale(event: Event) {
   options.imageScale = Math.max(1, Math.min(3, Number((event.target as HTMLInputElement).value) || 2))
+}
+
+function updateWatermarkPreviewScale() {
+  if (!import.meta.client)
+    return
+
+  window.requestAnimationFrame(() => {
+    const frame = watermarkPreviewFrame.value
+    const measure = watermarkPreviewMeasure.value
+
+    if (!frame || !measure)
+      return
+
+    const frameRect = frame.getBoundingClientRect()
+    const width = measure.offsetWidth
+    const height = measure.offsetHeight
+    const radians = Math.abs(options.watermarkRotation) * Math.PI / 180
+    const rotatedWidth = Math.abs(width * Math.cos(radians)) + Math.abs(height * Math.sin(radians))
+    const rotatedHeight = Math.abs(width * Math.sin(radians)) + Math.abs(height * Math.cos(radians))
+    const availableWidth = Math.max(1, frameRect.width - 32)
+    const availableHeight = Math.max(1, frameRect.height - 32)
+
+    watermarkPreviewScale.value = Math.max(0.08, Math.min(1, availableWidth / rotatedWidth, availableHeight / rotatedHeight))
+  })
 }
 </script>
 
@@ -164,15 +212,18 @@ function updateImageScale(event: Event) {
           <span class="font-mono text-xs font-black tracking-widest text-lilac uppercase">{{ t('pdf.watermarkPreview') }}</span>
           <div class="relative h-40 overflow-hidden border border-line bg-paper">
             <div class="absolute inset-0 bg-[linear-gradient(rgb(223_253_242_/_6%)_1px,transparent_1px),linear-gradient(90deg,rgb(223_253_242_/_6%)_1px,transparent_1px)] bg-[length:24px_24px]" />
-            <div class="absolute inset-4 overflow-hidden border border-line/70 bg-grid/38">
+            <div ref="watermarkPreviewFrame" class="absolute inset-4 overflow-hidden border border-line/70 bg-grid/38">
+              <span ref="watermarkPreviewMeasure" class="invisible absolute top-0 left-0 font-mono font-black whitespace-nowrap" :style="watermarkPreviewMeasureStyle">
+                {{ watermarkPreviewText }}
+              </span>
               <div v-if="options.watermarkPosition === 'tile'" class="absolute inset-0 grid grid-cols-2 place-items-center gap-4 p-4">
                 <span v-for="item in 6" :key="item" class="font-mono font-black whitespace-nowrap" :style="watermarkPreviewStyle">
-                  {{ options.watermarkText || 'web file' }}
+                  {{ watermarkPreviewText }}
                 </span>
               </div>
               <div v-else class="absolute inset-0 flex p-4" :class="watermarkPreviewPositionClass">
                 <span class="font-mono font-black whitespace-nowrap" :style="watermarkPreviewStyle">
-                  {{ options.watermarkText || 'web file' }}
+                  {{ watermarkPreviewText }}
                 </span>
               </div>
             </div>

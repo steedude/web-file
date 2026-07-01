@@ -57,6 +57,22 @@ export interface ImageTransformOptions {
   webpLossless: boolean
 }
 
+export interface ImageControlActions {
+  commitEstimate: () => void
+  openCrop: () => void
+  setOptimisePng: (optimisePng: boolean) => void
+  setPreserveDimensions: (preserveDimensions: boolean) => void
+  setProportionalResize: () => void
+  setResizeMode: (resizeMode: ImageResizeMode) => void
+  setWebpLossless: (webpLossless: boolean) => void
+  updateFormat: (event: Event) => void
+  updateHeight: (event: Event) => void
+  updateOutputFileName: (event: Event) => void
+  updateQuality: (event: Event) => void
+  updateResizePercent: (event: Event) => void
+  updateWidth: (event: Event) => void
+}
+
 export interface ConvertedImage {
   id: string
   sourceName: string

@@ -1,23 +1,13 @@
 <script setup lang="ts">
-import type { ImageMode, ImageTransformOptions, UploadedImagePreview } from '~/types/file-tool.type'
+import type { ImageControlActions, ImageMode, ImageTransformOptions, UploadedImagePreview } from '~/types/file-tool.type'
 import { Scissors } from '@lucide/vue'
 import { ImageModeValue, ImageResizeModeValue } from '~/types/file-tool.type'
 
 const props = defineProps<{
+  actions: ImageControlActions
   imageMode: ImageMode
   options: ImageTransformOptions
   previews: UploadedImagePreview[]
-}>()
-
-const emit = defineEmits<{
-  commitEstimate: []
-  openCrop: []
-  setPreserveDimensions: [preserveDimensions: boolean]
-  setProportionalResize: []
-  setResizeMode: [resizeMode: ImageTransformOptions['resizeMode']]
-  updateHeight: [event: Event]
-  updateResizePercent: [event: Event]
-  updateWidth: [event: Event]
 }>()
 
 const { t } = useI18n()
@@ -30,7 +20,7 @@ const hasActiveCrop = computed(() => props.imageMode === ImageModeValue.Single &
       type="button"
       class="focus-ring border px-3 py-2 font-mono text-sm font-black transition"
       :class="options.preserveDimensions ? 'border-sky bg-sky text-paper' : 'border-line bg-grid text-ink/62 hover:border-sky hover:text-sky'"
-      @click="emit('setPreserveDimensions', true)"
+      @click="actions.setPreserveDimensions(true)"
     >
       {{ t('image.keepOriginal') }}
     </button>
@@ -38,7 +28,7 @@ const hasActiveCrop = computed(() => props.imageMode === ImageModeValue.Single &
       type="button"
       class="focus-ring border px-3 py-2 font-mono text-sm font-black transition"
       :class="!options.preserveDimensions ? 'border-sky bg-sky text-paper' : 'border-line bg-grid text-ink/62 hover:border-sky hover:text-sky'"
-      @click="emit('setProportionalResize')"
+      @click="actions.setProportionalResize"
     >
       {{ t('image.proportionalResize') }}
     </button>
@@ -48,7 +38,7 @@ const hasActiveCrop = computed(() => props.imageMode === ImageModeValue.Single &
       class="focus-ring inline-flex items-center gap-2 border px-3 py-2 font-mono text-sm font-black transition disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-line disabled:hover:text-ink/76"
       :class="hasActiveCrop ? 'border-sky bg-sky text-paper' : 'border-line bg-grid text-ink/76 hover:border-sky hover:text-sky'"
       :disabled="!previews.length"
-      @click="emit('openCrop')"
+      @click="actions.openCrop"
     >
       <Scissors class="size-4" aria-hidden="true" />
       {{ t('image.crop') }}
@@ -60,7 +50,7 @@ const hasActiveCrop = computed(() => props.imageMode === ImageModeValue.Single &
       type="button"
       class="focus-ring border px-3 py-2 font-mono text-sm font-black transition"
       :class="options.resizeMode === ImageResizeModeValue.Dimensions ? 'border-sky bg-sky text-paper' : 'border-line bg-grid text-ink/62 hover:border-sky hover:text-sky'"
-      @click="emit('setResizeMode', ImageResizeModeValue.Dimensions)"
+      @click="actions.setResizeMode(ImageResizeModeValue.Dimensions)"
     >
       {{ t('image.resizeByPixels') }}
     </button>
@@ -68,7 +58,7 @@ const hasActiveCrop = computed(() => props.imageMode === ImageModeValue.Single &
       type="button"
       class="focus-ring border px-3 py-2 font-mono text-sm font-black transition"
       :class="options.resizeMode === ImageResizeModeValue.Percent ? 'border-sky bg-sky text-paper' : 'border-line bg-grid text-ink/62 hover:border-sky hover:text-sky'"
-      @click="emit('setResizeMode', ImageResizeModeValue.Percent)"
+      @click="actions.setResizeMode(ImageResizeModeValue.Percent)"
     >
       {{ t('image.resizeByPercent') }}
     </button>
@@ -76,7 +66,7 @@ const hasActiveCrop = computed(() => props.imageMode === ImageModeValue.Single &
 
   <label v-if="!options.preserveDimensions && options.resizeMode === ImageResizeModeValue.Percent" class="grid gap-2">
     <span class="font-mono text-sm font-black tracking-widest text-sky uppercase">{{ t('image.resizePercent') }} {{ t('common.dot') }} {{ options.resizePercent }}{{ t('common.percent') }}</span>
-    <input :value="options.resizePercent" class="w-full accent-acid" type="range" min="1" max="100" step="1" @change="emit('commitEstimate')" @input="emit('updateResizePercent', $event)">
+    <input :value="options.resizePercent" class="w-full accent-acid" type="range" min="1" max="100" step="1" @change="actions.commitEstimate" @input="actions.updateResizePercent($event)">
   </label>
 
   <div v-if="imageMode === ImageModeValue.Single && options.resizeMode === ImageResizeModeValue.Dimensions" class="grid gap-4 md:grid-cols-2">
@@ -89,7 +79,7 @@ const hasActiveCrop = computed(() => props.imageMode === ImageModeValue.Single &
         min="1"
         step="1"
         :disabled="options.preserveDimensions"
-        @input="emit('updateWidth', $event)"
+        @input="actions.updateWidth($event)"
       >
     </label>
 
@@ -102,7 +92,7 @@ const hasActiveCrop = computed(() => props.imageMode === ImageModeValue.Single &
         min="1"
         step="1"
         :disabled="options.preserveDimensions"
-        @input="emit('updateHeight', $event)"
+        @input="actions.updateHeight($event)"
       >
     </label>
   </div>

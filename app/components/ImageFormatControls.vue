@@ -1,22 +1,14 @@
 <script setup lang="ts">
-import type { ImageMode, ImageTransformOptions } from '~/types/file-tool.type'
+import type { ImageControlActions, ImageMode, ImageTransformOptions } from '~/types/file-tool.type'
 import { imageFormatOptions } from '~/configs/file-tool.config'
 import { ImageModeValue, ImageOutputFormatValue } from '~/types/file-tool.type'
 
 const props = defineProps<{
+  actions: ImageControlActions
   hasSameExtensionWarning: boolean
   imageMode: ImageMode
   options: ImageTransformOptions
   previewsLength: number
-}>()
-
-const emit = defineEmits<{
-  commitEstimate: []
-  setOptimisePng: [optimisePng: boolean]
-  setWebpLossless: [webpLossless: boolean]
-  updateFormat: [event: Event]
-  updateOutputFileName: [event: Event]
-  updateQuality: [event: Event]
 }>()
 
 const { t } = useI18n()
@@ -27,7 +19,7 @@ const displayedQuality = computed(() => props.options.webpLossless ? 100 : props
   <div class="grid gap-4 md:grid-cols-2">
     <label class="grid grid-rows-[auto_2.5rem] gap-2">
       <span class="flex h-5 items-center font-mono text-sm font-black tracking-widest text-sky uppercase">{{ t('image.outputFormat') }}</span>
-      <select :value="options.format" class="focus-ring w-full border border-line bg-grid px-3 py-2 font-mono text-base font-bold text-ink" @change="emit('updateFormat', $event)">
+      <select :value="options.format" class="focus-ring w-full border border-line bg-grid px-3 py-2 font-mono text-base font-bold text-ink" @change="actions.updateFormat($event)">
         <option v-for="format in imageFormatOptions" :key="format.value" :value="format.value">
           {{ format.value.toUpperCase() }}
         </option>
@@ -38,13 +30,13 @@ const displayedQuality = computed(() => props.options.webpLossless ? 100 : props
       <div v-if="options.format === ImageOutputFormatValue.Webp">
         <label class="grid grid-rows-[auto_2.5rem] gap-2">
           <span class="flex h-5 items-center font-mono text-sm font-black tracking-widest text-sky uppercase">{{ t('image.quality') }} {{ t('common.dot') }} {{ displayedQuality }}</span>
-          <input :value="displayedQuality" class="h-9 w-full accent-acid disabled:opacity-40" type="range" min="1" max="100" :disabled="options.webpLossless" @change="emit('commitEstimate')" @input="emit('updateQuality', $event)">
+          <input :value="displayedQuality" class="h-9 w-full accent-acid disabled:opacity-40" type="range" min="1" max="100" :disabled="options.webpLossless" @change="actions.commitEstimate" @input="actions.updateQuality($event)">
         </label>
       </div>
 
       <label v-else-if="options.format === ImageOutputFormatValue.Jpeg" class="grid grid-rows-[auto_2.5rem] gap-2">
         <span class="flex h-5 items-center font-mono text-sm font-black tracking-widest text-sky uppercase">{{ t('image.quality') }} {{ t('common.dot') }} {{ options.quality }}</span>
-        <input :value="options.quality" class="h-9 w-full accent-acid" type="range" min="1" max="100" @change="emit('commitEstimate')" @input="emit('updateQuality', $event)">
+        <input :value="options.quality" class="h-9 w-full accent-acid" type="range" min="1" max="100" @change="actions.commitEstimate" @input="actions.updateQuality($event)">
       </label>
 
       <div v-else class="grid grid-rows-[auto_2.5rem] gap-2">
@@ -59,7 +51,7 @@ const displayedQuality = computed(() => props.options.webpLossless ? 100 : props
   <label v-if="options.format === ImageOutputFormatValue.Png" class="grid gap-2">
     <span class="font-mono text-sm font-black tracking-widest text-sky uppercase">{{ t('image.losslessPng') }}</span>
     <span class="inline-flex w-full items-center gap-2 border border-line bg-grid px-3 py-2 font-mono text-sm font-black text-ink/76">
-      <input :checked="options.optimisePng" type="checkbox" class="size-4 accent-acid" @change="emit('setOptimisePng', ($event.target as HTMLInputElement).checked)">
+      <input :checked="options.optimisePng" type="checkbox" class="size-4 accent-acid" @change="actions.setOptimisePng(($event.target as HTMLInputElement).checked)">
       {{ t('image.optimisePng') }}
     </span>
   </label>
@@ -67,7 +59,7 @@ const displayedQuality = computed(() => props.options.webpLossless ? 100 : props
   <label v-if="options.format === ImageOutputFormatValue.Webp" class="grid gap-2">
     <span class="font-mono text-sm font-black tracking-widest text-sky uppercase">{{ t('image.webpLossless') }}</span>
     <span class="inline-flex w-full items-center gap-2 border border-line bg-grid px-3 py-2 font-mono text-sm font-black text-ink/76">
-      <input :checked="options.webpLossless" type="checkbox" class="size-4 accent-acid" @change="emit('setWebpLossless', ($event.target as HTMLInputElement).checked)">
+      <input :checked="options.webpLossless" type="checkbox" class="size-4 accent-acid" @change="actions.setWebpLossless(($event.target as HTMLInputElement).checked)">
       {{ t('image.enableWebpLossless') }}
     </span>
   </label>
@@ -84,7 +76,7 @@ const displayedQuality = computed(() => props.options.webpLossless ? 100 : props
       type="text"
       autocomplete="off"
       spellcheck="false"
-      @input="emit('updateOutputFileName', $event)"
+      @input="actions.updateOutputFileName($event)"
     >
   </label>
 </template>

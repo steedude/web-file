@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ImageCropSelection, ImageMode, ImageOutputFormat, ImageTransformOptions } from '~/types/file-tool.type'
+import type { ImageControlActions, ImageCropSelection, ImageMode, ImageOutputFormat, ImageTransformOptions } from '~/types/file-tool.type'
 import { Play, Trash2 } from '@lucide/vue'
 import { defaultImagePdfOptions } from '~/configs/file-tool.config'
 import { ImageModeValue, ImageOutputFormatValue, ImageResizeModeValue } from '~/types/file-tool.type'
@@ -93,6 +93,23 @@ const previewEstimates = computed(() => previews.value.map((preview, index) => {
     delta: outputSize ? createSizeDelta(preview.file.size, outputSize) : null,
   }
 }))
+const imageActions: ImageControlActions = {
+  commitEstimate,
+  openCrop: () => {
+    isCropEditorOpen.value = true
+  },
+  setOptimisePng,
+  setPreserveDimensions,
+  setProportionalResize,
+  setResizeMode,
+  setWebpLossless,
+  updateFormat,
+  updateHeight,
+  updateOutputFileName,
+  updateQuality,
+  updateResizePercent,
+  updateWidth,
+}
 
 function setImageMode(mode: ImageMode) {
   if (imageMode.value === mode)
@@ -268,19 +285,7 @@ function runImageAction() {
           :output-size-reference="outputSizeReference"
           :previews="previews"
           :summary-delta="summaryDelta"
-          @commit-estimate="commitEstimate"
-          @open-crop="isCropEditorOpen = true"
-          @set-optimise-png="setOptimisePng"
-          @set-preserve-dimensions="setPreserveDimensions"
-          @set-proportional-resize="setProportionalResize"
-          @set-resize-mode="setResizeMode"
-          @set-webp-lossless="setWebpLossless"
-          @update-format="updateFormat"
-          @update-height="updateHeight"
-          @update-output-file-name="updateOutputFileName"
-          @update-quality="updateQuality"
-          @update-resize-percent="updateResizePercent"
-          @update-width="updateWidth"
+          :actions="imageActions"
         />
       </template>
 

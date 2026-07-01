@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import type { ImageMode, ImageTransformOptions, UploadedImagePreview } from '~/types/file-tool.type'
+import type { ImageControlActions, ImageMode, ImageTransformOptions, UploadedImagePreview } from '~/types/file-tool.type'
 import { ImageModeValue } from '~/types/file-tool.type'
 import { formatFileSize } from '~/utils/file-size.util'
 
 defineProps<{
+  actions: ImageControlActions
   hasSameExtensionWarning: boolean
   imageMode: ImageMode
   isEstimatePending: boolean
@@ -12,22 +13,6 @@ defineProps<{
   outputSizeReference: number
   previews: UploadedImagePreview[]
   summaryDelta: { type: 'larger' | 'saved' | 'same', percent: number } | null
-}>()
-
-const emit = defineEmits<{
-  commitEstimate: []
-  openCrop: []
-  setOptimisePng: [optimisePng: boolean]
-  setPreserveDimensions: [preserveDimensions: boolean]
-  setProportionalResize: []
-  setResizeMode: [resizeMode: ImageTransformOptions['resizeMode']]
-  setWebpLossless: [webpLossless: boolean]
-  updateFormat: [event: Event]
-  updateHeight: [event: Event]
-  updateOutputFileName: [event: Event]
-  updateQuality: [event: Event]
-  updateResizePercent: [event: Event]
-  updateWidth: [event: Event]
 }>()
 
 const { t } = useI18n()
@@ -49,12 +34,7 @@ function getDeltaLabel(delta: { type: 'larger' | 'saved' | 'same', percent: numb
     :image-mode="imageMode"
     :options="options"
     :previews-length="previews.length"
-    @commit-estimate="emit('commitEstimate')"
-    @set-optimise-png="emit('setOptimisePng', $event)"
-    @set-webp-lossless="emit('setWebpLossless', $event)"
-    @update-format="emit('updateFormat', $event)"
-    @update-output-file-name="emit('updateOutputFileName', $event)"
-    @update-quality="emit('updateQuality', $event)"
+    :actions="actions"
   />
 
   <div class="grid gap-2 font-mono text-sm font-bold text-ink md:grid-cols-3">
@@ -76,13 +56,6 @@ function getDeltaLabel(delta: { type: 'larger' | 'saved' | 'same', percent: numb
     :image-mode="imageMode"
     :options="options"
     :previews="previews"
-    @commit-estimate="emit('commitEstimate')"
-    @open-crop="emit('openCrop')"
-    @set-preserve-dimensions="emit('setPreserveDimensions', $event)"
-    @set-proportional-resize="emit('setProportionalResize')"
-    @set-resize-mode="emit('setResizeMode', $event)"
-    @update-height="emit('updateHeight', $event)"
-    @update-resize-percent="emit('updateResizePercent', $event)"
-    @update-width="emit('updateWidth', $event)"
+    :actions="actions"
   />
 </template>

@@ -196,16 +196,19 @@ function scheduleEstimate() {
   if (!files.value.length || imageMode.value === ImageModeValue.Pdf)
     return
 
+  // requestId 用來擋已經開始但過期的 async 估算。
   const requestId = ++estimateRequestId
   estimateTimer = setTimeout(async () => {
     isEstimatePending.value = true
     await waitForEstimateSlot()
 
+    // 檢查這次估算的版本號是不是最新版本。
     if (requestId !== estimateRequestId)
       return
 
     const sizes = await estimateOutputSizes().catch(() => [])
 
+    // encode 回來時再確認一次，避免慢回來的舊結果覆蓋新設定。
     if (requestId === estimateRequestId) {
       const nextSizes: number[] = []
 
@@ -223,13 +226,16 @@ function waitForEstimateSlot() {
     return Promise.resolve()
 
   return new Promise<void>((resolve) => {
+    // 先等下一個 frame，讓「估算中」狀態有機會畫到畫面上。
     const resolveAfterFrame = () => window.requestAnimationFrame(() => resolve())
 
+    // 有空閒時間就晚一點做重的 encode；最多等 500ms，避免一直不估算。
     if ('requestIdleCallback' in window) {
       window.requestIdleCallback(resolveAfterFrame, { timeout: 500 })
       return
     }
 
+    // Safari 等環境沒有 requestIdleCallback，至少先讓出目前這輪 JS。
     globalThis.setTimeout(resolveAfterFrame, 0)
   })
 }

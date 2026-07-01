@@ -57,7 +57,7 @@ export interface UploadedImagePreview {
 
 export type PdfMode = 'merge' | 'split' | 'watermark' | 'images'
 export type PdfImageOutputFormat = 'png' | 'jpeg' | 'webp'
-export type PdfWatermarkPreviewScale = 50 | 75 | 100
+export type PdfWatermarkPreviewScale = 25 | 50 | 75 | 100
 
 export interface PdfOptions {
   mode: PdfMode

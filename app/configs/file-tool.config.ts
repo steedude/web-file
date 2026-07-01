@@ -32,7 +32,7 @@ export const defaultImagePdfOptions: ImagePdfOptions = {
 }
 
 export const pdfModeOptions: PdfMode[] = ['merge', 'split', 'watermark', 'images']
-export const pdfWatermarkPreviewScaleOptions: PdfWatermarkPreviewScale[] = [50, 75, 100]
+export const pdfWatermarkPreviewScaleOptions: PdfWatermarkPreviewScale[] = [25, 50, 75, 100]
 export const pdfImageFormatOptions: PdfImageOutputFormat[] = ['png', 'jpeg', 'webp']
 
 export const defaultPdfOptions: PdfOptions = {

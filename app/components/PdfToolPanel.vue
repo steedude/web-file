@@ -25,31 +25,14 @@ const {
   togglePageSelection,
 } = usePdfWorkshop()
 
-const watermarkPreviewStage = ref<HTMLElement | null>(null)
-const watermarkPreviewCanvas = ref<HTMLCanvasElement | null>(null)
 const watermarkPreviewText = computed(() => options.watermarkText || 'web file')
 const watermarkPreviewFontSize = computed(() => Math.max(8, options.watermarkFontSize * options.watermarkPreviewScale / 100))
-let watermarkPreviewFrameId = 0
-
-watch(
-  () => [
-    options.mode,
-    watermarkPreviewText.value,
-    options.watermarkColor,
-    options.watermarkFontSize,
-    options.watermarkOpacity,
-    options.watermarkPreviewScale,
-    options.watermarkRotation,
-  ],
-  drawWatermarkPreview,
-  { flush: 'post', immediate: true },
-)
-
-onMounted(drawWatermarkPreview)
-onBeforeUnmount(() => {
-  if (watermarkPreviewFrameId)
-    window.cancelAnimationFrame(watermarkPreviewFrameId)
-})
+const watermarkPreviewStyle = computed(() => ({
+  color: options.watermarkColor,
+  opacity: options.watermarkOpacity / 100,
+  fontSize: `${watermarkPreviewFontSize.value}px`,
+  transform: `translate(-50%, -50%) rotate(${options.watermarkRotation}deg)`,
+}))
 
 function updateWatermarkText(event: Event) {
   options.watermarkText = (event.target as HTMLInputElement).value
@@ -85,54 +68,6 @@ function updateImageQuality(event: Event) {
 
 function updateImageScale(event: Event) {
   options.imageScale = Math.max(1, Math.min(3, Number((event.target as HTMLInputElement).value) || 2))
-}
-
-function drawWatermarkPreview() {
-  if (!import.meta.client)
-    return
-
-  if (watermarkPreviewFrameId)
-    window.cancelAnimationFrame(watermarkPreviewFrameId)
-
-  watermarkPreviewFrameId = window.requestAnimationFrame(() => {
-    watermarkPreviewFrameId = 0
-    const stage = watermarkPreviewStage.value
-    const canvas = watermarkPreviewCanvas.value
-
-    if (!stage || !canvas)
-      return
-
-    const context = canvas.getContext('2d')
-
-    if (!context)
-      return
-
-    const rect = stage.getBoundingClientRect()
-    const width = Math.max(1, Math.floor(rect.width))
-    const height = Math.max(1, Math.floor(rect.height))
-    const pixelRatio = window.devicePixelRatio || 1
-    const fontSize = watermarkPreviewFontSize.value
-    const font = `900 ${fontSize}px "JetBrains Mono", "Cascadia Code", monospace`
-    const text = watermarkPreviewText.value
-
-    canvas.width = Math.ceil(width * pixelRatio)
-    canvas.height = Math.ceil(height * pixelRatio)
-    canvas.style.width = '100%'
-    canvas.style.height = '100%'
-
-    context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0)
-    context.clearRect(0, 0, width, height)
-    context.font = font
-    context.textAlign = 'center'
-    context.textBaseline = 'middle'
-    context.globalAlpha = Math.max(5, Math.min(100, options.watermarkOpacity)) / 100
-    context.fillStyle = options.watermarkColor
-    context.translate(width / 2, height / 2)
-    context.rotate(options.watermarkRotation * Math.PI / 180)
-    context.fillText(text, 0, 0)
-    context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0)
-    context.globalAlpha = 1
-  })
 }
 </script>
 
@@ -221,12 +156,10 @@ function drawWatermarkPreview() {
           </div>
           <div class="relative h-56 overflow-hidden border border-line bg-paper">
             <div class="absolute inset-0 bg-[linear-gradient(rgb(223_253_242_/_6%)_1px,transparent_1px),linear-gradient(90deg,rgb(223_253_242_/_6%)_1px,transparent_1px)] bg-[length:24px_24px]" />
-            <div ref="watermarkPreviewStage" class="absolute inset-4 overflow-hidden border border-line/70 bg-grid/38">
-              <canvas
-                ref="watermarkPreviewCanvas"
-                class="block size-full"
-                aria-hidden="true"
-              />
+            <div class="absolute inset-4 overflow-hidden border border-line/70 bg-grid/38">
+              <span class="absolute top-1/2 left-1/2 font-mono font-black whitespace-nowrap" :style="watermarkPreviewStyle">
+                {{ watermarkPreviewText }}
+              </span>
             </div>
           </div>
         </div>

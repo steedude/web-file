@@ -25,15 +25,25 @@ const {
   togglePageSelection,
 } = usePdfWorkshop()
 
+const watermarkPreviewCanvas = ref<HTMLCanvasElement | null>(null)
 const watermarkPreviewText = computed(() => options.watermarkText || 'web file')
 const watermarkPreviewFontSize = computed(() => Math.max(8, options.watermarkFontSize * options.watermarkPreviewScale / 100))
-const watermarkPreviewStyle = computed(() => ({
-  color: options.watermarkColor,
-  opacity: options.watermarkOpacity / 100,
-  fontSize: `${watermarkPreviewFontSize.value}px`,
-  transform: `rotate(${options.watermarkRotation}deg)`,
-  transformOrigin: 'center',
-}))
+const watermarkPreviewCanvasSize = reactive({ width: 1, height: 1 })
+
+watch(
+  () => [
+    watermarkPreviewText.value,
+    options.watermarkColor,
+    options.watermarkFontSize,
+    options.watermarkOpacity,
+    options.watermarkPreviewScale,
+    options.watermarkRotation,
+  ],
+  drawWatermarkPreview,
+  { flush: 'post', immediate: true },
+)
+
+onMounted(drawWatermarkPreview)
 
 function updateWatermarkText(event: Event) {
   options.watermarkText = (event.target as HTMLInputElement).value
@@ -69,6 +79,59 @@ function updateImageQuality(event: Event) {
 
 function updateImageScale(event: Event) {
   options.imageScale = Math.max(1, Math.min(3, Number((event.target as HTMLInputElement).value) || 2))
+}
+
+function drawWatermarkPreview() {
+  if (!import.meta.client)
+    return
+
+  window.requestAnimationFrame(() => {
+    const canvas = watermarkPreviewCanvas.value
+
+    if (!canvas)
+      return
+
+    const context = canvas.getContext('2d')
+
+    if (!context)
+      return
+
+    const fontSize = watermarkPreviewFontSize.value
+    const font = `900 ${fontSize}px "JetBrains Mono", "Cascadia Code", monospace`
+    context.font = font
+
+    const text = watermarkPreviewText.value
+    const metrics = context.measureText(text)
+    const textWidth = Math.max(1, metrics.width)
+    const textHeight = Math.max(1, (metrics.actualBoundingBoxAscent || fontSize * 0.8) + (metrics.actualBoundingBoxDescent || fontSize * 0.25))
+    const radians = Math.abs(options.watermarkRotation) * Math.PI / 180
+    const rotatedWidth = Math.abs(textWidth * Math.cos(radians)) + Math.abs(textHeight * Math.sin(radians))
+    const rotatedHeight = Math.abs(textWidth * Math.sin(radians)) + Math.abs(textHeight * Math.cos(radians))
+    const padding = 48
+    const width = Math.ceil(rotatedWidth + padding * 2)
+    const height = Math.ceil(rotatedHeight + padding * 2)
+    const pixelRatio = window.devicePixelRatio || 1
+
+    watermarkPreviewCanvasSize.width = width
+    watermarkPreviewCanvasSize.height = height
+    canvas.width = Math.ceil(width * pixelRatio)
+    canvas.height = Math.ceil(height * pixelRatio)
+    canvas.style.width = `${width}px`
+    canvas.style.height = `${height}px`
+
+    context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0)
+    context.clearRect(0, 0, width, height)
+    context.font = font
+    context.textAlign = 'center'
+    context.textBaseline = 'middle'
+    context.globalAlpha = Math.max(5, Math.min(100, options.watermarkOpacity)) / 100
+    context.fillStyle = options.watermarkColor
+    context.translate(width / 2, height / 2)
+    context.rotate(options.watermarkRotation * Math.PI / 180)
+    context.fillText(text, 0, 0)
+    context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0)
+    context.globalAlpha = 1
+  })
 }
 </script>
 
@@ -159,9 +222,12 @@ function updateImageScale(event: Event) {
             <div class="absolute inset-0 bg-[linear-gradient(rgb(223_253_242_/_6%)_1px,transparent_1px),linear-gradient(90deg,rgb(223_253_242_/_6%)_1px,transparent_1px)] bg-[length:24px_24px]" />
             <div class="absolute inset-4 overflow-auto border border-line/70 bg-grid/38">
               <div class="box-border flex min-h-full min-w-full items-center justify-center p-8">
-                <span class="font-mono font-black whitespace-nowrap" :style="watermarkPreviewStyle">
-                  {{ watermarkPreviewText }}
-                </span>
+                <canvas
+                  ref="watermarkPreviewCanvas"
+                  :height="watermarkPreviewCanvasSize.height"
+                  :width="watermarkPreviewCanvasSize.width"
+                  aria-hidden="true"
+                />
               </div>
             </div>
           </div>

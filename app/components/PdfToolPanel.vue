@@ -28,7 +28,7 @@ const {
 const watermarkPreviewCanvas = ref<HTMLCanvasElement | null>(null)
 const watermarkPreviewText = computed(() => options.watermarkText || 'web file')
 const watermarkPreviewFontSize = computed(() => Math.max(8, options.watermarkFontSize * options.watermarkPreviewScale / 100))
-const watermarkPreviewCanvasSize = reactive({ width: 1, height: 1 })
+let watermarkPreviewFrameId = 0
 
 watch(
   () => [
@@ -85,7 +85,11 @@ function drawWatermarkPreview() {
   if (!import.meta.client)
     return
 
-  window.requestAnimationFrame(() => {
+  if (watermarkPreviewFrameId)
+    window.cancelAnimationFrame(watermarkPreviewFrameId)
+
+  watermarkPreviewFrameId = window.requestAnimationFrame(() => {
+    watermarkPreviewFrameId = 0
     const canvas = watermarkPreviewCanvas.value
 
     if (!canvas)
@@ -112,8 +116,6 @@ function drawWatermarkPreview() {
     const height = Math.ceil(rotatedHeight + padding * 2)
     const pixelRatio = window.devicePixelRatio || 1
 
-    watermarkPreviewCanvasSize.width = width
-    watermarkPreviewCanvasSize.height = height
     canvas.width = Math.ceil(width * pixelRatio)
     canvas.height = Math.ceil(height * pixelRatio)
     canvas.style.width = `${width}px`
@@ -224,8 +226,6 @@ function drawWatermarkPreview() {
               <div class="box-border flex min-h-full min-w-full items-center justify-center p-8">
                 <canvas
                   ref="watermarkPreviewCanvas"
-                  :height="watermarkPreviewCanvasSize.height"
-                  :width="watermarkPreviewCanvasSize.width"
                   aria-hidden="true"
                 />
               </div>

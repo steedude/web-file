@@ -15,7 +15,7 @@ export const defaultImageOptions: ImageTransformOptions = {
   maxHeight: 1920,
   resizeMode: ImageResizeModeValue.Percent,
   resizePercent: 100,
-  preserveDimensions: false,
+  preserveDimensions: true,
   optimisePng: true,
   webpLossless: false,
 }

@@ -31,24 +31,24 @@ const sortablePages = computed({
   <div class="space-y-3">
     <div class="flex flex-wrap items-end justify-between gap-3">
       <div>
-        <h3 class="font-mono text-sm font-black tracking-widest text-lilac uppercase">
+        <h3 class="font-mono text-base font-black tracking-widest text-lilac uppercase">
           {{ mode === PdfModeValue.Merge ? t('pdf.pageQueue') : selectable ? t('pdf.pageSelection') : t('pdf.pagePreview') }}
         </h3>
-        <p class="mt-1 font-mono text-xs font-bold text-ink/42">
+        <p class="mt-1 font-mono text-sm font-bold text-ink/52">
           {{ isLoading ? t('pdf.renderingPages') : t('pdf.pageCount', { count: pages.length }) }}
         </p>
       </div>
       <div v-if="selectable && pages.length" class="flex gap-2">
         <button
           type="button"
-          class="focus-ring border border-line bg-grid px-3 py-2 font-mono text-xs font-black text-ink/62 transition hover:border-lilac hover:text-lilac"
+          class="focus-ring border border-line bg-grid px-3 py-2 font-mono text-sm font-black text-ink/70 transition hover:border-lilac hover:text-lilac"
           @click="emit('selectAll', true)"
         >
           {{ t('pdf.selectAll') }}
         </button>
         <button
           type="button"
-          class="focus-ring border border-line bg-grid px-3 py-2 font-mono text-xs font-black text-ink/62 transition hover:border-coral hover:text-coral"
+          class="focus-ring border border-line bg-grid px-3 py-2 font-mono text-sm font-black text-ink/70 transition hover:border-coral hover:text-coral"
           @click="emit('selectAll', false)"
         >
           {{ t('pdf.clearSelection') }}
@@ -56,7 +56,7 @@ const sortablePages = computed({
       </div>
     </div>
 
-    <p v-if="selectable && pages.length" class="font-mono text-xs font-black text-acid">
+    <p v-if="selectable && pages.length" class="font-mono text-sm font-black text-acid">
       {{ t('pdf.selectedPages', { count: selectedCount }) }}
     </p>
 
@@ -80,7 +80,7 @@ const sortablePages = computed({
           <button
             v-if="selectable"
             type="button"
-            class="focus-ring absolute top-2 left-2 grid size-7 place-items-center border font-mono text-xs font-black transition"
+            class="focus-ring absolute top-2 left-2 grid size-7 place-items-center border font-mono text-sm font-black transition"
             :class="page.selected ? 'border-acid bg-acid text-paper' : 'border-line bg-panel text-ink/52 hover:border-acid hover:text-acid'"
             @click="emit('toggle', page.id)"
           >
@@ -99,10 +99,10 @@ const sortablePages = computed({
           </button>
         </div>
         <div class="mt-2 min-w-0 font-mono">
-          <p class="truncate text-xs font-black text-ink">
+          <p class="truncate text-sm font-black text-ink">
             {{ page.sourceName }}
           </p>
-          <p class="mt-1 text-xs font-bold text-ink/42">
+          <p class="mt-1 text-sm font-bold text-ink/52">
             {{ t('pdf.pageNumber', { number: page.pageNumber }) }}
           </p>
         </div>
@@ -151,7 +151,7 @@ const sortablePages = computed({
       </article>
     </VueDraggable>
 
-    <p v-else class="border border-line bg-grid/70 px-3 py-8 text-center font-mono text-sm font-bold text-ink/42">
+    <p v-else class="border border-line bg-grid/70 px-3 py-8 text-center font-mono text-base font-bold text-ink/52">
       {{ isLoading ? t('pdf.renderingPages') : t('pdf.noPages') }}
     </p>
   </div>

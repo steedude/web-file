@@ -75,9 +75,25 @@ function updateImageScale(event: Event) {
           <h2 class="font-mono text-2xl font-black tracking-tight text-ink">
             {{ t('pdf.title') }}
           </h2>
-          <p class="mt-2 text-sm leading-6 font-semibold text-ink/52">
+          <p class="mt-2 text-base leading-7 font-semibold text-ink/62">
             {{ t('pdf.description') }}
           </p>
+        </div>
+      </div>
+
+      <div class="border border-line bg-panel/82 p-1 shadow-[0_0_34px_var(--fx-lilac-7)]">
+        <div class="grid grid-cols-2 gap-1">
+          <button
+            v-for="mode in pdfModeOptions"
+            :key="mode"
+            type="button"
+            class="focus-ring min-h-12 border px-4 py-3 font-mono text-sm font-black transition"
+            :aria-pressed="options.mode === mode"
+            :class="options.mode === mode ? 'border-lilac bg-lilac text-paper shadow-[0_0_22px_var(--fx-lilac-18)]' : 'border-transparent bg-grid/70 text-ink/62 hover:border-lilac/70 hover:text-lilac'"
+            @click="options.mode = mode"
+          >
+            {{ getPdfModeLabel(mode) }}
+          </button>
         </div>
       </div>
 
@@ -86,22 +102,6 @@ function updateImageScale(event: Event) {
     </div>
 
     <div class="space-y-4 border border-line bg-panel/82 p-4 shadow-[0_0_44px_var(--fx-lilac-7)] backdrop-blur">
-      <div class="space-y-2">
-        <span class="font-mono text-xs font-black tracking-widest text-lilac uppercase">{{ t('pdf.mode') }}</span>
-        <div class="grid grid-cols-2 gap-2 xl:grid-cols-4">
-          <button
-            v-for="mode in pdfModeOptions"
-            :key="mode"
-            type="button"
-            class="focus-ring border px-3 py-2 font-mono text-sm font-black transition"
-            :class="options.mode === mode ? 'border-lilac bg-lilac text-paper shadow-[0_0_20px_var(--fx-lilac-18)]' : 'border-line bg-grid text-ink/62 hover:border-lilac hover:text-lilac'"
-            @click="options.mode = mode"
-          >
-            {{ getPdfModeLabel(mode) }}
-          </button>
-        </div>
-      </div>
-
       <PdfWatermarkControls
         v-if="options.mode === PdfModeValue.Watermark"
         :options="options"
@@ -156,8 +156,8 @@ function updateImageScale(event: Event) {
         {{ error }}
       </p>
 
-      <p v-if="!results.length && !imageResults.length" class="border border-line bg-grid/70 px-3 py-8 text-center font-mono text-sm font-bold text-ink/42">
-        {{ t('pdf.empty') }}
+      <p v-if="!results.length && !imageResults.length" class="border border-line bg-grid/70 px-3 py-8 text-center font-mono text-base font-bold text-ink/52">
+        {{ t('pdf.resultEmpty') }}
       </p>
       <ResultList v-else :image-results="imageResults" :pdf-results="results" :show-image-details="options.mode !== PdfModeValue.Images" />
     </div>

@@ -49,24 +49,24 @@ function getDeltaLabel(delta: { type: 'larger' | 'saved' | 'same', percent: numb
         :class="compact ? 'h-full min-h-24 w-20' : allowCrop ? 'max-h-[520px] min-h-72 w-full' : 'aspect-video w-full'"
       >
       <div class="border-line bg-grid/90 p-3" :class="compact ? 'border-l' : 'border-t'">
-        <p class="truncate font-mono text-xs font-black text-ink/84">
+        <p class="truncate font-mono text-sm font-black text-ink/84">
           {{ preview.file.name }}
         </p>
-        <p class="mt-1 font-mono text-xs font-bold text-ink/42">
+        <p class="mt-1 font-mono text-sm font-bold text-ink/52">
           {{ preview.width }} {{ $t('common.by') }} {{ preview.height }} {{ $t('image.pixels') }}
         </p>
-        <p v-if="preview.crop" class="mt-1 font-mono text-xs font-black text-acid">
+        <p v-if="preview.crop" class="mt-1 font-mono text-sm font-black text-acid">
           {{ $t('image.cropped') }} {{ preview.crop.width }} {{ $t('common.by') }} {{ preview.crop.height }} {{ $t('image.pixels') }}
         </p>
-        <p v-if="!allowCrop" class="mt-1 font-mono text-xs font-bold text-ink/42">
+        <p v-if="!allowCrop" class="mt-1 font-mono text-sm font-bold text-ink/52">
           {{ $t('image.sourceSize') }} {{ formatFileSize(preview.file.size) }}
         </p>
-        <p v-if="!allowCrop" class="mt-1 font-mono text-xs font-bold text-ink/42">
+        <p v-if="!allowCrop" class="mt-1 font-mono text-sm font-bold text-ink/52">
           {{ $t('image.outputSizeReference') }} {{ estimates[index]?.outputSize ? formatFileSize(estimates[index]!.outputSize) : $t('image.waitingEstimate') }}
         </p>
         <p
           v-if="!allowCrop && estimates[index]?.delta"
-          class="mt-1 font-mono text-xs font-black"
+          class="mt-1 font-mono text-sm font-black"
           :class="estimates[index]!.delta?.type === 'larger' ? 'text-coral' : estimates[index]!.delta?.type === 'saved' ? 'text-acid' : 'text-ink/42'"
         >
           {{ getDeltaLabel(estimates[index]!.delta) }}

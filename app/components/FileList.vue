@@ -18,7 +18,7 @@ const emit = defineEmits<{
         <p class="truncate font-mono text-sm font-black text-ink/84">
           {{ file.name }}
         </p>
-        <p class="font-mono text-xs font-bold text-ink/42">
+        <p class="font-mono text-sm font-bold text-ink/52">
           {{ formatFileSize(file.size) }}
         </p>
       </div>

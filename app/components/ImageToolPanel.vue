@@ -353,8 +353,8 @@ function runImageAction() {
         {{ error }}
       </p>
 
-      <p v-if="!results.length && !pdfResults.length" class="border border-line bg-grid/70 px-3 py-8 text-center font-mono text-sm font-bold text-ink/42">
-        {{ t('image.empty') }}
+      <p v-if="!results.length && !pdfResults.length" class="border border-line bg-grid/70 px-3 py-8 text-center font-mono text-base font-bold text-ink/52">
+        {{ t('image.resultEmpty') }}
       </p>
       <ResultList v-else :image-results="results" :pdf-results="pdfResults" />
     </div>

@@ -31,7 +31,7 @@ const { t } = useI18n()
         <h2 class="font-mono text-2xl font-black tracking-tight text-ink">
           {{ t('image.title') }}
         </h2>
-        <p class="mt-2 text-sm leading-6 font-semibold text-ink/52">
+        <p class="mt-2 text-base leading-7 font-semibold text-ink/62">
           {{ t('image.description') }}
         </p>
       </div>

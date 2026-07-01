@@ -28,43 +28,43 @@ const watermarkPreviewStyle = computed(() => ({
 
 <template>
   <div class="grid gap-4 md:grid-cols-2">
-    <label class="space-y-2 md:col-span-2">
-      <span class="font-mono text-xs font-black tracking-widest text-lilac uppercase">{{ t('pdf.watermarkText') }}</span>
-      <input :value="options.watermarkText" class="focus-ring w-full border border-line bg-grid px-3 py-2 font-mono text-sm font-bold text-ink" type="text" autocomplete="off" @input="emit('updateText', $event)">
+    <label class="grid gap-2 md:col-span-2">
+      <span class="font-mono text-sm font-black tracking-widest text-lilac uppercase">{{ t('pdf.watermarkText') }}</span>
+      <input :value="options.watermarkText" class="focus-ring w-full border border-line bg-grid px-3 py-2 font-mono text-base font-bold text-ink" type="text" autocomplete="off" @input="emit('updateText', $event)">
     </label>
 
-    <div class="space-y-2">
-      <span class="font-mono text-xs font-black tracking-widest text-lilac uppercase">{{ t('pdf.watermarkColor') }}</span>
-      <label class="flex h-10 items-center gap-3 border border-line bg-grid px-3">
+    <label class="grid gap-2">
+      <span class="font-mono text-sm font-black tracking-widest text-lilac uppercase">{{ t('pdf.watermarkColor') }}</span>
+      <span class="flex h-10 items-center gap-3 border border-line bg-grid px-3">
         <input :value="options.watermarkColor" class="size-6 border border-line bg-transparent" type="color" @input="emit('updateColor', $event)">
         <span class="font-mono text-sm font-black text-ink">{{ options.watermarkColor.toUpperCase() }}</span>
-      </label>
-    </div>
+      </span>
+    </label>
 
-    <label class="space-y-2">
-      <span class="font-mono text-xs font-black tracking-widest text-lilac uppercase">{{ t('pdf.watermarkSize') }} {{ t('common.dot') }} {{ options.watermarkFontSize }}</span>
+    <label class="grid gap-2">
+      <span class="font-mono text-sm font-black tracking-widest text-lilac uppercase">{{ t('pdf.watermarkSize') }} {{ t('common.dot') }} {{ options.watermarkFontSize }}</span>
       <input :value="options.watermarkFontSize" class="h-9 w-full accent-acid" type="range" min="8" max="160" step="1" @input="emit('updateFontSize', $event)">
     </label>
 
-    <label class="space-y-2">
-      <span class="font-mono text-xs font-black tracking-widest text-lilac uppercase">{{ t('pdf.watermarkOpacity') }} {{ t('common.dot') }} {{ options.watermarkOpacity }}{{ t('common.percent') }}</span>
+    <label class="grid gap-2">
+      <span class="font-mono text-sm font-black tracking-widest text-lilac uppercase">{{ t('pdf.watermarkOpacity') }} {{ t('common.dot') }} {{ options.watermarkOpacity }}{{ t('common.percent') }}</span>
       <input :value="options.watermarkOpacity" class="h-9 w-full accent-acid" type="range" min="5" max="100" step="1" @input="emit('updateOpacity', $event)">
     </label>
 
-    <label class="space-y-2">
-      <span class="font-mono text-xs font-black tracking-widest text-lilac uppercase">{{ t('pdf.watermarkRotation') }} {{ t('common.dot') }} {{ options.watermarkRotation }}{{ t('common.degree') }}</span>
+    <label class="grid gap-2">
+      <span class="font-mono text-sm font-black tracking-widest text-lilac uppercase">{{ t('pdf.watermarkRotation') }} {{ t('common.dot') }} {{ options.watermarkRotation }}{{ t('common.degree') }}</span>
       <input :value="options.watermarkRotation" class="h-9 w-full accent-acid" type="range" min="-90" max="90" step="1" @input="emit('updateRotation', $event)">
     </label>
 
     <div class="space-y-2 md:col-span-2">
       <div class="flex flex-wrap items-center justify-between gap-3">
-        <span class="font-mono text-xs font-black tracking-widest text-lilac uppercase">{{ t('pdf.watermarkPreview') }}</span>
+        <span class="font-mono text-sm font-black tracking-widest text-lilac uppercase">{{ t('pdf.watermarkPreview') }}</span>
         <div class="flex gap-2">
           <button
             v-for="scale in pdfWatermarkPreviewScaleOptions"
             :key="scale"
             type="button"
-            class="focus-ring border px-3 py-1.5 font-mono text-xs font-black transition"
+            class="focus-ring border px-3 py-1.5 font-mono text-sm font-black transition"
             :class="options.watermarkPreviewScale === scale ? 'border-lilac bg-lilac text-paper' : 'border-line bg-grid text-ink/62 hover:border-lilac hover:text-lilac'"
             @click="emit('setPreviewScale', scale)"
           >

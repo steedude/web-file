@@ -26,15 +26,15 @@ const { t } = useI18n()
         <h3 class="truncate font-mono text-sm font-black text-ink">
           {{ result.fileName }}
         </h3>
-        <p v-if="showImageDetails" class="mt-1 font-mono text-xs font-bold text-ink/46">
+        <p v-if="showImageDetails" class="mt-1 font-mono text-sm font-bold text-ink/52">
           {{ result.width }} {{ t('common.by') }} {{ result.height }} {{ t('common.dot') }} {{ formatFileSize(result.originalSize) }} {{ t('common.arrow') }} {{ formatFileSize(result.outputSize) }}
         </p>
-        <p v-if="showImageDetails" class="mt-1 font-mono text-xs font-black" :class="percentSaved(result.originalSize, result.outputSize) >= 0 ? 'text-mint' : 'text-coral'">
+        <p v-if="showImageDetails" class="mt-1 font-mono text-sm font-black" :class="percentSaved(result.originalSize, result.outputSize) >= 0 ? 'text-mint' : 'text-coral'">
           {{ percentSaved(result.originalSize, result.outputSize) }}{{ t('common.percent') }}
         </p>
       </div>
       <a
-        class="focus-ring inline-flex items-center justify-center gap-2 border border-acid/70 bg-acid px-4 py-2 font-mono text-xs font-black text-paper shadow-[0_0_20px_var(--fx-acid-16)] transition hover:bg-acid/85"
+        class="focus-ring inline-flex items-center justify-center gap-2 border border-acid/70 bg-acid px-4 py-2 font-mono text-sm font-black text-paper shadow-[0_0_20px_var(--fx-acid-16)] transition hover:bg-acid/85"
         :href="result.url"
         :download="result.fileName"
       >
@@ -52,12 +52,12 @@ const { t } = useI18n()
         <h3 class="truncate font-mono text-sm font-black text-ink">
           {{ result.fileName }}
         </h3>
-        <p class="mt-1 font-mono text-xs font-bold text-ink/46">
+        <p class="mt-1 font-mono text-sm font-bold text-ink/52">
           {{ formatFileSize(result.size) }}
         </p>
       </div>
       <a
-        class="focus-ring inline-flex items-center justify-center gap-2 border border-acid/70 bg-acid px-4 py-2 font-mono text-xs font-black text-paper shadow-[0_0_20px_var(--fx-acid-16)] transition hover:bg-acid/85"
+        class="focus-ring inline-flex items-center justify-center gap-2 border border-acid/70 bg-acid px-4 py-2 font-mono text-sm font-black text-paper shadow-[0_0_20px_var(--fx-acid-16)] transition hover:bg-acid/85"
         :href="result.url"
         :download="result.fileName"
       >

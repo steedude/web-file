@@ -165,15 +165,15 @@ function updateImageScale(event: Event) {
 
         <div class="space-y-2 md:col-span-2">
           <span class="font-mono text-xs font-black tracking-widest text-lilac uppercase">{{ t('pdf.watermarkPreview') }}</span>
-          <div class="relative h-40 overflow-hidden border border-line bg-paper">
+          <div class="relative h-56 overflow-hidden border border-line bg-paper">
             <div class="absolute inset-0 bg-[linear-gradient(rgb(223_253_242_/_6%)_1px,transparent_1px),linear-gradient(90deg,rgb(223_253_242_/_6%)_1px,transparent_1px)] bg-[length:24px_24px]" />
             <div class="absolute inset-4 overflow-auto border border-line/70 bg-grid/38">
-              <div v-if="options.watermarkPosition === 'tile'" class="absolute inset-0 grid grid-cols-2 place-items-center gap-4 p-4">
+              <div v-if="options.watermarkPosition === 'tile'" class="grid min-h-[28rem] min-w-[48rem] grid-cols-2 place-items-center gap-6 p-24">
                 <span v-for="item in 6" :key="item" class="font-mono font-black whitespace-nowrap" :style="watermarkPreviewStyle">
                   {{ watermarkPreviewText }}
                 </span>
               </div>
-              <div v-else class="absolute inset-0 flex p-4" :class="watermarkPreviewPositionClass">
+              <div v-else class="flex min-h-[28rem] min-w-[48rem] p-24" :class="watermarkPreviewPositionClass">
                 <span class="font-mono font-black whitespace-nowrap" :style="watermarkPreviewStyle">
                   {{ watermarkPreviewText }}
                 </span>

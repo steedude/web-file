@@ -127,20 +127,11 @@
     "moveDown": "Move down",
     "moveLast": "Move to last",
     "watermarkText": "Watermark text",
-    "watermarkPosition": "Position",
     "watermarkSize": "Size",
     "watermarkOpacity": "Opacity",
     "watermarkRotation": "Rotation",
     "watermarkColor": "Color",
     "watermarkPreview": "Watermark preview",
-    "watermarkPositions": {
-      "center": "Center",
-      "topLeft": "Top left",
-      "topRight": "Top right",
-      "bottomLeft": "Bottom left",
-      "bottomRight": "Bottom right",
-      "tile": "Tile"
-    },
     "imageFormat": "Image format",
     "imageQuality": "Quality",
     "imageScale": "Scale"

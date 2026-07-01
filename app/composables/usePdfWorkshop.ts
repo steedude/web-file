@@ -1,6 +1,6 @@
 import type { PDFDocument as PdfLibDocument, PDFPage } from 'pdf-lib'
 import type { PDFDocumentProxy } from 'pdfjs-dist'
-import type { ConvertedImage, PdfOptions, PdfPageItem, PdfResult, PdfWatermarkPosition } from '~/types/file-tool.type'
+import type { ConvertedImage, PdfOptions, PdfPageItem, PdfResult } from '~/types/file-tool.type'
 import { defaultPdfOptions } from '~/configs/file-tool.config'
 import { appendFileSuffix } from '~/utils/file-name.util'
 
@@ -220,7 +220,6 @@ async function watermarkPdf(file: File, options: PdfOptions): Promise<PdfResult>
   const color = hexToRgb(options.watermarkColor)
 
   for (const page of pages) {
-    const { width, height } = page.getSize()
     const textWidth = font.widthOfTextAtSize(text, options.watermarkFontSize)
     const opacity = Math.max(5, Math.min(100, options.watermarkOpacity)) / 100
     const rotation = degrees(options.watermarkRotation)
@@ -234,19 +233,7 @@ async function watermarkPdf(file: File, options: PdfOptions): Promise<PdfResult>
       rotate: rotation,
     })
 
-    if (options.watermarkPosition === 'tile') {
-      const stepX = Math.max(180, textWidth + 90)
-      const stepY = Math.max(120, options.watermarkFontSize * 3)
-
-      for (let y = -height * 0.1; y < height * 1.1; y += stepY) {
-        for (let x = -width * 0.15; x < width * 1.1; x += stepX)
-          draw(x, y)
-      }
-
-      continue
-    }
-
-    const { x, y } = getWatermarkPosition(page, options.watermarkPosition, textWidth, options.watermarkFontSize)
+    const { x, y } = getWatermarkPosition(page, textWidth)
     draw(x, y)
   }
 
@@ -396,21 +383,8 @@ function getPdfImageMimeType(format: PdfOptions['imageFormat']) {
   return 'image/png'
 }
 
-function getWatermarkPosition(page: PDFPage, position: PdfWatermarkPosition, textWidth: number, fontSize: number) {
+function getWatermarkPosition(page: PDFPage, textWidth: number) {
   const { width, height } = page.getSize()
-  const edge = Math.max(32, Math.min(width, height) * 0.08)
-
-  if (position === 'topLeft')
-    return { x: edge, y: height - edge - fontSize }
-
-  if (position === 'topRight')
-    return { x: width - edge - textWidth, y: height - edge - fontSize }
-
-  if (position === 'bottomLeft')
-    return { x: edge, y: edge }
-
-  if (position === 'bottomRight')
-    return { x: width - edge - textWidth, y: edge }
 
   return { x: (width - textWidth) / 2, y: height / 2 }
 }

@@ -127,20 +127,11 @@
     "moveDown": "往下移",
     "moveLast": "移到最後",
     "watermarkText": "浮水印文字",
-    "watermarkPosition": "位置",
     "watermarkSize": "大小",
     "watermarkOpacity": "透明度",
     "watermarkRotation": "角度",
     "watermarkColor": "顏色",
     "watermarkPreview": "浮水印預覽",
-    "watermarkPositions": {
-      "center": "置中",
-      "topLeft": "左上",
-      "topRight": "右上",
-      "bottomLeft": "左下",
-      "bottomRight": "右下",
-      "tile": "平鋪"
-    },
     "imageFormat": "圖片格式",
     "imageQuality": "品質",
     "imageScale": "倍率"

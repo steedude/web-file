@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { FileStack, Play, Trash2 } from '@lucide/vue'
-import { pdfImageFormatOptions, pdfModeOptions, pdfWatermarkPositionOptions } from '~/configs/file-tool.config'
+import { pdfImageFormatOptions, pdfModeOptions, pdfWatermarkPreviewScaleOptions } from '~/configs/file-tool.config'
 
 const { t } = useI18n()
 const PdfPageWorkspace = defineAsyncComponent(() => import('~/components/PdfPageWorkspace.vue'))
@@ -26,7 +26,7 @@ const {
 } = usePdfWorkshop()
 
 const watermarkPreviewText = computed(() => options.watermarkText || 'web file')
-const watermarkPreviewFontSize = computed(() => Math.max(14, options.watermarkFontSize * 0.6))
+const watermarkPreviewFontSize = computed(() => Math.max(8, options.watermarkFontSize * options.watermarkPreviewScale / 100))
 const watermarkPreviewStyle = computed(() => ({
   color: options.watermarkColor,
   opacity: options.watermarkOpacity / 100,
@@ -34,21 +34,6 @@ const watermarkPreviewStyle = computed(() => ({
   transform: `rotate(${options.watermarkRotation}deg)`,
   transformOrigin: 'center',
 }))
-const watermarkPreviewPositionClass = computed(() => {
-  if (options.watermarkPosition === 'topLeft')
-    return 'items-start justify-start'
-
-  if (options.watermarkPosition === 'topRight')
-    return 'items-start justify-end'
-
-  if (options.watermarkPosition === 'bottomLeft')
-    return 'items-end justify-start'
-
-  if (options.watermarkPosition === 'bottomRight')
-    return 'items-end justify-end'
-
-  return 'items-center justify-center'
-})
 
 function updateWatermarkText(event: Event) {
   options.watermarkText = (event.target as HTMLInputElement).value
@@ -66,12 +51,12 @@ function updateWatermarkRotation(event: Event) {
   options.watermarkRotation = Math.max(-90, Math.min(90, Number((event.target as HTMLInputElement).value) || 0))
 }
 
-function updateWatermarkPosition(event: Event) {
-  options.watermarkPosition = (event.target as HTMLSelectElement).value as typeof options.watermarkPosition
-}
-
 function updateWatermarkColor(event: Event) {
   options.watermarkColor = (event.target as HTMLInputElement).value
+}
+
+function setWatermarkPreviewScale(scale: typeof options.watermarkPreviewScale) {
+  options.watermarkPreviewScale = scale
 }
 
 function updateImageFormat(event: Event) {
@@ -140,15 +125,6 @@ function updateImageScale(event: Event) {
         </div>
 
         <label class="space-y-2">
-          <span class="font-mono text-xs font-black tracking-widest text-lilac uppercase">{{ t('pdf.watermarkPosition') }}</span>
-          <select :value="options.watermarkPosition" class="focus-ring w-full border border-line bg-grid px-3 py-2 font-mono text-sm font-bold text-ink" @change="updateWatermarkPosition">
-            <option v-for="position in pdfWatermarkPositionOptions" :key="position" :value="position">
-              {{ t(`pdf.watermarkPositions.${position}`) }}
-            </option>
-          </select>
-        </label>
-
-        <label class="space-y-2">
           <span class="font-mono text-xs font-black tracking-widest text-lilac uppercase">{{ t('pdf.watermarkSize') }} {{ t('common.dot') }} {{ options.watermarkFontSize }}</span>
           <input :value="options.watermarkFontSize" class="h-9 w-full accent-acid" type="range" min="8" max="160" step="1" @input="updateWatermarkFontSize">
         </label>
@@ -164,16 +140,25 @@ function updateImageScale(event: Event) {
         </label>
 
         <div class="space-y-2 md:col-span-2">
-          <span class="font-mono text-xs font-black tracking-widest text-lilac uppercase">{{ t('pdf.watermarkPreview') }}</span>
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <span class="font-mono text-xs font-black tracking-widest text-lilac uppercase">{{ t('pdf.watermarkPreview') }}</span>
+            <div class="flex gap-2">
+              <button
+                v-for="scale in pdfWatermarkPreviewScaleOptions"
+                :key="scale"
+                type="button"
+                class="focus-ring border px-3 py-1.5 font-mono text-xs font-black transition"
+                :class="options.watermarkPreviewScale === scale ? 'border-lilac bg-lilac text-paper' : 'border-line bg-grid text-ink/62 hover:border-lilac hover:text-lilac'"
+                @click="setWatermarkPreviewScale(scale)"
+              >
+                {{ scale }}{{ t('common.percent') }}
+              </button>
+            </div>
+          </div>
           <div class="relative h-56 overflow-hidden border border-line bg-paper">
             <div class="absolute inset-0 bg-[linear-gradient(rgb(223_253_242_/_6%)_1px,transparent_1px),linear-gradient(90deg,rgb(223_253_242_/_6%)_1px,transparent_1px)] bg-[length:24px_24px]" />
             <div class="absolute inset-4 overflow-auto border border-line/70 bg-grid/38">
-              <div v-if="options.watermarkPosition === 'tile'" class="grid min-h-[28rem] min-w-[48rem] grid-cols-2 place-items-center gap-6 p-24">
-                <span v-for="item in 6" :key="item" class="font-mono font-black whitespace-nowrap" :style="watermarkPreviewStyle">
-                  {{ watermarkPreviewText }}
-                </span>
-              </div>
-              <div v-else class="flex min-h-[28rem] min-w-[48rem] p-24" :class="watermarkPreviewPositionClass">
+              <div class="box-border flex min-h-full min-w-full items-center justify-center p-8">
                 <span class="font-mono font-black whitespace-nowrap" :style="watermarkPreviewStyle">
                   {{ watermarkPreviewText }}
                 </span>

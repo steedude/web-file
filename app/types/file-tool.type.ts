@@ -56,8 +56,8 @@ export interface UploadedImagePreview {
 }
 
 export type PdfMode = 'merge' | 'split' | 'watermark' | 'images'
-export type PdfWatermarkPosition = 'center' | 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight' | 'tile'
 export type PdfImageOutputFormat = 'png' | 'jpeg' | 'webp'
+export type PdfWatermarkPreviewScale = 50 | 75 | 100
 
 export interface PdfOptions {
   mode: PdfMode
@@ -65,8 +65,8 @@ export interface PdfOptions {
   watermarkFontSize: number
   watermarkOpacity: number
   watermarkRotation: number
-  watermarkPosition: PdfWatermarkPosition
   watermarkColor: string
+  watermarkPreviewScale: PdfWatermarkPreviewScale
   imageFormat: PdfImageOutputFormat
   imageQuality: number
   imageScale: number

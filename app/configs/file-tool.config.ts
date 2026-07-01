@@ -1,4 +1,4 @@
-import type { ImageCropPosition, ImageOutputFormat, ImagePdfFitMode, ImagePdfOptions, ImagePdfPageSize, ImageTransformOptions, PdfImageOutputFormat, PdfMode, PdfOptions, PdfWatermarkPosition } from '~/types/file-tool.type'
+import type { ImageCropPosition, ImageOutputFormat, ImagePdfFitMode, ImagePdfOptions, ImagePdfPageSize, ImageTransformOptions, PdfImageOutputFormat, PdfMode, PdfOptions, PdfWatermarkPreviewScale } from '~/types/file-tool.type'
 
 export const imageFormatOptions: Array<{ value: ImageOutputFormat, mimeType: string, extension: string }> = [
   { value: 'jpeg', mimeType: 'image/jpeg', extension: 'jpg' },
@@ -32,7 +32,7 @@ export const defaultImagePdfOptions: ImagePdfOptions = {
 }
 
 export const pdfModeOptions: PdfMode[] = ['merge', 'split', 'watermark', 'images']
-export const pdfWatermarkPositionOptions: PdfWatermarkPosition[] = ['center', 'topLeft', 'topRight', 'bottomLeft', 'bottomRight', 'tile']
+export const pdfWatermarkPreviewScaleOptions: PdfWatermarkPreviewScale[] = [50, 75, 100]
 export const pdfImageFormatOptions: PdfImageOutputFormat[] = ['png', 'jpeg', 'webp']
 
 export const defaultPdfOptions: PdfOptions = {
@@ -41,8 +41,8 @@ export const defaultPdfOptions: PdfOptions = {
   watermarkFontSize: 48,
   watermarkOpacity: 25,
   watermarkRotation: -30,
-  watermarkPosition: 'center',
   watermarkColor: '#6dff9d',
+  watermarkPreviewScale: 100,
   imageFormat: 'png',
   imageQuality: 90,
   imageScale: 2,

@@ -6,3 +6,14 @@ node_modules
 dist
 coverage
 *.local
+
+# local/system noise
+.DS_Store
+Thumbs.db
+*.log
+
+# deployment caches
+.vercel
+
+# local project notes
+doc/

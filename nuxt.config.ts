@@ -21,6 +21,7 @@ export default defineNuxtConfig({
     },
   },
   build: {
+    // @jsquash 的 codec 會載入 WASM，讓 Nuxt/Vite 先處理套件可避免部署後路徑失效。
     transpile: wasmPackages,
   },
   compatibilityDate: '2025-07-15',
@@ -70,6 +71,7 @@ export default defineNuxtConfig({
     },
     workbox: {
       globPatterns: ['**/*.{js,css,html,png,svg,ico,wasm}'],
+      // WASM codec 比一般前端資源大，PWA 快取上限要放寬才吃得到離線能力。
       maximumFileSizeToCacheInBytes: 8 * 1024 * 1024,
     },
   },
@@ -78,6 +80,7 @@ export default defineNuxtConfig({
   },
   vite: {
     optimizeDeps: {
+      // WASM 套件維持原本的動態載入流程，避免被 optimizeDeps 預打包後找不到 worker/wasm。
       exclude: wasmPackages,
     },
     plugins: [tailwindcss()],

@@ -10,6 +10,7 @@ interface SourceRect {
 
 export async function fileToImageData(file: File, maxWidth: number, maxHeight: number, preserveDimensions: boolean, cropPosition: ImageCropPosition, crop: ImageCropSelection | undefined, resizeMode: ImageResizeMode, resizePercent: number): Promise<ImageData> {
   const bitmap = await createImageBitmap(file)
+  // 手動裁切優先於批次裁切；百分比縮放只縮整張圖，不再套用裁切位置。
   const effectiveCropPosition = resizeMode === ImageResizeModeValue.Percent ? ImageCropPositionValue.None : cropPosition
   const source = crop ? getManualCropRect(bitmap.width, bitmap.height, crop) : getSourceRect(bitmap.width, bitmap.height, maxWidth, maxHeight, preserveDimensions ? ImageCropPositionValue.None : effectiveCropPosition)
   const scale = getScale(source, maxWidth, maxHeight, preserveDimensions, resizeMode, resizePercent)
@@ -36,6 +37,7 @@ function getScale(source: SourceRect, maxWidth: number, maxHeight: number, prese
   if (resizeMode === ImageResizeModeValue.Percent)
     return Math.min(1, Math.max(1, Math.min(100, resizePercent)) / 100)
 
+  // 目前尺寸模式只做等比例縮小，不放大，避免輸出看起來比來源糊。
   return Math.min(1, maxWidth / source.width, maxHeight / source.height)
 }
 

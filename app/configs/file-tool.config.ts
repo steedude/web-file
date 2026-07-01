@@ -1,6 +1,7 @@
 import type { ImagePdfOptions, ImageTransformOptions, PdfOptions } from '~/types/file-tool.type'
 import { ImageCropPositionValue, ImageOutputFormatValue, ImagePdfFitModeValue, ImagePdfPageSizeValue, ImageResizeModeValue, PdfImageOutputFormatValue, PdfModeValue, PdfWatermarkPreviewScaleValue } from '~/types/file-tool.type'
 
+// UI 選項和預設值集中在這裡，避免 component/composable 各自散落一份字串。
 export const imageFormatOptions = [
   { value: ImageOutputFormatValue.Jpeg, mimeType: 'image/jpeg', extension: 'jpg' },
   { value: ImageOutputFormatValue.Png, mimeType: 'image/png', extension: 'png' },

@@ -9,6 +9,7 @@ export function usePwaInstall() {
 
   if (import.meta.client) {
     window.addEventListener('beforeinstallprompt', (event) => {
+      // 先攔下瀏覽器預設提示，讓安裝入口交給右上角按鈕控制。
       event.preventDefault()
       deferredPrompt.value = event as BeforeInstallPromptEvent
     })

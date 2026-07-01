@@ -8,6 +8,7 @@ import { appendFileSuffix } from '~/utils/file-name.util'
 const selectablePdfModes = new Set<PdfOptions['mode']>([PdfModeValue.Split, PdfModeValue.Images])
 
 export function usePdfWorkshop() {
+  // PDF 模式共用同一份頁面清單；合併看順序，擷取/轉圖片看勾選狀態。
   const options = reactive<PdfOptions>({ ...defaultPdfOptions })
   const files = ref<File[]>([])
   const pages = ref<PdfPageItem[]>([])
@@ -21,6 +22,7 @@ export function usePdfWorkshop() {
   const canRun = computed(() => activePages.value.length > 0 && !isProcessing.value && !isRenderingPages.value)
 
   watch(() => options.mode, () => {
+    // 切換模式時清空檔案，避免上一個模式的頁面狀態誤用到新的工作流。
     files.value = []
     clearPages()
     clearResults()
@@ -193,6 +195,7 @@ async function mergePdfPages(pages: PdfPageItem[]): Promise<PdfResult> {
   const sources = new Map<File, PdfLibDocument>()
 
   for (const page of pages) {
+    // 同一份來源 PDF 可能有多頁被選到，快取 document 可以少重複 parse 幾次。
     const source = await getSourceDocument(page.file, sources)
     const [copiedPage] = await output.copyPages(source, [page.pageIndex])
 
@@ -270,6 +273,7 @@ async function renderPdfPagesAsImages(pages: PdfPageItem[], options: PdfOptions)
   const results: ConvertedImage[] = []
 
   for (const page of pages) {
+    // PDF 轉圖片走 pdf.js render 到 canvas，再用瀏覽器 encoder 輸出指定格式。
     const previewDocument = await loadPdfPreviewDocument(page.file)
     const pdfPage = await previewDocument.getPage(page.pageNumber)
     const viewport = pdfPage.getViewport({ scale: options.imageScale })
@@ -317,6 +321,7 @@ async function createPdfPageItems(files: File[], selected: boolean): Promise<Pdf
 }
 
 async function loadPdfPreviewDocument(file: File): Promise<PDFDocumentProxy> {
+  // pdf.js worker 只在需要 PDF 預覽/渲染時載入，避免首頁初始 bundle 太重。
   const [{ getDocument, GlobalWorkerOptions }, workerUrl] = await Promise.all([
     import('pdfjs-dist'),
     import('pdfjs-dist/build/pdf.worker.mjs?url'),
@@ -331,6 +336,7 @@ async function createPdfPageItem(file: File, pdfDocument: PDFDocumentProxy, page
   const page = await pdfDocument.getPage(pageNumber)
   const viewport = page.getViewport({ scale: 1 })
   const targetWidth = 144
+  // 縮圖只用來排序/勾選，不需要用完整解析度佔記憶體。
   const scale = targetWidth / viewport.width
   const scaledViewport = page.getViewport({ scale })
   const canvas = document.createElement('canvas')

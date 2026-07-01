@@ -9,6 +9,7 @@ const supportedImageMimeTypes = new Set(['image/jpeg', 'image/png', 'image/webp'
 const supportedImageExtensions = new Set(['jpg', 'jpeg', 'png', 'webp'])
 
 export function useImageTranscoder() {
+  // 這裡保留圖片工具的狀態；實際像素處理和檔名處理會再丟到 utils，避免 UI 元件直接碰轉檔細節。
   const options = reactive<ImageTransformOptions>({ ...defaultImageOptions })
   const files = ref<File[]>([])
   const previews = ref<UploadedImagePreview[]>([])
@@ -35,6 +36,7 @@ export function useImageTranscoder() {
     previews.value = replace ? nextPreviews : [...previews.value, ...nextPreviews]
 
     if (isFirstUpload && nextPreviews[0]?.width && nextPreviews[0]?.height) {
+      // 第一張圖決定預設尺寸，單張模式才不會一進來還停在 1920 這種通用值。
       options.maxWidth = nextPreviews[0].width
       options.maxHeight = nextPreviews[0].height
       options.outputFileName = getFileBaseName(nextPreviews[0].file.name)
@@ -116,6 +118,7 @@ export function useImageTranscoder() {
         if (!file)
           continue
 
+        // 轉檔流程固定是 File -> ImageData -> WASM encoder，壓縮估算也共用同一條路徑。
         const imageData = await fileToImageData(file, options.maxWidth, options.maxHeight, options.preserveDimensions, options.cropPosition, previews.value[_index]?.crop, options.resizeMode, options.resizePercent)
         const encoded = await encodeImage(imageData, options.format, options)
         const format = imageFormatOptions.find(item => item.value === options.format) ?? imageFormatOptions[0]!
@@ -339,6 +342,7 @@ async function embedImage(pdfDocument: PdfLibDocument, file: File, bitmap: Image
   if (file.type === 'image/png' || /\.png$/i.test(file.name))
     return pdfDocument.embedPng(await file.arrayBuffer())
 
+  // pdf-lib 只能直接嵌 JPEG/PNG，WebP 先走 canvas 轉成 PNG 再放進 PDF。
   const canvas = document.createElement('canvas')
   const context = canvas.getContext('2d')
 
@@ -384,6 +388,7 @@ async function encodeImage(imageData: ImageData, format: ImageOutputFormat, opti
   if (!options.optimisePng)
     return png
 
+  // PNG 的「壓縮」是無損最佳化；品質滑桿不參與，避免暗示可以有失真壓縮。
   const { optimise } = await import('@jsquash/oxipng')
   return optimise(png, {
     level: 2,

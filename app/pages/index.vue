@@ -26,7 +26,7 @@ useSeoMeta({
         </p>
       </div>
 
-      <div class="grid w-full grid-cols-2 border border-line bg-panel/75 p-1 shadow-[0_0_32px_rgb(72_215_255_/_8%)]">
+      <div class="grid w-full grid-cols-2 border border-line bg-panel/75 p-1 shadow-[0_0_32px_var(--fx-sky-8)]">
         <button
           type="button"
           class="focus-ring inline-flex items-center justify-center gap-2 px-5 py-3 font-mono text-sm font-black tracking-wide transition"

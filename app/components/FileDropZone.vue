@@ -40,7 +40,7 @@ function handleDrop(event: DragEvent) {
 <template>
   <div
     class="border border-dashed border-line bg-grid/70 p-6 transition"
-    :class="isDragging ? 'border-sky bg-sky/10 shadow-[0_0_36px_rgb(72_215_255_/_18%)]' : 'shadow-[0_0_24px_rgb(0_0_0_/_18%)]'"
+    :class="isDragging ? 'border-sky bg-sky/10 shadow-[0_0_36px_var(--fx-sky-18)]' : 'shadow-[0_0_24px_var(--fx-black-18)]'"
     @dragenter.prevent="isDragging = true"
     @dragover.prevent="isDragging = true"
     @dragleave.prevent="isDragging = false"
@@ -52,7 +52,7 @@ function handleDrop(event: DragEvent) {
       class="focus-ring flex w-full flex-col items-center justify-center gap-3 py-8 text-center"
       @click="openPicker"
     >
-      <span class="grid size-12 place-items-center border border-acid/60 bg-acid/12 text-acid shadow-[0_0_24px_rgb(109_255_157_/_16%)]">
+      <span class="grid size-12 place-items-center border border-acid/60 bg-acid/12 text-acid shadow-[0_0_24px_var(--fx-acid-16)]">
         <UploadCloud class="size-6" aria-hidden="true" />
       </span>
       <span class="font-mono text-base font-black text-ink/76">{{ label }}</span>

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { FileStack, Play, Trash2 } from '@lucide/vue'
-import { pdfImageFormatOptions, pdfModeOptions, pdfWatermarkPreviewScaleOptions } from '~/configs/file-tool.config'
-import { PdfImageOutputFormatValue, PdfModeValue } from '~/types/file-tool.type'
+import { pdfModeOptions } from '~/configs/file-tool.config'
+import { PdfModeValue } from '~/types/file-tool.type'
 
 const { t } = useI18n()
 const { getPdfModeLabel } = useFileToolLang()
@@ -26,15 +26,6 @@ const {
   selectAllPages,
   togglePageSelection,
 } = usePdfWorkshop()
-
-const watermarkPreviewText = computed(() => options.watermarkText || 'web file')
-const watermarkPreviewFontSize = computed(() => Math.max(8, options.watermarkFontSize * options.watermarkPreviewScale / 100))
-const watermarkPreviewStyle = computed(() => ({
-  color: options.watermarkColor,
-  opacity: options.watermarkOpacity / 100,
-  fontSize: `${watermarkPreviewFontSize.value}px`,
-  transform: `translate(-50%, -50%) rotate(${options.watermarkRotation}deg)`,
-}))
 
 function updateWatermarkText(event: Event) {
   options.watermarkText = (event.target as HTMLInputElement).value
@@ -77,7 +68,7 @@ function updateImageScale(event: Event) {
   <section class="grid gap-5 xl:grid-cols-[360px_minmax(0,1fr)]">
     <div class="space-y-4">
       <div class="flex items-start gap-3">
-        <span class="grid size-11 shrink-0 place-items-center border border-lilac/70 bg-lilac/12 text-lilac shadow-[0_0_28px_rgb(167_139_250_/_14%)]">
+        <span class="grid size-11 shrink-0 place-items-center border border-lilac/70 bg-lilac/12 text-lilac shadow-[0_0_28px_var(--fx-lilac-14)]">
           <FileStack class="size-5" aria-hidden="true" />
         </span>
         <div>
@@ -94,7 +85,7 @@ function updateImageScale(event: Event) {
       <FileList :files="files" @remove="removeFile" />
     </div>
 
-    <div class="space-y-4 border border-line bg-panel/82 p-4 shadow-[0_0_44px_rgb(167_139_250_/_7%)] backdrop-blur">
+    <div class="space-y-4 border border-line bg-panel/82 p-4 shadow-[0_0_44px_var(--fx-lilac-7)] backdrop-blur">
       <div class="space-y-2">
         <span class="font-mono text-xs font-black tracking-widest text-lilac uppercase">{{ t('pdf.mode') }}</span>
         <div class="grid grid-cols-2 gap-2 xl:grid-cols-4">
@@ -103,7 +94,7 @@ function updateImageScale(event: Event) {
             :key="mode"
             type="button"
             class="focus-ring border px-3 py-2 font-mono text-sm font-black transition"
-            :class="options.mode === mode ? 'border-lilac bg-lilac text-paper shadow-[0_0_20px_rgb(167_139_250_/_18%)]' : 'border-line bg-grid text-ink/62 hover:border-lilac hover:text-lilac'"
+            :class="options.mode === mode ? 'border-lilac bg-lilac text-paper shadow-[0_0_20px_var(--fx-lilac-18)]' : 'border-line bg-grid text-ink/62 hover:border-lilac hover:text-lilac'"
             @click="options.mode = mode"
           >
             {{ getPdfModeLabel(mode) }}
@@ -111,82 +102,24 @@ function updateImageScale(event: Event) {
         </div>
       </div>
 
-      <div v-if="options.mode === PdfModeValue.Watermark" class="grid gap-4 md:grid-cols-2">
-        <label class="space-y-2 md:col-span-2">
-          <span class="font-mono text-xs font-black tracking-widest text-lilac uppercase">{{ t('pdf.watermarkText') }}</span>
-          <input :value="options.watermarkText" class="focus-ring w-full border border-line bg-grid px-3 py-2 font-mono text-sm font-bold text-ink" type="text" autocomplete="off" @input="updateWatermarkText">
-        </label>
+      <PdfWatermarkControls
+        v-if="options.mode === PdfModeValue.Watermark"
+        :options="options"
+        @set-preview-scale="setWatermarkPreviewScale"
+        @update-color="updateWatermarkColor"
+        @update-font-size="updateWatermarkFontSize"
+        @update-opacity="updateWatermarkOpacity"
+        @update-rotation="updateWatermarkRotation"
+        @update-text="updateWatermarkText"
+      />
 
-        <div class="space-y-2">
-          <span class="font-mono text-xs font-black tracking-widest text-lilac uppercase">{{ t('pdf.watermarkColor') }}</span>
-          <label class="flex h-10 items-center gap-3 border border-line bg-grid px-3">
-            <input :value="options.watermarkColor" class="size-6 border border-line bg-transparent" type="color" @input="updateWatermarkColor">
-            <span class="font-mono text-sm font-black text-ink">{{ options.watermarkColor.toUpperCase() }}</span>
-          </label>
-        </div>
-
-        <label class="space-y-2">
-          <span class="font-mono text-xs font-black tracking-widest text-lilac uppercase">{{ t('pdf.watermarkSize') }} {{ t('common.dot') }} {{ options.watermarkFontSize }}</span>
-          <input :value="options.watermarkFontSize" class="h-9 w-full accent-acid" type="range" min="8" max="160" step="1" @input="updateWatermarkFontSize">
-        </label>
-
-        <label class="space-y-2">
-          <span class="font-mono text-xs font-black tracking-widest text-lilac uppercase">{{ t('pdf.watermarkOpacity') }} {{ t('common.dot') }} {{ options.watermarkOpacity }}{{ t('common.percent') }}</span>
-          <input :value="options.watermarkOpacity" class="h-9 w-full accent-acid" type="range" min="5" max="100" step="1" @input="updateWatermarkOpacity">
-        </label>
-
-        <label class="space-y-2">
-          <span class="font-mono text-xs font-black tracking-widest text-lilac uppercase">{{ t('pdf.watermarkRotation') }} {{ t('common.dot') }} {{ options.watermarkRotation }}{{ t('common.degree') }}</span>
-          <input :value="options.watermarkRotation" class="h-9 w-full accent-acid" type="range" min="-90" max="90" step="1" @input="updateWatermarkRotation">
-        </label>
-
-        <div class="space-y-2 md:col-span-2">
-          <div class="flex flex-wrap items-center justify-between gap-3">
-            <span class="font-mono text-xs font-black tracking-widest text-lilac uppercase">{{ t('pdf.watermarkPreview') }}</span>
-            <div class="flex gap-2">
-              <button
-                v-for="scale in pdfWatermarkPreviewScaleOptions"
-                :key="scale"
-                type="button"
-                class="focus-ring border px-3 py-1.5 font-mono text-xs font-black transition"
-                :class="options.watermarkPreviewScale === scale ? 'border-lilac bg-lilac text-paper' : 'border-line bg-grid text-ink/62 hover:border-lilac hover:text-lilac'"
-                @click="setWatermarkPreviewScale(scale)"
-              >
-                {{ scale }}{{ t('common.percent') }}
-              </button>
-            </div>
-          </div>
-          <div class="relative h-56 overflow-hidden border border-line bg-paper">
-            <div class="absolute inset-0 bg-[linear-gradient(rgb(223_253_242_/_6%)_1px,transparent_1px),linear-gradient(90deg,rgb(223_253_242_/_6%)_1px,transparent_1px)] bg-[length:24px_24px]" />
-            <div class="absolute inset-4 overflow-hidden border border-line/70 bg-grid/38">
-              <span class="absolute top-1/2 left-1/2 font-mono font-black whitespace-nowrap" :style="watermarkPreviewStyle">
-                {{ watermarkPreviewText }}
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div v-if="options.mode === PdfModeValue.Images" class="grid gap-4 md:grid-cols-3">
-        <label class="space-y-2">
-          <span class="font-mono text-xs font-black tracking-widest text-lilac uppercase">{{ t('pdf.imageFormat') }}</span>
-          <select :value="options.imageFormat" class="focus-ring w-full border border-line bg-grid px-3 py-2 font-mono text-sm font-bold text-ink" @change="updateImageFormat">
-            <option v-for="format in pdfImageFormatOptions" :key="format" :value="format">
-              {{ format.toUpperCase() }}
-            </option>
-          </select>
-        </label>
-
-        <label v-if="options.imageFormat !== PdfImageOutputFormatValue.Png" class="space-y-2">
-          <span class="font-mono text-xs font-black tracking-widest text-lilac uppercase">{{ t('pdf.imageQuality') }} {{ t('common.dot') }} {{ options.imageQuality }}</span>
-          <input :value="options.imageQuality" class="h-9 w-full accent-acid" type="range" min="1" max="100" step="1" @input="updateImageQuality">
-        </label>
-
-        <label class="space-y-2">
-          <span class="font-mono text-xs font-black tracking-widest text-lilac uppercase">{{ t('pdf.imageScale') }} {{ t('common.dot') }} {{ options.imageScale }}{{ t('common.by') }}</span>
-          <input :value="options.imageScale" class="h-9 w-full accent-acid" type="range" min="1" max="3" step="0.5" @input="updateImageScale">
-        </label>
-      </div>
+      <PdfImageExportControls
+        v-if="options.mode === PdfModeValue.Images"
+        :options="options"
+        @update-format="updateImageFormat"
+        @update-quality="updateImageQuality"
+        @update-scale="updateImageScale"
+      />
 
       <PdfPageWorkspace
         :is-loading="isRenderingPages"
@@ -202,7 +135,7 @@ function updateImageScale(event: Event) {
       <div class="flex flex-wrap gap-3">
         <button
           type="button"
-          class="focus-ring inline-flex items-center gap-2 border border-acid/70 bg-acid px-5 py-3 font-mono text-sm font-black text-paper shadow-[0_0_24px_rgb(109_255_157_/_18%)] transition hover:bg-acid/85 disabled:opacity-50"
+          class="focus-ring inline-flex items-center gap-2 border border-acid/70 bg-acid px-5 py-3 font-mono text-sm font-black text-paper shadow-[0_0_24px_var(--fx-acid-18)] transition hover:bg-acid/85 disabled:opacity-50"
           :disabled="!canRun"
           @click="run"
         >

@@ -18,16 +18,6 @@ export const ImageModeValue = {
 } as const
 export type ImageMode = typeof ImageModeValue[keyof typeof ImageModeValue]
 
-export const ImageCropPositionValue = {
-  None: 'none',
-  Center: 'center',
-  Top: 'top',
-  Bottom: 'bottom',
-  Left: 'left',
-  Right: 'right',
-} as const
-export type ImageCropPosition = typeof ImageCropPositionValue[keyof typeof ImageCropPositionValue]
-
 export const ImageResizeModeValue = {
   Dimensions: 'dimensions',
   Percent: 'percent',
@@ -63,7 +53,6 @@ export interface ImageTransformOptions {
   resizeMode: ImageResizeMode
   resizePercent: number
   preserveDimensions: boolean
-  cropPosition: ImageCropPosition
   optimisePng: boolean
   webpLossless: boolean
 }

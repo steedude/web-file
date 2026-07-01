@@ -1,5 +1,5 @@
-import type { ImageCropPosition, ImagePdfFitMode, ImagePdfPageSize, PdfMode } from '~/types/file-tool.type'
-import { ImageCropPositionValue, ImagePdfFitModeValue, ImagePdfPageSizeValue, PdfModeValue } from '~/types/file-tool.type'
+import type { ImagePdfFitMode, ImagePdfPageSize, PdfMode } from '~/types/file-tool.type'
+import { ImagePdfFitModeValue, ImagePdfPageSizeValue, PdfModeValue } from '~/types/file-tool.type'
 
 export function useFileToolLang() {
   const { t } = useI18n()
@@ -13,19 +13,6 @@ export function useFileToolLang() {
     }
 
     return labels[mode]
-  }
-
-  function getImageCropPositionLabel(position: ImageCropPosition) {
-    const labels = {
-      [ImageCropPositionValue.None]: t('image.cropPositions.none'),
-      [ImageCropPositionValue.Center]: t('image.cropPositions.center'),
-      [ImageCropPositionValue.Top]: t('image.cropPositions.top'),
-      [ImageCropPositionValue.Bottom]: t('image.cropPositions.bottom'),
-      [ImageCropPositionValue.Left]: t('image.cropPositions.left'),
-      [ImageCropPositionValue.Right]: t('image.cropPositions.right'),
-    }
-
-    return labels[position]
   }
 
   function getImagePdfPageSizeLabel(pageSize: ImagePdfPageSize) {
@@ -48,7 +35,6 @@ export function useFileToolLang() {
   }
 
   return {
-    getImageCropPositionLabel,
     getImagePdfFitModeLabel,
     getImagePdfPageSizeLabel,
     getPdfModeLabel,

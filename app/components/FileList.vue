@@ -12,7 +12,7 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <ul v-if="files.length" class="divide-y divide-line border border-line bg-panel/80 shadow-[0_0_24px_rgb(0_0_0_/_20%)]">
+  <ul v-if="files.length" class="divide-y divide-line border border-line bg-panel/80 shadow-[0_0_24px_var(--fx-black-20)]">
     <li v-for="(file, index) in files" :key="`${file.name}-${file.size}-${index}`" class="flex items-center justify-between gap-4 p-3">
       <div class="min-w-0">
         <p class="truncate font-mono text-sm font-black text-ink/84">

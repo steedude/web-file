@@ -154,7 +154,7 @@ function saveSelection() {
 
 <template>
   <div class="fixed inset-0 z-50 grid place-items-center bg-paper/82 p-4 backdrop-blur-md">
-    <section class="w-full max-w-4xl border border-line bg-panel p-4 shadow-[0_0_60px_rgb(72_215_255_/_18%)]">
+    <section class="w-full max-w-4xl border border-line bg-panel p-4 shadow-[0_0_60px_var(--fx-sky-18)]">
       <div class="mb-4 flex items-start justify-between gap-4">
         <div>
           <h3 class="font-mono text-lg font-black text-ink">

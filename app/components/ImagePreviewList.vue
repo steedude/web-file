@@ -39,7 +39,7 @@ function getDeltaLabel(delta: { type: 'larger' | 'saved' | 'same', percent: numb
     <article
       v-for="(preview, index) in previews"
       :key="preview.id"
-      class="group relative overflow-hidden border border-line bg-panel/80 shadow-[0_0_24px_rgb(0_0_0_/_20%)]"
+      class="group relative overflow-hidden border border-line bg-panel/80 shadow-[0_0_24px_var(--fx-black-20)]"
       :class="compact ? 'grid grid-cols-[5rem_minmax(0,1fr)]' : ''"
     >
       <img

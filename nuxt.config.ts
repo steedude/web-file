@@ -1,4 +1,6 @@
+import process from 'node:process'
 import tailwindcss from '@tailwindcss/vite'
+import { defaultSeoConfig } from './app/configs/seo.config'
 
 const wasmPackages = [
   '@jsquash/jpeg',
@@ -37,6 +39,13 @@ export default defineNuxtConfig({
     '@nuxtjs/i18n',
     '@vite-pwa/nuxt',
   ],
+  runtimeConfig: {
+    public: {
+      ogImage: process.env.NUXT_PUBLIC_OG_IMAGE ?? defaultSeoConfig.ogImage,
+      siteName: process.env.NUXT_PUBLIC_SITE_NAME ?? defaultSeoConfig.siteName,
+      siteUrl: process.env.NUXT_PUBLIC_SITE_URL ?? defaultSeoConfig.siteUrl,
+    },
+  },
   i18n: {
     defaultLocale: 'zh-TW',
     strategy: 'prefix_except_default',
@@ -52,8 +61,8 @@ export default defineNuxtConfig({
     },
     registerType: 'autoUpdate',
     manifest: {
-      name: 'web file',
-      short_name: 'web file',
+      name: defaultSeoConfig.siteName,
+      short_name: defaultSeoConfig.siteName,
       description: 'Local-first image and PDF conversion tools powered by Nuxt, WASM, and PWA.',
       theme_color: '#060b10',
       background_color: '#060b10',

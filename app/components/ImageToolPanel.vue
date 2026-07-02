@@ -23,6 +23,7 @@ const {
   removeFile,
   resetOptions,
   results,
+  rotatePreview,
   setSingleCropSelection,
 } = useImageTranscoder()
 
@@ -250,11 +251,6 @@ function updateImagePdfPageSize(event: Event) {
   clearResults()
 }
 
-function updateImagePdfFitMode(event: Event) {
-  imagePdfOptions.fitMode = (event.target as HTMLSelectElement).value as typeof imagePdfOptions.fitMode
-  clearResults()
-}
-
 function updateImagePdfMargin(event: Event) {
   imagePdfOptions.margin = Math.max(0, Number((event.target as HTMLInputElement).value) || 0)
   clearResults()
@@ -272,7 +268,7 @@ function runImageAction() {
 
 <template>
   <section class="grid gap-5 xl:grid-cols-[minmax(340px,0.9fr)_minmax(0,1.35fr)]">
-    <ImageSourcePanel :image-mode="imageMode" :preview-estimates="previewEstimates" :previews="previews" @files-added="handleImageFiles" @mode-changed="setImageMode" @remove-file="removeFile" />
+    <ImageSourcePanel :image-mode="imageMode" :preview-estimates="previewEstimates" :previews="previews" @files-added="handleImageFiles" @mode-changed="setImageMode" @remove-file="removeFile" @rotate-file="rotatePreview" />
 
     <div class="space-y-4 border border-line bg-panel/82 p-4 shadow-[0_0_44px_var(--fx-sky-7)] backdrop-blur">
       <template v-if="imageMode !== ImageModeValue.Pdf">
@@ -289,7 +285,7 @@ function runImageAction() {
         />
       </template>
 
-      <ImagePdfControls v-else :options="imagePdfOptions" @update-fit-mode="updateImagePdfFitMode" @update-margin="updateImagePdfMargin" @update-page-size="updateImagePdfPageSize" />
+      <ImagePdfControls v-else :options="imagePdfOptions" :previews="previews" @update-margin="updateImagePdfMargin" @update-page-size="updateImagePdfPageSize" />
 
       <div class="flex flex-wrap gap-3">
         <button

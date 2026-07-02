@@ -31,11 +31,13 @@ export const ImagePdfPageSizeValue = {
 } as const
 export type ImagePdfPageSize = typeof ImagePdfPageSizeValue[keyof typeof ImagePdfPageSizeValue]
 
-export const ImagePdfFitModeValue = {
-  Contain: 'contain',
-  Cover: 'cover',
+export const ImageRotationValue = {
+  Deg0: 0,
+  Deg90: 90,
+  Deg180: 180,
+  Deg270: 270,
 } as const
-export type ImagePdfFitMode = typeof ImagePdfFitModeValue[keyof typeof ImagePdfFitModeValue]
+export type ImageRotation = typeof ImageRotationValue[keyof typeof ImageRotationValue]
 
 export interface ImageCropSelection {
   x: number
@@ -87,7 +89,6 @@ export interface ConvertedImage {
 
 export interface ImagePdfOptions {
   pageSize: ImagePdfPageSize
-  fitMode: ImagePdfFitMode
   margin: number
 }
 
@@ -97,6 +98,7 @@ export interface UploadedImagePreview {
   url: string
   width: number
   height: number
+  rotation: ImageRotation
   crop?: ImageCropSelection
 }
 

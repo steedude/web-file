@@ -1,5 +1,5 @@
 import type { ImagePdfOptions, ImageTransformOptions, PdfOptions } from '~/types/file-tool.type'
-import { ImageOutputFormatValue, ImagePdfFitModeValue, ImagePdfPageSizeValue, ImageResizeModeValue, PdfImageOutputFormatValue, PdfModeValue, PdfWatermarkPreviewScaleValue } from '~/types/file-tool.type'
+import { ImageOutputFormatValue, ImagePdfPageSizeValue, ImageResizeModeValue, PdfImageOutputFormatValue, PdfModeValue, PdfWatermarkPreviewScaleValue } from '~/types/file-tool.type'
 
 export const imageFormatOptions = [
   { value: ImageOutputFormatValue.Jpeg, mimeType: 'image/jpeg', extension: 'jpg' },
@@ -21,11 +21,9 @@ export const defaultImageOptions: ImageTransformOptions = {
 }
 
 export const imagePdfPageSizeOptions = Object.values(ImagePdfPageSizeValue)
-export const imagePdfFitModeOptions = Object.values(ImagePdfFitModeValue)
 
 export const defaultImagePdfOptions: ImagePdfOptions = {
   pageSize: ImagePdfPageSizeValue.Image,
-  fitMode: ImagePdfFitModeValue.Contain,
   margin: 0,
 }
 

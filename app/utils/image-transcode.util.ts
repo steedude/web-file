@@ -1,6 +1,6 @@
 import type { ConvertedImage, ImageOutputFormat, ImageTransformOptions, UploadedImagePreview } from '~/types/file-tool.type'
 import { imageFormatOptions } from '~/configs/file-tool.config'
-import { ImageOutputFormatValue } from '~/types/file-tool.type'
+import { ImageOutputFormatValue, ImageRotationValue } from '~/types/file-tool.type'
 import { replaceFileExtension } from '~/utils/file-name.util'
 
 const supportedImageMimeTypes = new Set(['image/jpeg', 'image/png', 'image/webp'])
@@ -47,6 +47,7 @@ export async function createImagePreview(file: File): Promise<UploadedImagePrevi
     url: URL.createObjectURL(file),
     width: dimensions.width,
     height: dimensions.height,
+    rotation: ImageRotationValue.Deg0,
   }
 }
 

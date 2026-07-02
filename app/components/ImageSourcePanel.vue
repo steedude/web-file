@@ -16,6 +16,7 @@ const emit = defineEmits<{
   filesAdded: [files: FileList | File[]]
   modeChanged: [mode: ImageMode]
   removeFile: [index: number]
+  rotateFile: [index: number]
 }>()
 
 const { t } = useI18n()
@@ -70,6 +71,6 @@ const { t } = useI18n()
     </div>
 
     <FileDropZone accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp" :label="t('common.dropFiles')" :multiple="imageMode !== ImageModeValue.Single" @files="emit('filesAdded', $event)" />
-    <ImagePreviewList :allow-crop="imageMode === ImageModeValue.Single" :compact="imageMode !== ImageModeValue.Single" :estimates="previewEstimates" :previews="previews" @remove="emit('removeFile', $event)" />
+    <ImagePreviewList :allow-crop="imageMode === ImageModeValue.Single" :allow-rotate="imageMode === ImageModeValue.Pdf" :compact="imageMode !== ImageModeValue.Single" :estimates="previewEstimates" :previews="previews" :show-estimates="imageMode === ImageModeValue.Batch" @remove="emit('removeFile', $event)" @rotate="emit('rotateFile', $event)" />
   </div>
 </template>

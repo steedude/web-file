@@ -1,5 +1,5 @@
-import type { ImagePdfFitMode, ImagePdfPageSize, PdfMode } from '~/types/file-tool.type'
-import { ImagePdfFitModeValue, ImagePdfPageSizeValue, PdfModeValue } from '~/types/file-tool.type'
+import type { ImagePdfPageSize, PdfMode } from '~/types/file-tool.type'
+import { ImagePdfPageSizeValue, PdfModeValue } from '~/types/file-tool.type'
 
 export function useFileToolLang() {
   const { t } = useI18n()
@@ -25,17 +25,7 @@ export function useFileToolLang() {
     return labels[pageSize]
   }
 
-  function getImagePdfFitModeLabel(fitMode: ImagePdfFitMode) {
-    const labels = {
-      [ImagePdfFitModeValue.Contain]: t('image.pdfFitModes.contain'),
-      [ImagePdfFitModeValue.Cover]: t('image.pdfFitModes.cover'),
-    }
-
-    return labels[fitMode]
-  }
-
   return {
-    getImagePdfFitModeLabel,
     getImagePdfPageSizeLabel,
     getPdfModeLabel,
   }

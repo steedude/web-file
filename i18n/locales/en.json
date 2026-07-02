@@ -76,18 +76,19 @@
     "outputFileName": "File name",
     "createPdf": "Create PDF",
     "pdfPageSize": "Page size",
-    "pdfFitMode": "Image fit",
     "pdfMargin": "Margin",
     "pdfPageSizes": {
       "image": "Match image",
       "a4": "A4",
       "letter": "Letter"
     },
-    "pdfFitModes": {
-      "contain": "Fit full image",
-      "cover": "Fill and crop"
-    },
-    "unsupportedFiles": "Skipped {count} unsupported image file(s)."
+    "unsupportedFiles": "Skipped {count} unsupported image file(s).",
+    "pdfPreview": "PDF preview",
+    "pdfPreviewEmpty": "Add images to preview PDF pages.",
+    "pdfPreviewCount": "{count} page(s)",
+    "rotateImage": "Rotate image",
+    "rotated": "Rotated",
+    "pdfPreviewItem": "{number}. {name}"
   },
   "pdf": {
     "title": "PDF tools",

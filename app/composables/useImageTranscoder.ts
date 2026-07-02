@@ -1,5 +1,6 @@
 import type { ConvertedImage, ImageCropSelection, ImagePdfOptions, ImageTransformOptions, PdfResult, UploadedImagePreview } from '~/types/file-tool.type'
 import { defaultImageOptions } from '~/configs/file-tool.config'
+import { ImageRotationValue } from '~/types/file-tool.type'
 import { fileToImageData } from '~/utils/image-canvas.util'
 import { createImagePdf } from '~/utils/image-pdf.util'
 import { createConvertedImage, createImagePreview, encodeImage, getFileBaseName, isSupportedImageFile } from '~/utils/image-transcode.util'
@@ -80,6 +81,20 @@ export function useImageTranscoder() {
     clearResults()
   }
 
+  function rotatePreview(index: number) {
+    const preview = previews.value[index]
+
+    if (!preview)
+      return
+
+    const rotations = Object.values(ImageRotationValue)
+    const currentIndex = rotations.indexOf(preview.rotation)
+    const nextRotation = rotations[(currentIndex + 1) % rotations.length] ?? ImageRotationValue.Deg0
+
+    previews.value = previews.value.map((item, previewIndex) => previewIndex === index ? { ...item, rotation: nextRotation } : item)
+    clearResults()
+  }
+
   function clear() {
     files.value = []
     clearPreviews()
@@ -148,7 +163,7 @@ export function useImageTranscoder() {
     clearResults()
 
     try {
-      pdfResults.value = [await createImagePdf(files.value, pdfOptions)]
+      pdfResults.value = [await createImagePdf(previews.value, pdfOptions)]
     }
     catch (cause) {
       error.value = cause instanceof Error ? cause.message : 'Image to PDF failed.'
@@ -204,6 +219,7 @@ export function useImageTranscoder() {
     removeFile,
     resetOptions,
     results,
+    rotatePreview,
     setSingleCropSelection,
     estimateOutputSizes,
   }

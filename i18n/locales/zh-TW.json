@@ -76,18 +76,19 @@
     "outputFileName": "檔案名稱",
     "createPdf": "建立 PDF",
     "pdfPageSize": "頁面大小",
-    "pdfFitMode": "圖片填入",
     "pdfMargin": "邊距",
     "pdfPageSizes": {
       "image": "跟圖片相同",
       "a4": "A4",
       "letter": "Letter"
     },
-    "pdfFitModes": {
-      "contain": "完整放入",
-      "cover": "填滿裁切"
-    },
-    "unsupportedFiles": "已略過 {count} 個不支援的圖片檔。"
+    "unsupportedFiles": "已略過 {count} 個不支援的圖片檔。",
+    "pdfPreview": "PDF 預覽",
+    "pdfPreviewEmpty": "加入圖片後預覽 PDF 頁面。",
+    "pdfPreviewCount": "共 {count} 頁",
+    "rotateImage": "旋轉圖片",
+    "rotated": "已旋轉",
+    "pdfPreviewItem": "{number}. {name}"
   },
   "pdf": {
     "title": "PDF 工具",

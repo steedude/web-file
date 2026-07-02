@@ -1,24 +1,29 @@
 <script setup lang="ts">
 import type { UploadedImagePreview } from '~/types/file-tool.type'
-import { X } from '@lucide/vue'
+import { RotateCw, X } from '@lucide/vue'
 import { formatFileSize } from '~/utils/file-size.util'
 
 const props = withDefaults(defineProps<{
   allowCrop?: boolean
+  allowRotate?: boolean
   compact?: boolean
   estimates?: Array<{
     outputSize: number
     delta: { type: 'larger' | 'saved' | 'same', percent: number } | null
   }>
   previews: UploadedImagePreview[]
+  showEstimates?: boolean
 }>(), {
   allowCrop: false,
+  allowRotate: false,
   compact: false,
   estimates: () => [],
+  showEstimates: true,
 })
 
 const emit = defineEmits<{
   remove: [index: number]
+  rotate: [index: number]
 }>()
 
 const { t } = useI18n()
@@ -33,13 +38,21 @@ function getPreviewFrameStyle(preview: UploadedImagePreview) {
 }
 
 function getCroppedImageStyle(preview: UploadedImagePreview) {
+  const rotationStyle = props.allowRotate && preview.rotation
+    ? {
+        transform: `rotate(${preview.rotation}deg)`,
+        transformOrigin: 'center',
+      }
+    : {}
+
   if (!preview.crop)
-    return {}
+    return rotationStyle
 
   return {
     height: `${preview.height / preview.crop.height * 100}%`,
     left: `${-preview.crop.x / preview.crop.width * 100}%`,
     top: `${-preview.crop.y / preview.crop.height * 100}%`,
+    ...rotationStyle,
     width: `${preview.width / preview.crop.width * 100}%`,
   }
 }
@@ -96,14 +109,17 @@ function getDeltaLabel(delta: { type: 'larger' | 'saved' | 'same', percent: numb
         <p v-if="preview.crop" class="mt-1 font-mono text-sm font-black text-acid">
           {{ $t('image.cropped') }} {{ preview.crop.width }} {{ $t('common.by') }} {{ preview.crop.height }} {{ $t('image.pixels') }}
         </p>
+        <p v-if="allowRotate && preview.rotation" class="mt-1 font-mono text-sm font-black text-acid">
+          {{ $t('image.rotated') }} {{ preview.rotation }}{{ $t('common.degree') }}
+        </p>
         <p v-if="!allowCrop" class="mt-1 font-mono text-sm font-bold text-ink/52">
           {{ $t('image.sourceSize') }} {{ formatFileSize(preview.file.size) }}
         </p>
-        <p v-if="!allowCrop" class="mt-1 font-mono text-sm font-bold text-ink/52">
+        <p v-if="showEstimates && !allowCrop" class="mt-1 font-mono text-sm font-bold text-ink/52">
           {{ $t('image.outputSizeReference') }} {{ estimates[index]?.outputSize ? formatFileSize(estimates[index]!.outputSize) : $t('image.waitingEstimate') }}
         </p>
         <p
-          v-if="!allowCrop && estimates[index]?.delta"
+          v-if="showEstimates && !allowCrop && estimates[index]?.delta"
           class="mt-1 font-mono text-sm font-black"
           :class="estimates[index]!.delta?.type === 'larger' ? 'text-coral' : estimates[index]!.delta?.type === 'saved' ? 'text-acid' : 'text-ink/42'"
         >
@@ -118,6 +134,16 @@ function getDeltaLabel(delta: { type: 'larger' | 'saved' | 'same', percent: numb
         @click="emit('remove', index)"
       >
         <X class="size-4" aria-hidden="true" />
+      </button>
+      <button
+        v-if="allowRotate"
+        type="button"
+        class="focus-ring absolute top-2 left-2 grid size-8 place-items-center border border-line bg-paper/90 text-ink/70 opacity-100 transition hover:border-sky hover:text-sky md:opacity-0 md:group-hover:opacity-100"
+        :aria-label="$t('image.rotateImage')"
+        :title="$t('image.rotateImage')"
+        @click="emit('rotate', index)"
+      >
+        <RotateCw class="size-4" aria-hidden="true" />
       </button>
     </article>
   </div>

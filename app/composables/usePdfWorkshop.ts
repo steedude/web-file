@@ -1,13 +1,16 @@
+import type { AppErrorCode, AppErrorFeature } from '~/types/error.type'
 import type { ConvertedImage, PdfOptions, PdfPageItem, PdfResult } from '~/types/file-tool.type'
+import { AppErrorCodes, AppErrorFeatures, AppErrorSeverities } from '~/configs/error-code.config'
 import { defaultPdfOptions } from '~/configs/file-tool.config'
-import { PdfModeValue } from '~/types/file-tool.type'
+import { PdfModes } from '~/types/file-tool.type'
 import { createPdfPageItems, extractPdfPages, mergePdfPages, renderPdfPagesAsImages, watermarkPdf } from '~/utils/pdf-workshop.util'
 
 // 只有擷取與轉圖片需要勾選頁面；合併和浮水印使用目前頁面清單即可。
-const selectablePdfModes = new Set<PdfOptions['mode']>([PdfModeValue.Split, PdfModeValue.Images])
+const selectablePdfModes = new Set<PdfOptions['mode']>([PdfModes.Split, PdfModes.Images])
 
 export function usePdfWorkshop() {
   const { t } = useI18n()
+  const { captureAppError } = useErrorReporter()
   const options = reactive<PdfOptions>({ ...defaultPdfOptions })
   const files = ref<File[]>([])
   const pages = ref<PdfPageItem[]>([])
@@ -15,7 +18,8 @@ export function usePdfWorkshop() {
   const imageResults = ref<ConvertedImage[]>([])
   const isProcessing = ref(false)
   const isRenderingPages = ref(false)
-  const error = ref('')
+  const errorCode = ref<AppErrorCode | null>(null)
+  const notice = ref('')
 
   const activePages = computed(() => selectablePdfModes.has(options.mode) ? pages.value.filter(page => page.selected) : pages.value)
   const canRun = computed(() => activePages.value.length > 0 && !isProcessing.value && !isRenderingPages.value)
@@ -25,7 +29,8 @@ export function usePdfWorkshop() {
     files.value = []
     clearPages()
     clearResults()
-    error.value = ''
+    errorCode.value = null
+    notice.value = ''
   })
 
   async function addFiles(fileList: FileList | File[]) {
@@ -33,7 +38,8 @@ export function usePdfWorkshop() {
     const pdfFiles = incomingFiles.filter(isPdfFile)
     const skippedCount = incomingFiles.length - pdfFiles.length
 
-    error.value = skippedCount ? t('pdf.unsupportedFiles', { count: skippedCount }) : ''
+    errorCode.value = null
+    notice.value = skippedCount ? t('pdf.unsupportedFiles', { count: skippedCount }) : ''
 
     if (pdfFiles.length === 0)
       return
@@ -41,9 +47,9 @@ export function usePdfWorkshop() {
     clearResults()
 
     // 合併可以收多份 PDF；其他模式先收單份，避免頁碼來源變得難判斷。
-    const nextFiles = options.mode === PdfModeValue.Merge ? pdfFiles : pdfFiles.slice(0, 1)
+    const nextFiles = options.mode === PdfModes.Merge ? pdfFiles : pdfFiles.slice(0, 1)
 
-    if (options.mode !== PdfModeValue.Merge) {
+    if (options.mode !== PdfModes.Merge) {
       clearPages()
       files.value = []
     }
@@ -52,11 +58,21 @@ export function usePdfWorkshop() {
 
     try {
       const nextPages = await createPdfPageItems(nextFiles, selectablePdfModes.has(options.mode))
-      files.value = options.mode === PdfModeValue.Merge ? [...files.value, ...nextFiles] : nextFiles
-      pages.value = options.mode === PdfModeValue.Merge ? [...pages.value, ...nextPages] : nextPages
+      files.value = options.mode === PdfModes.Merge ? [...files.value, ...nextFiles] : nextFiles
+      pages.value = options.mode === PdfModes.Merge ? [...pages.value, ...nextPages] : nextPages
     }
     catch (cause) {
-      error.value = cause instanceof Error ? cause.message : 'PDF preview failed.'
+      errorCode.value = AppErrorCodes.PdfPreviewFailed
+      captureAppError({
+        cause,
+        code: errorCode.value,
+        context: {
+          fileCount: nextFiles.length,
+          mode: options.mode,
+        },
+        feature: AppErrorFeatures.PdfPreview,
+        severity: AppErrorSeverities.Error,
+      })
     }
     finally {
       isRenderingPages.value = false
@@ -76,7 +92,8 @@ export function usePdfWorkshop() {
     files.value = []
     clearPages()
     clearResults()
-    error.value = ''
+    errorCode.value = null
+    notice.value = ''
   }
 
   function removePage(id: string) {
@@ -144,24 +161,38 @@ export function usePdfWorkshop() {
       return
 
     isProcessing.value = true
-    error.value = ''
+    errorCode.value = null
+    notice.value = ''
     clearResults()
 
     try {
       const firstFile = files.value[0]
 
       // 真正的 PDF 處理在 util；composable 只負責依照目前模式分派。
-      if (options.mode === PdfModeValue.Merge)
+      if (options.mode === PdfModes.Merge)
         results.value = [await mergePdfPages(activePages.value)]
-      else if (options.mode === PdfModeValue.Split && firstFile)
+      else if (options.mode === PdfModes.Split && firstFile)
         results.value = await extractPdfPages(firstFile, activePages.value)
-      else if (options.mode === PdfModeValue.Watermark && firstFile)
+      else if (options.mode === PdfModes.Watermark && firstFile)
         results.value = [await watermarkPdf(firstFile, options)]
-      else if (options.mode === PdfModeValue.Images)
+      else if (options.mode === PdfModes.Images)
         imageResults.value = await renderPdfPagesAsImages(activePages.value, options)
     }
     catch (cause) {
-      error.value = cause instanceof Error ? cause.message : 'PDF processing failed.'
+      const errorMeta = getPdfRunErrorMeta(options.mode)
+      errorCode.value = errorMeta.code
+      captureAppError({
+        cause,
+        code: errorCode.value,
+        context: {
+          activePageCount: activePages.value.length,
+          fileCount: files.value.length,
+          imageFormat: options.imageFormat,
+          mode: options.mode,
+        },
+        feature: errorMeta.feature,
+        severity: AppErrorSeverities.Error,
+      })
     }
     finally {
       isProcessing.value = false
@@ -177,9 +208,10 @@ export function usePdfWorkshop() {
     addFiles,
     canRun,
     clear,
-    error,
+    errorCode,
     files,
     imageResults,
+    notice,
     pages,
     isRenderingPages,
     isProcessing,
@@ -197,4 +229,39 @@ export function usePdfWorkshop() {
 
 function isPdfFile(file: File) {
   return file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')
+}
+
+function getPdfRunErrorMeta(mode: PdfOptions['mode']): { code: AppErrorCode, feature: AppErrorFeature } {
+  if (mode === PdfModes.Merge) {
+    return {
+      code: AppErrorCodes.PdfMergeFailed,
+      feature: AppErrorFeatures.PdfMerge,
+    }
+  }
+
+  if (mode === PdfModes.Split) {
+    return {
+      code: AppErrorCodes.PdfSplitFailed,
+      feature: AppErrorFeatures.PdfSplit,
+    }
+  }
+
+  if (mode === PdfModes.Watermark) {
+    return {
+      code: AppErrorCodes.PdfWatermarkFailed,
+      feature: AppErrorFeatures.PdfWatermark,
+    }
+  }
+
+  if (mode === PdfModes.Images) {
+    return {
+      code: AppErrorCodes.PdfRenderImageFailed,
+      feature: AppErrorFeatures.PdfToImage,
+    }
+  }
+
+  return {
+    code: AppErrorCodes.Unknown,
+    feature: AppErrorFeatures.System,
+  }
 }

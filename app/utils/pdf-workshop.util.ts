@@ -1,7 +1,7 @@
 import type { PDFDocument as PdfLibDocument, PDFPage } from 'pdf-lib'
 import type { PDFDocumentProxy } from 'pdfjs-dist'
 import type { ConvertedImage, PdfOptions, PdfPageItem, PdfResult } from '~/types/file-tool.type'
-import { PdfImageOutputFormatValue } from '~/types/file-tool.type'
+import { PdfImageOutputFormats } from '~/types/file-tool.type'
 import { appendFileSuffix } from '~/utils/file-name.util'
 
 export async function mergePdfPages(pages: PdfPageItem[]): Promise<PdfResult> {
@@ -79,7 +79,7 @@ export async function renderPdfPagesAsImages(pages: PdfPageItem[], options: PdfO
 
     const mimeType = getPdfImageMimeType(options.imageFormat)
     const blob = await canvasToBlob(canvas, mimeType, options.imageQuality / 100)
-    const extension = options.imageFormat === PdfImageOutputFormatValue.Jpeg ? 'jpg' : options.imageFormat
+    const extension = options.imageFormat === PdfImageOutputFormats.Jpeg ? 'jpg' : options.imageFormat
 
     results.push({
       id: crypto.randomUUID(),
@@ -213,10 +213,10 @@ function canvasToBlob(canvas: HTMLCanvasElement, mimeType: string, quality?: num
 }
 
 function getPdfImageMimeType(format: PdfOptions['imageFormat']) {
-  if (format === PdfImageOutputFormatValue.Jpeg)
+  if (format === PdfImageOutputFormats.Jpeg)
     return 'image/jpeg'
 
-  if (format === PdfImageOutputFormatValue.Webp)
+  if (format === PdfImageOutputFormats.Webp)
     return 'image/webp'
 
   return 'image/png'

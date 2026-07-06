@@ -1,15 +1,15 @@
 import type { ImagePdfPageSize, PdfMode } from '~/types/file-tool.type'
-import { ImagePdfPageSizeValue, PdfModeValue } from '~/types/file-tool.type'
+import { ImagePdfPageSizes, PdfModes } from '~/types/file-tool.type'
 
 export function useFileToolLang() {
   const { t } = useI18n()
 
   function getPdfModeLabel(mode: PdfMode) {
     const labels = {
-      [PdfModeValue.Merge]: t('pdf.merge'),
-      [PdfModeValue.Split]: t('pdf.split'),
-      [PdfModeValue.Watermark]: t('pdf.watermark'),
-      [PdfModeValue.Images]: t('pdf.images'),
+      [PdfModes.Merge]: t('pdf.merge'),
+      [PdfModes.Split]: t('pdf.split'),
+      [PdfModes.Watermark]: t('pdf.watermark'),
+      [PdfModes.Images]: t('pdf.images'),
     }
 
     return labels[mode]
@@ -17,9 +17,9 @@ export function useFileToolLang() {
 
   function getImagePdfPageSizeLabel(pageSize: ImagePdfPageSize) {
     const labels = {
-      [ImagePdfPageSizeValue.Image]: t('image.pdfPageSizes.image'),
-      [ImagePdfPageSizeValue.A4]: t('image.pdfPageSizes.a4'),
-      [ImagePdfPageSizeValue.Letter]: t('image.pdfPageSizes.letter'),
+      [ImagePdfPageSizes.Image]: t('image.pdfPageSizes.image'),
+      [ImagePdfPageSizes.A4]: t('image.pdfPageSizes.a4'),
+      [ImagePdfPageSizes.Letter]: t('image.pdfPageSizes.letter'),
     }
 
     return labels[pageSize]

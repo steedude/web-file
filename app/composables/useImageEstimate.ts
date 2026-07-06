@@ -1,5 +1,5 @@
 import type { ImageMode } from '~/types/file-tool.type'
-import { ImageModeValue } from '~/types/file-tool.type'
+import { ImageModes } from '~/types/file-tool.type'
 
 export function useImageEstimate(params: {
   estimateOutputSizes: () => Promise<Array<{ index: number, size: number }>>
@@ -20,7 +20,7 @@ export function useImageEstimate(params: {
     if (estimateTimer)
       clearTimeout(estimateTimer)
 
-    if (!params.files.value.length || params.imageMode.value === ImageModeValue.Pdf)
+    if (!params.files.value.length || params.imageMode.value === ImageModes.Pdf)
       return
 
     // requestId 用來擋已經開始但過期的 async 估算。

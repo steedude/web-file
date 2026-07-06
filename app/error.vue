@@ -1,15 +1,35 @@
 <script setup lang="ts">
 import type { NuxtError } from '#app'
 import { ArrowLeft, FileWarning } from '@lucide/vue'
+import { AppErrorCodes, AppErrorFeatures, AppErrorSeverities } from '~/configs/error-code.config'
 
 const props = defineProps<{
   error: NuxtError
 }>()
 
 const { t } = useI18n()
+const { captureAppError } = useErrorReporter()
 const localePath = useLocalePath()
-const statusCode = computed(() => props.error.statusCode || 500)
+const route = useRoute()
+const statusCode = computed(() => props.error.status || 500)
 const isNotFound = computed(() => statusCode.value === 404)
+
+onMounted(() => {
+  if (isNotFound.value)
+    return
+
+  captureAppError({
+    cause: props.error,
+    code: AppErrorCodes.Unknown,
+    context: {
+      message: props.error.message,
+      statusCode: statusCode.value,
+      path: route.fullPath,
+    },
+    feature: AppErrorFeatures.System,
+    severity: AppErrorSeverities.Fatal,
+  })
+})
 
 function backHome() {
   clearError({ redirect: localePath('/') })

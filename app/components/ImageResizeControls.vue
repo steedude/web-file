@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { ImageControlActions, ImageMode, ImageTransformOptions, UploadedImagePreview } from '~/types/file-tool.type'
 import { Scissors } from '@lucide/vue'
-import { ImageModeValue, ImageResizeModeValue } from '~/types/file-tool.type'
+import { ImageModes, ImageResizeModes } from '~/types/file-tool.type'
 
 const props = defineProps<{
   actions: ImageControlActions
@@ -11,7 +11,7 @@ const props = defineProps<{
 }>()
 
 const { t } = useI18n()
-const hasActiveCrop = computed(() => props.imageMode === ImageModeValue.Single && !!props.previews[0]?.crop)
+const hasActiveCrop = computed(() => props.imageMode === ImageModes.Single && !!props.previews[0]?.crop)
 </script>
 
 <template>
@@ -33,7 +33,7 @@ const hasActiveCrop = computed(() => props.imageMode === ImageModeValue.Single &
       {{ t('image.proportionalResize') }}
     </button>
     <button
-      v-if="imageMode === ImageModeValue.Single"
+      v-if="imageMode === ImageModes.Single"
       type="button"
       class="focus-ring inline-flex items-center gap-2 border px-3 py-2 font-mono text-sm font-black transition disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-line disabled:hover:text-ink/76"
       :class="hasActiveCrop ? 'border-sky bg-sky text-paper' : 'border-line bg-grid text-ink/76 hover:border-sky hover:text-sky'"
@@ -45,31 +45,31 @@ const hasActiveCrop = computed(() => props.imageMode === ImageModeValue.Single &
     </button>
   </div>
 
-  <div v-if="imageMode === ImageModeValue.Single && !options.preserveDimensions" class="grid grid-cols-2 gap-2 md:w-max">
+  <div v-if="imageMode === ImageModes.Single && !options.preserveDimensions" class="grid grid-cols-2 gap-2 md:w-max">
     <button
       type="button"
       class="focus-ring border px-3 py-2 font-mono text-sm font-black transition"
-      :class="options.resizeMode === ImageResizeModeValue.Dimensions ? 'border-sky bg-sky text-paper' : 'border-line bg-grid text-ink/62 hover:border-sky hover:text-sky'"
-      @click="actions.setResizeMode(ImageResizeModeValue.Dimensions)"
+      :class="options.resizeMode === ImageResizeModes.Dimensions ? 'border-sky bg-sky text-paper' : 'border-line bg-grid text-ink/62 hover:border-sky hover:text-sky'"
+      @click="actions.setResizeMode(ImageResizeModes.Dimensions)"
     >
       {{ t('image.resizeByPixels') }}
     </button>
     <button
       type="button"
       class="focus-ring border px-3 py-2 font-mono text-sm font-black transition"
-      :class="options.resizeMode === ImageResizeModeValue.Percent ? 'border-sky bg-sky text-paper' : 'border-line bg-grid text-ink/62 hover:border-sky hover:text-sky'"
-      @click="actions.setResizeMode(ImageResizeModeValue.Percent)"
+      :class="options.resizeMode === ImageResizeModes.Percent ? 'border-sky bg-sky text-paper' : 'border-line bg-grid text-ink/62 hover:border-sky hover:text-sky'"
+      @click="actions.setResizeMode(ImageResizeModes.Percent)"
     >
       {{ t('image.resizeByPercent') }}
     </button>
   </div>
 
-  <label v-if="!options.preserveDimensions && options.resizeMode === ImageResizeModeValue.Percent" class="grid gap-2">
+  <label v-if="!options.preserveDimensions && options.resizeMode === ImageResizeModes.Percent" class="grid gap-2">
     <span class="font-mono text-sm font-black tracking-widest text-sky uppercase">{{ t('image.resizePercent') }} {{ t('common.dot') }} {{ options.resizePercent }}{{ t('common.percent') }}</span>
     <input :value="options.resizePercent" class="w-full accent-acid" type="range" min="1" max="100" step="1" @change="actions.commitEstimate" @input="actions.updateResizePercent($event)">
   </label>
 
-  <div v-if="imageMode === ImageModeValue.Single && options.resizeMode === ImageResizeModeValue.Dimensions" class="grid gap-4 md:grid-cols-2">
+  <div v-if="imageMode === ImageModes.Single && options.resizeMode === ImageResizeModes.Dimensions" class="grid gap-4 md:grid-cols-2">
     <label class="grid gap-2">
       <span class="font-mono text-sm font-black tracking-widest text-sky uppercase">{{ t('image.width') }}</span>
       <input

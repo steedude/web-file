@@ -2,12 +2,12 @@
 import type { ToolMode } from '~/types/file-tool.type'
 import { FileText, Image } from '@lucide/vue'
 import { createAbsoluteUrl } from '~/configs/seo.config'
-import { ToolModeValue } from '~/types/file-tool.type'
+import { ToolModes } from '~/types/file-tool.type'
 
 const { t } = useI18n()
 const localePath = useLocalePath()
 const runtimeConfig = useRuntimeConfig()
-const activeTool = ref<ToolMode>(ToolModeValue.Image)
+const activeTool = ref<ToolMode>(ToolModes.Image)
 const ImageToolPanel = defineAsyncComponent(() => import('~/components/ImageToolPanel.vue'))
 const PdfToolPanel = defineAsyncComponent(() => import('~/components/PdfToolPanel.vue'))
 const canonicalUrl = computed(() => createAbsoluteUrl(runtimeConfig.public.siteUrl, localePath('/')))
@@ -54,8 +54,8 @@ useHead({
         <button
           type="button"
           class="focus-ring inline-flex items-center justify-center gap-2 px-5 py-3 font-mono text-sm font-black tracking-wide transition"
-          :class="activeTool === ToolModeValue.Image ? 'bg-sky text-paper' : 'text-ink/58 hover:bg-panel-soft hover:text-sky'"
-          @click="activeTool = ToolModeValue.Image"
+          :class="activeTool === ToolModes.Image ? 'bg-sky text-paper' : 'text-ink/58 hover:bg-panel-soft hover:text-sky'"
+          @click="activeTool = ToolModes.Image"
         >
           <Image class="size-4" aria-hidden="true" />
           {{ t('home.imageTab') }}
@@ -63,8 +63,8 @@ useHead({
         <button
           type="button"
           class="focus-ring inline-flex items-center justify-center gap-2 px-5 py-3 font-mono text-sm font-black tracking-wide transition"
-          :class="activeTool === ToolModeValue.Pdf ? 'bg-lilac text-paper' : 'text-ink/58 hover:bg-panel-soft hover:text-lilac'"
-          @click="activeTool = ToolModeValue.Pdf"
+          :class="activeTool === ToolModes.Pdf ? 'bg-lilac text-paper' : 'text-ink/58 hover:bg-panel-soft hover:text-lilac'"
+          @click="activeTool = ToolModes.Pdf"
         >
           <FileText class="size-4" aria-hidden="true" />
           {{ t('home.pdfTab') }}
@@ -73,7 +73,7 @@ useHead({
     </section>
 
     <div class="mt-6">
-      <ImageToolPanel v-if="activeTool === ToolModeValue.Image" />
+      <ImageToolPanel v-if="activeTool === ToolModes.Image" />
       <PdfToolPanel v-else />
     </div>
   </div>

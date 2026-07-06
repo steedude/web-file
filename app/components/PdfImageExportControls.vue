@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { PdfOptions } from '~/types/file-tool.type'
 import { pdfImageFormatOptions } from '~/configs/file-tool.config'
-import { PdfImageOutputFormatValue } from '~/types/file-tool.type'
+import { PdfImageOutputFormats } from '~/types/file-tool.type'
 
 defineProps<{
   options: PdfOptions
@@ -27,7 +27,7 @@ const { t } = useI18n()
       </select>
     </label>
 
-    <label v-if="options.imageFormat !== PdfImageOutputFormatValue.Png" class="grid gap-2">
+    <label v-if="options.imageFormat !== PdfImageOutputFormats.Png" class="grid gap-2">
       <span class="font-mono text-sm font-black tracking-widest text-lilac uppercase">{{ t('pdf.imageQuality') }} {{ t('common.dot') }} {{ options.imageQuality }}</span>
       <input :value="options.imageQuality" class="h-9 w-full accent-acid" type="range" min="1" max="100" step="1" @input="emit('updateQuality', $event)">
     </label>

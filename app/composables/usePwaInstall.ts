@@ -1,9 +1,12 @@
+import { AppErrorCodes, AppErrorFeatures, AppErrorSeverities } from '~/configs/error-code.config'
+
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>
 }
 
 export function usePwaInstall() {
+  const { captureAppError } = useErrorReporter()
   const deferredPrompt = useState<BeforeInstallPromptEvent | null>('pwa-install-prompt', () => null)
   const canInstall = computed(() => Boolean(deferredPrompt.value))
 
@@ -19,9 +22,19 @@ export function usePwaInstall() {
     if (!deferredPrompt.value)
       return
 
-    await deferredPrompt.value.prompt()
-    await deferredPrompt.value.userChoice
-    deferredPrompt.value = null
+    try {
+      await deferredPrompt.value.prompt()
+      await deferredPrompt.value.userChoice
+      deferredPrompt.value = null
+    }
+    catch (cause) {
+      captureAppError({
+        cause,
+        code: AppErrorCodes.PwaInstallFailed,
+        feature: AppErrorFeatures.PwaInstall,
+        severity: AppErrorSeverities.Warning,
+      })
+    }
   }
 
   return {

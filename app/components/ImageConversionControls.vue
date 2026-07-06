@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { ImageControlActions, ImageMode, ImageTransformOptions, UploadedImagePreview } from '~/types/file-tool.type'
-import { ImageModeValue } from '~/types/file-tool.type'
+import { ImageModes } from '~/types/file-tool.type'
 import { formatFileSize } from '~/utils/file-size.util'
 
 defineProps<{
@@ -39,7 +39,7 @@ function getDeltaLabel(delta: { type: 'larger' | 'saved' | 'same', percent: numb
 
   <div class="grid gap-2 font-mono text-sm font-bold text-ink md:grid-cols-3">
     <span class="border border-line/70 bg-paper/70 px-3 py-2">
-      <span class="block text-ink/42"><template v-if="imageMode === ImageModeValue.Batch">{{ t('image.batchSummary') }} </template>{{ t('image.sourceSize') }}</span>
+      <span class="block text-ink/42"><template v-if="imageMode === ImageModes.Batch">{{ t('image.batchSummary') }} </template>{{ t('image.sourceSize') }}</span>
       <span class="mt-1 block text-base font-black text-ink">{{ formatFileSize(originalSizeReference) }}</span>
     </span>
     <span class="border border-line/70 bg-paper/70 px-3 py-2">

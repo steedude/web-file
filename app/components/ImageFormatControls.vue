@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { ImageControlActions, ImageMode, ImageTransformOptions } from '~/types/file-tool.type'
 import { imageFormatOptions } from '~/configs/file-tool.config'
-import { ImageModeValue, ImageOutputFormatValue } from '~/types/file-tool.type'
+import { ImageModes, ImageOutputFormats } from '~/types/file-tool.type'
 
 const props = defineProps<{
   actions: ImageControlActions
@@ -27,14 +27,14 @@ const displayedQuality = computed(() => props.options.webpLossless ? 100 : props
     </label>
 
     <div>
-      <div v-if="options.format === ImageOutputFormatValue.Webp">
+      <div v-if="options.format === ImageOutputFormats.Webp">
         <label class="grid grid-rows-[auto_2.5rem] gap-2">
           <span class="flex h-5 items-center font-mono text-sm font-black tracking-widest text-sky uppercase">{{ t('image.quality') }} {{ t('common.dot') }} {{ displayedQuality }}</span>
           <input :value="displayedQuality" class="h-9 w-full accent-acid disabled:opacity-40" type="range" min="1" max="100" :disabled="options.webpLossless" @change="actions.commitEstimate" @input="actions.updateQuality($event)">
         </label>
       </div>
 
-      <label v-else-if="options.format === ImageOutputFormatValue.Jpeg" class="grid grid-rows-[auto_2.5rem] gap-2">
+      <label v-else-if="options.format === ImageOutputFormats.Jpeg" class="grid grid-rows-[auto_2.5rem] gap-2">
         <span class="flex h-5 items-center font-mono text-sm font-black tracking-widest text-sky uppercase">{{ t('image.quality') }} {{ t('common.dot') }} {{ options.quality }}</span>
         <input :value="options.quality" class="h-9 w-full accent-acid" type="range" min="1" max="100" @change="actions.commitEstimate" @input="actions.updateQuality($event)">
       </label>
@@ -48,7 +48,7 @@ const displayedQuality = computed(() => props.options.webpLossless ? 100 : props
     </div>
   </div>
 
-  <label v-if="options.format === ImageOutputFormatValue.Png" class="grid gap-2">
+  <label v-if="options.format === ImageOutputFormats.Png" class="grid gap-2">
     <span class="font-mono text-sm font-black tracking-widest text-sky uppercase">{{ t('image.losslessPng') }}</span>
     <span class="inline-flex w-full items-center gap-2 border border-line bg-grid px-3 py-2 font-mono text-sm font-black text-ink/76">
       <input :checked="options.optimisePng" type="checkbox" class="size-4 accent-acid" @change="actions.setOptimisePng(($event.target as HTMLInputElement).checked)">
@@ -56,7 +56,7 @@ const displayedQuality = computed(() => props.options.webpLossless ? 100 : props
     </span>
   </label>
 
-  <label v-if="options.format === ImageOutputFormatValue.Webp" class="grid gap-2">
+  <label v-if="options.format === ImageOutputFormats.Webp" class="grid gap-2">
     <span class="font-mono text-sm font-black tracking-widest text-sky uppercase">{{ t('image.webpLossless') }}</span>
     <span class="inline-flex w-full items-center gap-2 border border-line bg-grid px-3 py-2 font-mono text-sm font-black text-ink/76">
       <input :checked="options.webpLossless" type="checkbox" class="size-4 accent-acid" @change="actions.setWebpLossless(($event.target as HTMLInputElement).checked)">
@@ -68,7 +68,7 @@ const displayedQuality = computed(() => props.options.webpLossless ? 100 : props
     {{ t('image.sameExtensionWarning') }}
   </p>
 
-  <label v-if="imageMode === ImageModeValue.Single && previewsLength" class="grid gap-2">
+  <label v-if="imageMode === ImageModes.Single && previewsLength" class="grid gap-2">
     <span class="font-mono text-sm font-black tracking-widest text-sky uppercase">{{ t('image.outputFileName') }}</span>
     <input
       :value="options.outputFileName"

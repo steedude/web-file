@@ -1,5 +1,5 @@
 import type { ImageCropSelection, ImageResizeMode } from '~/types/file-tool.type'
-import { ImageResizeModeValue } from '~/types/file-tool.type'
+import { ImageResizeModes } from '~/types/file-tool.type'
 
 interface SourceRect {
   x: number
@@ -33,7 +33,7 @@ function getScale(source: SourceRect, maxWidth: number, maxHeight: number, prese
   if (preserveDimensions)
     return 1
 
-  if (resizeMode === ImageResizeModeValue.Percent)
+  if (resizeMode === ImageResizeModes.Percent)
     return Math.min(1, Math.max(1, Math.min(100, resizePercent)) / 100)
 
   // 尺寸模式目前只縮小不放大，避免輸出尺寸變大但畫質變糊。

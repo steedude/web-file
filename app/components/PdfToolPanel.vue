@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { FileStack, Play, Trash2 } from '@lucide/vue'
 import { pdfModeOptions } from '~/configs/file-tool.config'
-import { PdfModeValue } from '~/types/file-tool.type'
+import { PdfModes } from '~/types/file-tool.type'
 
 const { t } = useI18n()
 const { getPdfModeLabel } = useFileToolLang()
@@ -10,12 +10,13 @@ const {
   addFiles,
   canRun,
   clear,
-  error,
+  errorCode,
   files,
   imageResults,
   isRenderingPages,
   isProcessing,
   movePage,
+  notice,
   options,
   pages,
   removePage,
@@ -26,6 +27,9 @@ const {
   selectAllPages,
   togglePageSelection,
 } = usePdfWorkshop()
+
+const { getAppErrorMessage } = useAppErrorLang()
+const errorMessage = computed(() => errorCode.value ? getAppErrorMessage(errorCode.value) : notice.value)
 
 function updateWatermarkText(event: Event) {
   options.watermarkText = (event.target as HTMLInputElement).value
@@ -97,13 +101,13 @@ function updateImageScale(event: Event) {
         </div>
       </div>
 
-      <FileDropZone accept="application/pdf,.pdf" :label="t('common.dropFiles')" :multiple="options.mode === PdfModeValue.Merge" @files="addFiles" />
+      <FileDropZone accept="application/pdf,.pdf" :label="t('common.dropFiles')" :multiple="options.mode === PdfModes.Merge" @files="addFiles" />
       <FileList :files="files" @remove="removeFile" />
     </div>
 
     <div class="space-y-4 border border-line bg-panel/82 p-4 shadow-[0_0_44px_var(--fx-lilac-7)] backdrop-blur">
       <PdfWatermarkControls
-        v-if="options.mode === PdfModeValue.Watermark"
+        v-if="options.mode === PdfModes.Watermark"
         :options="options"
         @set-preview-scale="setWatermarkPreviewScale"
         @update-color="updateWatermarkColor"
@@ -114,7 +118,7 @@ function updateImageScale(event: Event) {
       />
 
       <PdfImageExportControls
-        v-if="options.mode === PdfModeValue.Images"
+        v-if="options.mode === PdfModes.Images"
         :options="options"
         @update-format="updateImageFormat"
         @update-quality="updateImageQuality"
@@ -152,14 +156,14 @@ function updateImageScale(event: Event) {
         </button>
       </div>
 
-      <p v-if="error" class="border border-coral bg-coral/12 px-3 py-2 font-mono text-sm font-bold text-coral">
-        {{ error }}
+      <p v-if="errorMessage" class="border border-coral bg-coral/12 px-3 py-2 font-mono text-sm font-bold text-coral">
+        {{ errorMessage }}
       </p>
 
       <p v-if="!results.length && !imageResults.length" class="border border-line bg-grid/70 px-3 py-8 text-center font-mono text-base font-bold text-ink/52">
         {{ t('pdf.resultEmpty') }}
       </p>
-      <ResultList v-else :image-results="imageResults" :pdf-results="results" :show-image-details="options.mode !== PdfModeValue.Images" />
+      <ResultList v-else :image-results="imageResults" :pdf-results="results" :show-image-details="options.mode !== PdfModes.Images" />
     </div>
   </section>
 </template>

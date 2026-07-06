@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { ImageMode, UploadedImagePreview } from '~/types/file-tool.type'
 import { Image } from '@lucide/vue'
-import { ImageModeValue } from '~/types/file-tool.type'
+import { ImageModes } from '~/types/file-tool.type'
 
 defineProps<{
   imageMode: ImageMode
@@ -43,34 +43,34 @@ const { t } = useI18n()
         <button
           type="button"
           class="focus-ring min-h-12 border px-4 py-3 font-mono text-sm font-black transition"
-          :aria-pressed="imageMode === ImageModeValue.Batch"
-          :class="imageMode === ImageModeValue.Batch ? 'border-sky bg-sky text-paper shadow-[0_0_22px_var(--fx-sky-18)]' : 'border-transparent bg-grid/70 text-ink/62 hover:border-sky/70 hover:text-sky'"
-          @click="emit('modeChanged', ImageModeValue.Batch)"
+          :aria-pressed="imageMode === ImageModes.Batch"
+          :class="imageMode === ImageModes.Batch ? 'border-sky bg-sky text-paper shadow-[0_0_22px_var(--fx-sky-18)]' : 'border-transparent bg-grid/70 text-ink/62 hover:border-sky/70 hover:text-sky'"
+          @click="emit('modeChanged', ImageModes.Batch)"
         >
           {{ t('image.batchSettings') }}
         </button>
         <button
           type="button"
           class="focus-ring min-h-12 border px-4 py-3 font-mono text-sm font-black transition"
-          :aria-pressed="imageMode === ImageModeValue.Single"
-          :class="imageMode === ImageModeValue.Single ? 'border-sky bg-sky text-paper shadow-[0_0_22px_var(--fx-sky-18)]' : 'border-transparent bg-grid/70 text-ink/62 hover:border-sky/70 hover:text-sky'"
-          @click="emit('modeChanged', ImageModeValue.Single)"
+          :aria-pressed="imageMode === ImageModes.Single"
+          :class="imageMode === ImageModes.Single ? 'border-sky bg-sky text-paper shadow-[0_0_22px_var(--fx-sky-18)]' : 'border-transparent bg-grid/70 text-ink/62 hover:border-sky/70 hover:text-sky'"
+          @click="emit('modeChanged', ImageModes.Single)"
         >
           {{ t('image.singleSettings') }}
         </button>
         <button
           type="button"
           class="focus-ring min-h-12 border px-4 py-3 font-mono text-sm font-black transition"
-          :aria-pressed="imageMode === ImageModeValue.Pdf"
-          :class="imageMode === ImageModeValue.Pdf ? 'border-sky bg-sky text-paper shadow-[0_0_22px_var(--fx-sky-18)]' : 'border-transparent bg-grid/70 text-ink/62 hover:border-sky/70 hover:text-sky'"
-          @click="emit('modeChanged', ImageModeValue.Pdf)"
+          :aria-pressed="imageMode === ImageModes.Pdf"
+          :class="imageMode === ImageModes.Pdf ? 'border-sky bg-sky text-paper shadow-[0_0_22px_var(--fx-sky-18)]' : 'border-transparent bg-grid/70 text-ink/62 hover:border-sky/70 hover:text-sky'"
+          @click="emit('modeChanged', ImageModes.Pdf)"
         >
           {{ t('image.pdfSettings') }}
         </button>
       </div>
     </div>
 
-    <FileDropZone accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp" :label="t('common.dropFiles')" :multiple="imageMode !== ImageModeValue.Single" @files="emit('filesAdded', $event)" />
-    <ImagePreviewList :allow-crop="imageMode === ImageModeValue.Single" :allow-rotate="imageMode === ImageModeValue.Pdf" :compact="imageMode !== ImageModeValue.Single" :estimates="previewEstimates" :previews="previews" :show-estimates="imageMode === ImageModeValue.Batch" @remove="emit('removeFile', $event)" @rotate="emit('rotateFile', $event)" />
+    <FileDropZone accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp" :label="t('common.dropFiles')" :multiple="imageMode !== ImageModes.Single" @files="emit('filesAdded', $event)" />
+    <ImagePreviewList :allow-crop="imageMode === ImageModes.Single" :allow-rotate="imageMode === ImageModes.Pdf" :compact="imageMode !== ImageModes.Single" :estimates="previewEstimates" :previews="previews" :show-estimates="imageMode === ImageModes.Batch" @remove="emit('removeFile', $event)" @rotate="emit('rotateFile', $event)" />
   </div>
 </template>

@@ -1,6 +1,6 @@
 import type { ConvertedImage, ImageOutputFormat, ImageTransformOptions, UploadedImagePreview } from '~/types/file-tool.type'
 import { imageFormatOptions } from '~/configs/file-tool.config'
-import { ImageOutputFormatValue, ImageRotationValue } from '~/types/file-tool.type'
+import { ImageOutputFormats, ImageRotations } from '~/types/file-tool.type'
 import { replaceFileExtension } from '~/utils/file-name.util'
 
 const supportedImageMimeTypes = new Set(['image/jpeg', 'image/png', 'image/webp'])
@@ -47,12 +47,12 @@ export async function createImagePreview(file: File): Promise<UploadedImagePrevi
     url: URL.createObjectURL(file),
     width: dimensions.width,
     height: dimensions.height,
-    rotation: ImageRotationValue.Deg0,
+    rotation: ImageRotations.Deg0,
   }
 }
 
 export async function encodeImage(imageData: ImageData, format: ImageOutputFormat, options: ImageTransformOptions): Promise<ArrayBuffer> {
-  if (format === ImageOutputFormatValue.Jpeg) {
+  if (format === ImageOutputFormats.Jpeg) {
     const { encode } = await import('@jsquash/jpeg')
     return encode(imageData, {
       quality: options.quality,
@@ -61,7 +61,7 @@ export async function encodeImage(imageData: ImageData, format: ImageOutputForma
     })
   }
 
-  if (format === ImageOutputFormatValue.Webp) {
+  if (format === ImageOutputFormats.Webp) {
     const { encode } = await import('@jsquash/webp')
     return encode(imageData, {
       quality: options.webpLossless ? 100 : options.quality,

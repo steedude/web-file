@@ -1,43 +1,43 @@
-export const ToolModeValue = {
+export const ToolModes = {
   Image: 'image',
   Pdf: 'pdf',
 } as const
-export type ToolMode = typeof ToolModeValue[keyof typeof ToolModeValue]
+export type ToolMode = typeof ToolModes[keyof typeof ToolModes]
 
-export const ImageOutputFormatValue = {
+export const ImageOutputFormats = {
   Jpeg: 'jpeg',
   Png: 'png',
   Webp: 'webp',
 } as const
-export type ImageOutputFormat = typeof ImageOutputFormatValue[keyof typeof ImageOutputFormatValue]
+export type ImageOutputFormat = typeof ImageOutputFormats[keyof typeof ImageOutputFormats]
 
-export const ImageModeValue = {
+export const ImageModes = {
   Batch: 'batch',
   Single: 'single',
   Pdf: 'pdf',
 } as const
-export type ImageMode = typeof ImageModeValue[keyof typeof ImageModeValue]
+export type ImageMode = typeof ImageModes[keyof typeof ImageModes]
 
-export const ImageResizeModeValue = {
+export const ImageResizeModes = {
   Dimensions: 'dimensions',
   Percent: 'percent',
 } as const
-export type ImageResizeMode = typeof ImageResizeModeValue[keyof typeof ImageResizeModeValue]
+export type ImageResizeMode = typeof ImageResizeModes[keyof typeof ImageResizeModes]
 
-export const ImagePdfPageSizeValue = {
+export const ImagePdfPageSizes = {
   Image: 'image',
   A4: 'a4',
   Letter: 'letter',
 } as const
-export type ImagePdfPageSize = typeof ImagePdfPageSizeValue[keyof typeof ImagePdfPageSizeValue]
+export type ImagePdfPageSize = typeof ImagePdfPageSizes[keyof typeof ImagePdfPageSizes]
 
-export const ImageRotationValue = {
+export const ImageRotations = {
   Deg0: 0,
   Deg90: 90,
   Deg180: 180,
   Deg270: 270,
 } as const
-export type ImageRotation = typeof ImageRotationValue[keyof typeof ImageRotationValue]
+export type ImageRotation = typeof ImageRotations[keyof typeof ImageRotations]
 
 export interface ImageCropSelection {
   x: number
@@ -102,28 +102,28 @@ export interface UploadedImagePreview {
   crop?: ImageCropSelection
 }
 
-export const PdfModeValue = {
+export const PdfModes = {
   Merge: 'merge',
   Split: 'split',
   Watermark: 'watermark',
   Images: 'images',
 } as const
-export type PdfMode = typeof PdfModeValue[keyof typeof PdfModeValue]
+export type PdfMode = typeof PdfModes[keyof typeof PdfModes]
 
-export const PdfImageOutputFormatValue = {
+export const PdfImageOutputFormats = {
   Png: 'png',
   Jpeg: 'jpeg',
   Webp: 'webp',
 } as const
-export type PdfImageOutputFormat = typeof PdfImageOutputFormatValue[keyof typeof PdfImageOutputFormatValue]
+export type PdfImageOutputFormat = typeof PdfImageOutputFormats[keyof typeof PdfImageOutputFormats]
 
-export const PdfWatermarkPreviewScaleValue = {
+export const PdfWatermarkPreviewScales = {
   Quarter: 25,
   Half: 50,
   ThreeQuarter: 75,
   Full: 100,
 } as const
-export type PdfWatermarkPreviewScale = typeof PdfWatermarkPreviewScaleValue[keyof typeof PdfWatermarkPreviewScaleValue]
+export type PdfWatermarkPreviewScale = typeof PdfWatermarkPreviewScales[keyof typeof PdfWatermarkPreviewScales]
 
 export interface PdfOptions {
   mode: PdfMode

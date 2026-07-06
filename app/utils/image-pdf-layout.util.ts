@@ -1,5 +1,5 @@
 import type { ImagePdfOptions, ImageRotation } from '~/types/file-tool.type'
-import { ImagePdfPageSizeValue } from '~/types/file-tool.type'
+import { ImagePdfPageSizes } from '~/types/file-tool.type'
 
 export interface PdfSize {
   width: number
@@ -21,10 +21,10 @@ export function getRotatedImageSize(width: number, height: number, rotation: Ima
 }
 
 export function getImagePdfPageSize(pageSize: ImagePdfOptions['pageSize'], imageWidth: number, imageHeight: number): PdfSize {
-  if (pageSize === ImagePdfPageSizeValue.A4)
+  if (pageSize === ImagePdfPageSizes.A4)
     return { width: 595, height: 842 }
 
-  if (pageSize === ImagePdfPageSizeValue.Letter)
+  if (pageSize === ImagePdfPageSizes.Letter)
     return { width: 612, height: 792 }
 
   return { width: imageWidth, height: imageHeight }

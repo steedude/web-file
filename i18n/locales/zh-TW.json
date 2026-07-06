@@ -132,5 +132,20 @@
     "notFound": "找不到頁面",
     "statusLabel": "錯誤代碼",
     "title": "訊號中斷"
+  },
+  "appErrors": {
+    "imageDecodeFailed": "無法讀取這張圖片，請換一個檔案試試。",
+    "imageEncodeFailed": "圖片轉檔失敗，請試試其他格式或品質設定。",
+    "imagePdfCreateFailed": "無法將這些圖片建立成 PDF。",
+    "imagePreviewFailed": "無法建立圖片預覽。",
+    "imageUnsupportedFormat": "目前不支援這個圖片格式。",
+    "pdfLoadFailed": "無法讀取這份 PDF。",
+    "pdfMergeFailed": "無法合併選取的 PDF 頁面。",
+    "pdfPreviewFailed": "無法產生 PDF 預覽。",
+    "pdfRenderImageFailed": "無法將選取的 PDF 頁面匯出成圖片。",
+    "pdfSplitFailed": "無法擷取選取的 PDF 頁面。",
+    "pdfWatermarkFailed": "無法將浮水印加到這份 PDF。",
+    "pwaInstallFailed": "無法開啟 App 安裝提示。",
+    "unknown": "發生未預期的錯誤，請再試一次。"
   }
 }

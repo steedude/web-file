@@ -132,5 +132,20 @@
     "notFound": "Page not found",
     "statusLabel": "Error code",
     "title": "Signal lost"
+  },
+  "appErrors": {
+    "imageDecodeFailed": "Could not read this image. Try another file.",
+    "imageEncodeFailed": "Image conversion failed. Try a different format or quality setting.",
+    "imagePdfCreateFailed": "Could not create the PDF from these images.",
+    "imagePreviewFailed": "Could not prepare the image preview.",
+    "imageUnsupportedFormat": "This image format is not supported.",
+    "pdfLoadFailed": "Could not load this PDF.",
+    "pdfMergeFailed": "Could not merge the selected PDF pages.",
+    "pdfPreviewFailed": "Could not render the PDF preview.",
+    "pdfRenderImageFailed": "Could not export the selected PDF pages as images.",
+    "pdfSplitFailed": "Could not extract the selected PDF pages.",
+    "pdfWatermarkFailed": "Could not add the watermark to this PDF.",
+    "pwaInstallFailed": "The app install prompt could not be opened.",
+    "unknown": "Something went wrong. Please try again."
   }
 }

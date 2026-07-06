@@ -1,19 +1,23 @@
+import type { AppErrorCode } from '~/types/error.type'
 import type { ConvertedImage, ImageCropSelection, ImagePdfOptions, ImageTransformOptions, PdfResult, UploadedImagePreview } from '~/types/file-tool.type'
+import { AppErrorCodes, AppErrorFeatures, AppErrorSeverities } from '~/configs/error-code.config'
 import { defaultImageOptions } from '~/configs/file-tool.config'
-import { ImageRotationValue } from '~/types/file-tool.type'
+import { ImageRotations } from '~/types/file-tool.type'
 import { fileToImageData } from '~/utils/image-canvas.util'
 import { createImagePdf } from '~/utils/image-pdf.util'
 import { createConvertedImage, createImagePreview, encodeImage, getFileBaseName, isSupportedImageFile } from '~/utils/image-transcode.util'
 
 export function useImageTranscoder() {
   const { t } = useI18n()
+  const { captureAppError } = useErrorReporter()
   const options = reactive<ImageTransformOptions>({ ...defaultImageOptions })
   const files = ref<File[]>([])
   const previews = ref<UploadedImagePreview[]>([])
   const results = ref<ConvertedImage[]>([])
   const pdfResults = ref<PdfResult[]>([])
   const isProcessing = ref(false)
-  const error = ref('')
+  const errorCode = ref<AppErrorCode | null>(null)
+  const notice = ref('')
 
   const canConvert = computed(() => files.value.length > 0 && !isProcessing.value)
 
@@ -23,7 +27,8 @@ export function useImageTranscoder() {
     const imageFiles = incomingFiles.filter(isSupportedImageFile)
     const skippedCount = incomingFiles.length - imageFiles.length
 
-    error.value = skippedCount ? t('image.unsupportedFiles', { count: skippedCount }) : ''
+    errorCode.value = null
+    notice.value = skippedCount ? t('image.unsupportedFiles', { count: skippedCount }) : ''
 
     if (imageFiles.length === 0)
       return
@@ -87,9 +92,9 @@ export function useImageTranscoder() {
     if (!preview)
       return
 
-    const rotations = Object.values(ImageRotationValue)
+    const rotations = Object.values(ImageRotations)
     const currentIndex = rotations.indexOf(preview.rotation)
-    const nextRotation = rotations[(currentIndex + 1) % rotations.length] ?? ImageRotationValue.Deg0
+    const nextRotation = rotations[(currentIndex + 1) % rotations.length] ?? ImageRotations.Deg0
 
     previews.value = previews.value.map((item, previewIndex) => previewIndex === index ? { ...item, rotation: nextRotation } : item)
     clearResults()
@@ -99,7 +104,8 @@ export function useImageTranscoder() {
     files.value = []
     clearPreviews()
     clearResults()
-    error.value = ''
+    errorCode.value = null
+    notice.value = ''
   }
 
   function clearPreviews() {
@@ -130,7 +136,8 @@ export function useImageTranscoder() {
       return
 
     isProcessing.value = true
-    error.value = ''
+    errorCode.value = null
+    notice.value = ''
     clearResults()
 
     try {
@@ -147,7 +154,20 @@ export function useImageTranscoder() {
       results.value = nextResults
     }
     catch (cause) {
-      error.value = cause instanceof Error ? cause.message : 'Image conversion failed.'
+      errorCode.value = AppErrorCodes.ImageEncodeFailed
+      captureAppError({
+        cause,
+        code: errorCode.value,
+        context: {
+          fileCount: files.value.length,
+          format: options.format,
+          preserveDimensions: options.preserveDimensions,
+          quality: options.quality,
+          resizeMode: options.resizeMode,
+        },
+        feature: AppErrorFeatures.ImageConvert,
+        severity: AppErrorSeverities.Error,
+      })
     }
     finally {
       isProcessing.value = false
@@ -159,14 +179,26 @@ export function useImageTranscoder() {
       return
 
     isProcessing.value = true
-    error.value = ''
+    errorCode.value = null
+    notice.value = ''
     clearResults()
 
     try {
       pdfResults.value = [await createImagePdf(previews.value, pdfOptions)]
     }
     catch (cause) {
-      error.value = cause instanceof Error ? cause.message : 'Image to PDF failed.'
+      errorCode.value = AppErrorCodes.ImagePdfCreateFailed
+      captureAppError({
+        cause,
+        code: errorCode.value,
+        context: {
+          fileCount: previews.value.length,
+          margin: pdfOptions.margin,
+          pageSize: pdfOptions.pageSize,
+        },
+        feature: AppErrorFeatures.ImageToPdf,
+        severity: AppErrorSeverities.Error,
+      })
     }
     finally {
       isProcessing.value = false
@@ -210,9 +242,10 @@ export function useImageTranscoder() {
     clearSingleCropSelection,
     convert,
     convertToPdf,
-    error,
+    errorCode,
     files,
     isProcessing,
+    notice,
     options,
     pdfResults,
     previews,

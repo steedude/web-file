@@ -2,7 +2,7 @@
 import type { ImageControlActions, ImageCropSelection, ImageMode, ImageOutputFormat, ImageTransformOptions } from '~/types/file-tool.type'
 import { Play, Trash2 } from '@lucide/vue'
 import { defaultImagePdfOptions } from '~/configs/file-tool.config'
-import { ImageModeValue, ImageOutputFormatValue, ImageResizeModeValue } from '~/types/file-tool.type'
+import { ImageModes, ImageOutputFormats, ImageResizeModes } from '~/types/file-tool.type'
 
 const { t } = useI18n()
 const {
@@ -13,10 +13,11 @@ const {
   clearResults,
   convert,
   convertToPdf,
-  error,
+  errorCode,
   estimateOutputSizes,
   files,
   isProcessing,
+  notice,
   options,
   pdfResults,
   previews,
@@ -27,9 +28,11 @@ const {
   setSingleCropSelection,
 } = useImageTranscoder()
 
-const imageMode = ref<ImageMode>(ImageModeValue.Batch)
+const { getAppErrorMessage } = useAppErrorLang()
+const imageMode = ref<ImageMode>(ImageModes.Batch)
 const imagePdfOptions = reactive({ ...defaultImagePdfOptions })
 const isCropEditorOpen = ref(false)
+const errorMessage = computed(() => errorCode.value ? getAppErrorMessage(errorCode.value) : notice.value)
 
 const activeReference = computed(() => previews.value.length === 1 ? previews.value[0] ?? null : null)
 const activeCropPreview = computed(() => isCropEditorOpen.value ? previews.value[0] ?? null : null)
@@ -125,10 +128,10 @@ function setImageMode(mode: ImageMode) {
 }
 
 function handleImageFiles(fileList: FileList | File[]) {
-  if (imageMode.value === ImageModeValue.Single || files.value.length === 0)
+  if (imageMode.value === ImageModes.Single || files.value.length === 0)
     resetOptions()
 
-  addFiles(fileList, imageMode.value === ImageModeValue.Single)
+  addFiles(fileList, imageMode.value === ImageModes.Single)
   isCropEditorOpen.value = false
 }
 
@@ -189,7 +192,7 @@ function setPreserveDimensions(preserveDimensions: boolean) {
 function setProportionalResize() {
   patchCurrentOptions({
     preserveDimensions: false,
-    resizeMode: imageMode.value === ImageModeValue.Batch ? ImageResizeModeValue.Percent : ImageResizeModeValue.Dimensions,
+    resizeMode: imageMode.value === ImageModes.Batch ? ImageResizeModes.Percent : ImageResizeModes.Dimensions,
   })
 }
 
@@ -240,7 +243,7 @@ function getFileExtension(fileName: string) {
 }
 
 function getOutputExtensions(format: ImageOutputFormat) {
-  if (format === ImageOutputFormatValue.Jpeg)
+  if (format === ImageOutputFormats.Jpeg)
     return ['jpg', 'jpeg']
 
   return [format]
@@ -257,7 +260,7 @@ function updateImagePdfMargin(event: Event) {
 }
 
 function runImageAction() {
-  if (imageMode.value === ImageModeValue.Pdf) {
+  if (imageMode.value === ImageModes.Pdf) {
     convertToPdf(imagePdfOptions)
     return
   }
@@ -271,7 +274,7 @@ function runImageAction() {
     <ImageSourcePanel :image-mode="imageMode" :preview-estimates="previewEstimates" :previews="previews" @files-added="handleImageFiles" @mode-changed="setImageMode" @remove-file="removeFile" @rotate-file="rotatePreview" />
 
     <div class="space-y-4 border border-line bg-panel/82 p-4 shadow-[0_0_44px_var(--fx-sky-7)] backdrop-blur">
-      <template v-if="imageMode !== ImageModeValue.Pdf">
+      <template v-if="imageMode !== ImageModes.Pdf">
         <ImageConversionControls
           :has-same-extension-warning="hasSameExtensionWarning"
           :image-mode="imageMode"
@@ -295,7 +298,7 @@ function runImageAction() {
           @click="runImageAction"
         >
           <Play class="size-4" aria-hidden="true" />
-          {{ isProcessing ? t('common.processing') : imageMode === ImageModeValue.Pdf ? t('image.createPdf') : t('image.convert') }}
+          {{ isProcessing ? t('common.processing') : imageMode === ImageModes.Pdf ? t('image.createPdf') : t('image.convert') }}
         </button>
         <button
           type="button"
@@ -307,8 +310,8 @@ function runImageAction() {
         </button>
       </div>
 
-      <p v-if="error" class="border border-coral bg-coral/12 px-3 py-2 font-mono text-sm font-bold text-coral">
-        {{ error }}
+      <p v-if="errorMessage" class="border border-coral bg-coral/12 px-3 py-2 font-mono text-sm font-bold text-coral">
+        {{ errorMessage }}
       </p>
 
       <p v-if="!results.length && !pdfResults.length" class="border border-line bg-grid/70 px-3 py-8 text-center font-mono text-base font-bold text-ink/52">

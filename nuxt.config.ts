@@ -1,5 +1,6 @@
 import process from 'node:process'
 import tailwindcss from '@tailwindcss/vite'
+import { defaultSentryConfig } from './app/configs/sentry.config'
 import { defaultSeoConfig } from './app/configs/seo.config'
 
 const wasmPackages = [
@@ -37,13 +38,24 @@ export default defineNuxtConfig({
   modules: [
     '@nuxt/eslint',
     '@nuxtjs/i18n',
+    '@sentry/nuxt/module',
     '@vite-pwa/nuxt',
   ],
   runtimeConfig: {
     public: {
       ogImage: process.env.NUXT_PUBLIC_OG_IMAGE ?? defaultSeoConfig.ogImage,
+      sentry: {
+        dsn: process.env.NUXT_PUBLIC_SENTRY_DSN ?? defaultSentryConfig.dsn,
+        enabled: process.env.NUXT_PUBLIC_SENTRY_ENABLED === 'true',
+      },
       siteName: process.env.NUXT_PUBLIC_SITE_NAME ?? defaultSeoConfig.siteName,
       siteUrl: process.env.NUXT_PUBLIC_SITE_URL ?? defaultSeoConfig.siteUrl,
+    },
+  },
+  sentry: {
+    enabled: process.env.NUXT_PUBLIC_SENTRY_ENABLED === 'true',
+    sourcemaps: {
+      disable: true,
     },
   },
   i18n: {

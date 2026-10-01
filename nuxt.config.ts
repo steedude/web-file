@@ -41,6 +41,13 @@ export default defineNuxtConfig({
     '@sentry/nuxt/module',
     '@vite-pwa/nuxt',
   ],
+  nitro: {
+    prerender: {
+      // 讓兩個語系的 HTML 隨靜態資源一起預快取，供離線開啟使用。
+      routes: ['/', '/en'],
+      failOnError: true,
+    },
+  },
   runtimeConfig: {
     public: {
       ogImage: process.env.NUXT_PUBLIC_OG_IMAGE ?? defaultSeoConfig.ogImage,
@@ -91,7 +98,10 @@ export default defineNuxtConfig({
       ],
     },
     workbox: {
-      globPatterns: ['**/*.{js,css,html,png,svg,ico,wasm}'],
+      globPatterns: ['**/*.{js,mjs,css,html,png,svg,ico,wasm}', '_i18n/**/*.json'],
+      // Nuxt PWA 會將預先產生的 index.html 對應到快取中的 /。
+      navigateFallback: '/',
+      navigateFallbackAllowlist: [/^\/(?:en\/?)?$/],
       // WASM codec 比一般前端資源大，PWA 快取上限要放寬才吃得到離線能力。
       maximumFileSizeToCacheInBytes: 8 * 1024 * 1024,
     },
